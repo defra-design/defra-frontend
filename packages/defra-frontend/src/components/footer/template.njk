@@ -1,0 +1,12 @@
+{# DEF-001 — replaces govukFooter for services outside the GOV.UK proposition.
+   Drops the Royal Arms and the OGL assertion; keeps GOV.UK footer classes so
+   upstream footer styles still apply and only tokens differ. #}
+<footer class="govuk-footer defra-footer">
+  <div class="govuk-width-container">
+    <div class="govuk-footer__meta">
+      <div class="govuk-footer__meta-item govuk-footer__meta-item--grow">
+        {% for item in params.items %}<a class="govuk-footer__link" href="{{ item.href }}">{{ item.text }}</a>{% if not loop.last %} &middot; {% endif %}{% endfor %}
+      </div>
+    </div>
+  </div>
+</footer>

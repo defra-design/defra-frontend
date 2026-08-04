@@ -1,0 +1,8 @@
+{
+  "footer": {
+    "id": "DEF-001",
+    "reason": "GOV.UK footer asserts Royal Arms + OGL; not permitted outside the GOV.UK proposition",
+    "approvedBy": "TBC - Defra design authority",
+    "review": "each govuk-frontend minor"
+  }
+}

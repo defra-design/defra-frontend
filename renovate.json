@@ -1,0 +1,13 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "packageRules": [
+    {
+      "description": "govuk-frontend bumps get their own PR and never auto-merge. The drift check on that PR is the review.",
+      "matchPackageNames": ["govuk-frontend"],
+      "groupName": "govuk-frontend",
+      "automerge": false,
+      "labels": ["upstream", "needs-design-review"]
+    }
+  ]
+}

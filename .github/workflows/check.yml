@@ -1,0 +1,28 @@
+name: check
+
+on:
+  push: { branches: [main] }
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+
+      # Fails if any govuk-frontend fixture renders differently to upstream
+      # and the divergence is not declared in deviations.json.
+      - name: Drift from GOV.UK Frontend
+        run: npm run drift
+
+      # Fails if any page type exceeds its byte budget.
+      - name: Carbon budgets
+        run: npm run build && npm run carbon
+
+      - name: Stories build
+        run: npm run stories

@@ -1,0 +1,38 @@
+{
+  "name": "@defra/frontend",
+  "version": "0.1.0",
+  "description": "Defra Frontend — GOV.UK Frontend, themed for Defra services, built for minimum payload.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/defra-design/defra-frontend.git"
+  },
+  "type": "module",
+  "sass": "./src/defra-frontend.scss",
+  "exports": {
+    "./sass": "./src/defra-frontend.scss",
+    "./views": "./src",
+    "./render": "./lib/render.mjs"
+  },
+  "files": [
+    "src",
+    "lib",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "sass --load-path=../../node_modules --style=compressed --no-source-map src/defra-frontend.scss dist/defra-frontend.min.css",
+    "drift": "node scripts/drift.mjs",
+    "carbon": "node scripts/carbon.mjs",
+    "stories": "node scripts/generate-stories.mjs"
+  },
+  "peerDependencies": {
+    "govuk-frontend": "^6.4.0"
+  },
+  "dependencies": {
+    "nunjucks": "^3.2.4"
+  },
+  "devDependencies": {
+    "@tgwf/co2": "^0.19.0",
+    "sass": "^1.102.0"
+  }
+}
