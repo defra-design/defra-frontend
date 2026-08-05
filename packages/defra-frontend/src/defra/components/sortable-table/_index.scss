@@ -1,0 +1,35 @@
+// DEF-105 — sortable table
+//
+// Inherits every table style from govuk-table. Only the header control and its
+// sort indicator are added.
+
+.defra-sortable-table__button {
+  // The whole header cell should be the target, not just the word.
+  display: block;
+}
+
+// Sort direction is conveyed by aria-sort for assistive technology; these
+// arrows are the visible equivalent. Generated content is not reliably
+// exposed, which is exactly what makes it right for a purely visual cue.
+.defra-sortable-table th[aria-sort] .defra-sortable-table__button::after {
+  content: "";
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: govuk-spacing(1);
+  vertical-align: middle;
+  border-left: govuk-spacing(1) solid transparent;
+  border-right: govuk-spacing(1) solid transparent;
+  border-bottom: govuk-spacing(1) solid currentcolor;
+  opacity: 0.4;
+}
+
+.defra-sortable-table th[aria-sort="descending"] .defra-sortable-table__button::after {
+  border-bottom: 0;
+  border-top: govuk-spacing(1) solid currentcolor;
+  opacity: 1;
+}
+
+.defra-sortable-table th[aria-sort="ascending"] .defra-sortable-table__button::after {
+  opacity: 1;
+}

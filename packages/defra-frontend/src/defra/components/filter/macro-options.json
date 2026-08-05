@@ -1,0 +1,28 @@
+[
+  {
+    "name": "groups",
+    "type": "array",
+    "required": true,
+    "description": "Groups of checkbox filters.",
+    "params": [
+      { "name": "legend", "type": "string", "required": true, "description": "Group legend." },
+      { "name": "name", "type": "string", "required": true, "description": "Form field name, also used to build checkbox ids." },
+      { "name": "items", "type": "array", "required": true, "description": "Checkboxes, each with `value`, `text` and optional `checked`." }
+    ]
+  },
+  {
+    "name": "selected",
+    "type": "array",
+    "required": false,
+    "description": "Currently applied filters, rendered as links that remove them. Omit entirely when nothing is selected.",
+    "params": [
+      { "name": "text", "type": "string", "required": true, "description": "Filter label." },
+      { "name": "href", "type": "string", "required": true, "description": "URL that removes this filter." }
+    ]
+  },
+  { "name": "heading", "type": "string", "required": false, "description": "Panel heading. Defaults to `Filter`." },
+  { "name": "clearHref", "type": "string", "required": false, "description": "URL that clears every filter. Omitted if not set." },
+  { "name": "id", "type": "string", "required": false, "description": "Prefix for the content id used by the disclosure button." },
+  { "name": "classes", "type": "string", "required": false, "description": "Classes to add to the filter." },
+  { "name": "attributes", "type": "object", "required": false, "description": "HTML attributes to add to the filter." }
+]

@@ -1,0 +1,56 @@
+{
+  "component": "filter",
+  "fixtures": [
+    {
+      "name": "default",
+      "options": {
+        "heading": "Filter applications",
+        "clearHref": "#clear",
+        "selected": [
+          { "text": "Awaiting inspection", "href": "#remove-awaiting" },
+          { "text": "Thames river basin", "href": "#remove-thames" }
+        ],
+        "groups": [
+          {
+            "legend": "Status",
+            "name": "status",
+            "items": [
+              { "value": "awaiting", "text": "Awaiting inspection", "checked": true },
+              { "value": "approved", "text": "Approved" },
+              { "value": "withdrawn", "text": "Withdrawn" }
+            ]
+          },
+          {
+            "legend": "River basin",
+            "name": "basin",
+            "items": [
+              { "value": "thames", "text": "Thames", "checked": true },
+              { "value": "severn", "text": "Severn" },
+              { "value": "anglian", "text": "Anglian" }
+            ]
+          }
+        ]
+      },
+      "hidden": false,
+      "description": "Selected filters are links that remove themselves, each carrying visually hidden \"Remove filter\" text — out of context, \"Thames river basin\" gives no clue that activating it removes something. The Show/Hide button appears below the tablet breakpoint only, and is created in JavaScript so it never exists as a control that cannot work."
+    },
+    {
+      "name": "with no filters selected",
+      "options": {
+        "heading": "Filter applications",
+        "groups": [
+          {
+            "legend": "Status",
+            "name": "status",
+            "items": [
+              { "value": "awaiting", "text": "Awaiting inspection" },
+              { "value": "approved", "text": "Approved" }
+            ]
+          }
+        ]
+      },
+      "hidden": false,
+      "description": "The selected filters block is omitted entirely rather than rendered empty."
+    }
+  ]
+}

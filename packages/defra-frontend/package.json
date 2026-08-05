@@ -12,7 +12,8 @@
   "exports": {
     "./sass": "./src/defra-frontend.scss",
     "./views": "./src",
-    "./render": "./lib/render.mjs"
+    "./render": "./lib/render.mjs",
+    "./javascript": "./src/defra-frontend.mjs"
   },
   "files": [
     "src",

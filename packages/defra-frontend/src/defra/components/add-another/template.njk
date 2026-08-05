@@ -1,0 +1,43 @@
+{# DEF-103 — add another.
+
+   Server-first. The Add and Remove controls are real submit buttons with
+   names, so without JavaScript the form posts and the server re-renders with
+   one more or one fewer item. JavaScript only intercepts that round trip.
+
+   Each item is a fieldset with a numbered legend, so a screen reader user
+   knows which of several identical groups they are in. #}
+{% set itemName = params.itemName | default("item") %}
+<div class="defra-add-another{{ ' ' + params.classes if params.classes }}"
+  data-module="defra-add-another"
+  data-item-name="{{ itemName }}"
+  {%- for attribute, value in params.attributes %} {{ attribute }}="{{ value }}"{% endfor %}>
+  <div class="defra-add-another__items">
+    {% for item in params.items %}
+      <div class="defra-add-another__item">
+        <fieldset class="govuk-fieldset">
+          <legend class="govuk-fieldset__legend govuk-fieldset__legend--s defra-add-another__legend">
+            {{ itemName | capitalize }} {{ loop.index }}
+          </legend>
+          {{ item.html | safe }}
+        </fieldset>
+        {# Hidden on the first item when it is the only one: removing the last
+           item would leave a form with nothing to fill in. #}
+        {# Styled as a link (see _index.scss) but a real submit button, so it
+           still posts without JavaScript. #}
+        <button type="submit"
+          class="defra-add-another__remove"
+          name="remove"
+          value="{{ loop.index0 }}">
+          Remove<span class="govuk-visually-hidden"> {{ itemName }} {{ loop.index }}</span>
+        </button>
+      </div>
+    {% endfor %}
+  </div>
+
+  <button type="submit"
+    class="govuk-button govuk-button--secondary defra-add-another__add"
+    name="add"
+    value="1">
+    Add another {{ itemName }}
+  </button>
+</div>

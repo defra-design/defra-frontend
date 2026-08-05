@@ -1,0 +1,61 @@
+{# DEF-102 — card.
+
+   Deliberately narrow. It takes a heading, an optional description, optional
+   meta, and EITHER a whole-card link OR footer actions — never both.
+
+   Why never both: a whole-card link is made by stretching a pseudo-element
+   from the heading link across the card. Any other interactive element inside
+   would sit under that overlay and become unclickable, and nesting links is
+   invalid markup besides. The macro enforces this rather than documenting it,
+   because "don't do that" in prose is not a constraint.
+
+   The link stays on the heading text so the accessible name is the heading,
+   not "read more". #}
+{% set headingLevel = params.headingLevel | default(2) %}
+{% set clickable = params.href and not params.actions %}
+<div class="defra-card
+    {{- ' defra-card--clickable' if clickable }}
+    {{- ' defra-card--header-' + params.headerColour if params.headerColour }}
+    {{- ' ' + params.classes if params.classes }}"
+  {%- for attribute, value in params.attributes %} {{ attribute }}="{{ value }}"{% endfor %}>
+  {# The header is always present so the base card and the coloured variant
+     share one structure. Only `meta` and below sit in the content area —
+     deliberately: meta is secondary-text grey, which would not carry enough
+     contrast against a saturated header band. #}
+  <div class="defra-card__header">
+    <h{{ headingLevel }} class="defra-card__title govuk-heading-s">
+      {% if params.href %}
+        <a class="govuk-link defra-card__link" href="{{ params.href }}">{{ params.title }}</a>
+      {% else %}
+        {{ params.title }}
+      {% endif %}
+    </h{{ headingLevel }}>
+  </div>
+
+  <div class="defra-card__content">
+  {% if params.meta %}
+    <p class="defra-card__meta govuk-body-s">{{ params.meta }}</p>
+  {% endif %}
+
+  {% if params.html %}
+    <div class="defra-card__description">{{ params.html | safe }}</div>
+  {% elif params.text %}
+    <p class="defra-card__description govuk-body-s">{{ params.text }}</p>
+  {% endif %}
+
+  {% if params.actions %}
+    <ul class="defra-card__actions govuk-list">
+      {% for action in params.actions %}
+        <li class="defra-card__action">
+          <a class="govuk-link" href="{{ action.href }}">
+            {{ action.text }}
+            {% if action.visuallyHiddenText %}
+              <span class="govuk-visually-hidden"> {{ action.visuallyHiddenText }}</span>
+            {% endif %}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  </div>
+</div>

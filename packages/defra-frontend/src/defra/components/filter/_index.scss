@@ -1,0 +1,85 @@
+// DEF-104 — filter
+
+// The panel sits on the body background, not a tinted surface.
+//
+// It used to use surface-background (green tint-95). That put a secondary
+// button — whose face is black tint-95 and which upstream designs against the
+// body background — onto a near-identical tint: 1.03:1, so the button face
+// was invisible and only its shadow defined it. The fix is to stop putting a
+// component on a surface it was not designed for, rather than to restyle the
+// button and fight upstream. Separation comes from the border.
+.defra-filter {
+  @include govuk-responsive-margin(6, "bottom");
+
+  padding: govuk-spacing(4);
+  border: 1px solid govuk-functional-colour(border);
+  background: govuk-functional-colour(body-background);
+}
+
+.defra-filter__heading {
+  margin-bottom: govuk-spacing(3);
+}
+
+.defra-filter__toggle {
+  margin-bottom: govuk-spacing(3);
+}
+
+.defra-filter__selected {
+  @include govuk-responsive-margin(4, "bottom");
+}
+
+.defra-filter__selected-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: govuk-spacing(2);
+
+  > :first-child {
+    margin-bottom: govuk-spacing(2);
+  }
+}
+
+.defra-filter__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: govuk-spacing(2);
+  margin-bottom: 0;
+}
+
+// A removable filter. Reads as a control rather than a label, and the ✕ is
+// decorative — the accessible name comes from the visually hidden "Remove
+// filter" text in the markup.
+.defra-filter__tag {
+  @include govuk-font($size: 16);
+  @include govuk-link-common;
+  // govuk-link-common sets typography and underline behaviour but NOT colour.
+  // Without the style mixin the tag fell back to the browser default blue —
+  // the one colour in the system that is meant to have been re-pointed.
+  @include govuk-link-style-default;
+  // A filter that has been used should not then render as "visited" purple:
+  // the state means nothing here and reads as a third, unexplained colour.
+  @include govuk-link-style-no-visited-state;
+
+  display: inline-block;
+  padding: govuk-spacing(1) govuk-spacing(2);
+  border: 1px solid govuk-functional-colour(border);
+  background: govuk-functional-colour(body-background);
+  text-decoration: none;
+
+  &::after {
+    content: " ✕";
+  }
+
+  &:hover {
+    border-color: govuk-functional-colour(input-border);
+  }
+
+  &:focus {
+    @include govuk-focused-text;
+  }
+}
+
+.defra-filter__group {
+  @include govuk-responsive-margin(4, "bottom");
+}

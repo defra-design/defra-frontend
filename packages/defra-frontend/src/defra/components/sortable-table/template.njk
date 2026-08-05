@@ -1,0 +1,56 @@
+{# DEF-105 — sortable table.
+
+   Uses the upstream govuk-table classes throughout, so it inherits every
+   table style and only adds sorting behaviour. Not a fork of govukTable — a
+   sibling, because govukTable has no header-sorting support to extend.
+
+   Sortable headers are LINKS carrying the sort in the query string, so
+   sorting works server-side with no JavaScript. `aria-sort` on the th is the
+   correct mechanism for conveying sort state; a visual arrow alone conveys it
+   to nobody using a screen reader. #}
+{% set sort = params.sort %}
+{% set order = params.order | default("ascending") %}
+<table class="govuk-table defra-sortable-table{{ ' ' + params.classes if params.classes }}"
+  data-module="defra-sortable-table"
+  {%- for attribute, value in params.attributes %} {{ attribute }}="{{ value }}"{% endfor %}>
+  {% if params.caption %}
+    <caption class="govuk-table__caption {{ params.captionClasses | default('govuk-table__caption--m') }}">
+      {{ params.caption }}
+    </caption>
+  {% endif %}
+  <thead class="govuk-table__head">
+    <tr class="govuk-table__row">
+      {% for cell in params.head %}
+        {% set isSorted = cell.key and cell.key == sort %}
+        <th scope="col"
+          class="govuk-table__header {{ cell.classes }}"
+          {%- if cell.sortable %} aria-sort="{{ order if isSorted else 'none' }}" data-key="{{ cell.key }}"{% endif %}>
+          {% if cell.sortable %}
+            {# Reverse the order when re-sorting the column already sorted. #}
+            {% set nextOrder = "descending" if (isSorted and order == "ascending") else "ascending" %}
+            <a class="govuk-link defra-sortable-table__button" href="?sort={{ cell.key }}&order={{ nextOrder }}">
+              {{ cell.text }}
+            </a>
+          {% else %}
+            {{ cell.text }}
+          {% endif %}
+        </th>
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody class="govuk-table__body">
+    {% for row in params.rows %}
+      <tr class="govuk-table__row">
+        {% for cell in row %}
+          {% if loop.first and params.firstCellIsHeader %}
+            <th scope="row" class="govuk-table__header {{ cell.classes }}"
+              {%- if cell.sortValue %} data-sort-value="{{ cell.sortValue }}"{% endif %}>{{ cell.text }}</th>
+          {% else %}
+            <td class="govuk-table__cell {{ cell.classes }}"
+              {%- if cell.sortValue %} data-sort-value="{{ cell.sortValue }}"{% endif %}>{{ cell.text }}</td>
+          {% endif %}
+        {% endfor %}
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>

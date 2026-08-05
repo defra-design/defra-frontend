@@ -1,0 +1,34 @@
+{
+  "component": "add-another",
+  "fixtures": [
+    {
+      "name": "default",
+      "options": {
+        "itemName": "abstraction point",
+        "items": [
+          {
+            "html": "<div class=\"govuk-form-group\"><label class=\"govuk-label\" for=\"points-0-grid\">Grid reference</label><div id=\"points-0-grid-hint\" class=\"govuk-hint\">For example, SU 1234 5678</div><input class=\"govuk-input govuk-input--width-10\" id=\"points-0-grid\" name=\"points[0][grid]\" type=\"text\" aria-describedby=\"points-0-grid-hint\"></div>"
+          }
+        ]
+      },
+      "hidden": false,
+      "description": "One item to start. Remove is hidden while only one remains — removing it would leave the form with nothing to complete."
+    },
+    {
+      "name": "with several items",
+      "options": {
+        "itemName": "abstraction point",
+        "items": [
+          {
+            "html": "<div class=\"govuk-form-group\"><label class=\"govuk-label\" for=\"points-0-grid\">Grid reference</label><input class=\"govuk-input govuk-input--width-10\" id=\"points-0-grid\" name=\"points[0][grid]\" type=\"text\" value=\"SU 1234 5678\"></div>"
+          },
+          {
+            "html": "<div class=\"govuk-form-group\"><label class=\"govuk-label\" for=\"points-1-grid\">Grid reference</label><input class=\"govuk-input govuk-input--width-10\" id=\"points-1-grid\" name=\"points[1][grid]\" type=\"text\" value=\"SU 8765 4321\"></div>"
+          }
+        ]
+      },
+      "hidden": false,
+      "description": "Adding or removing renumbers every legend, id, name, for and aria-describedby. A stale index breaks the hint and error association silently — invisible on screen, total for a screen reader."
+    }
+  ]
+}

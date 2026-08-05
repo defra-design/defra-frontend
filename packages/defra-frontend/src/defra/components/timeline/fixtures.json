@@ -1,0 +1,63 @@
+{
+  "component": "timeline",
+  "fixtures": [
+    {
+      "name": "default",
+      "options": {
+        "items": [
+          {
+            "title": "Application approved",
+            "date": "12 March 2026",
+            "datetime": "2026-03-12",
+            "byline": "R Patel",
+            "text": "Licence issued for 450 cubic metres per day, subject to low flow conditions."
+          },
+          {
+            "title": "Site inspection completed",
+            "date": "28 February 2026",
+            "datetime": "2026-02-28",
+            "byline": "J Okafor",
+            "text": "Abstraction point confirmed at SU 1234 5678. No discrepancies found."
+          },
+          {
+            "title": "Application received",
+            "date": "14 January 2026",
+            "datetime": "2026-01-14",
+            "text": "Submitted online with supporting hydrological assessment."
+          }
+        ]
+      },
+      "hidden": false,
+      "description": "An ordered list, so a screen reader announces the number of entries and the position of each. Visual markers are drawn in CSS, so no decorative markup is exposed."
+    },
+    {
+      "name": "without bylines or descriptions",
+      "options": {
+        "items": [
+          { "title": "Permit surrendered", "date": "3 June 2026", "datetime": "2026-06-03" },
+          { "title": "Permit varied", "date": "19 April 2026", "datetime": "2026-04-19" },
+          { "title": "Permit granted", "date": "2 February 2026", "datetime": "2026-02-02" }
+        ]
+      },
+      "hidden": false,
+      "description": "Every field except title and date is optional."
+    },
+    {
+      "name": "with html content",
+      "options": {
+        "headingLevel": 2,
+        "items": [
+          {
+            "title": "Further information requested",
+            "date": "7 February 2026",
+            "datetime": "2026-02-07",
+            "byline": "A Nowak",
+            "html": "<p class=\"govuk-body\">We asked for:</p><ul class=\"govuk-list govuk-list--bullet\"><li>a revised abstraction volume</li><li>evidence of landowner consent</li></ul>"
+          }
+        ]
+      },
+      "hidden": false,
+      "description": "`headingLevel` sets the entry heading so the timeline fits the page's heading order — it must not skip a level."
+    }
+  ]
+}

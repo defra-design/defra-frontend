@@ -1,0 +1,24 @@
+{
+  "component": "header",
+  "use": "generic-header",
+  "fixtures": [
+    {
+      "name": "default",
+      "options": {
+        "logoText": "Defra",
+        "url": "/"
+      },
+      "hidden": false,
+      "description": "Not a fork. This is upstream `govukGenericHeader` with the Defra wordmark — GDS added generic-header for services outside the GOV.UK proposition, and Defra has no logo mark, so the header is a token-only restyle with zero forked markup. Do not build a Defra header component."
+    },
+    {
+      "name": "full name",
+      "options": {
+        "logoText": "Department for Environment, Food & Rural Affairs",
+        "url": "/"
+      },
+      "hidden": false,
+      "description": "Long-form wordmark for estates that require the full department name."
+    }
+  ]
+}

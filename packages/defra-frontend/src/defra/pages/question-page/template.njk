@@ -1,0 +1,41 @@
+{% extends "defra/pages/layout.njk" %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ text: "Back", href: "#" }) }}
+{% endblock %}
+
+{% block content %}
+  {% if params.showError %}
+    {{ govukErrorSummary({
+      titleText: "There is a problem",
+      errorList: [{ text: "Select how the water will be used", href: "#use-0" }]
+    }) }}
+  {% endif %}
+
+  {{ govukRadios({
+    name: "use",
+    idPrefix: "use",
+    errorMessage: { text: "Select how the water will be used" } if params.showError,
+    fieldset: {
+      legend: {
+        text: "How will the water be used?",
+        isPageHeading: true,
+        classes: "govuk-fieldset__legend--l"
+      }
+    },
+    hint: { text: "If the water has more than one use, select the main one." },
+    items: [
+      { value: "irrigation", text: "Spray irrigation", hint: { text: "Watering crops or land using a spray system." } },
+      { value: "industrial", text: "Industrial or commercial use" },
+      { value: "supply", text: "Public water supply" },
+      { divider: "or" },
+      { value: "other", text: "Another use" }
+    ]
+  }) }}
+
+  {{ govukButton({ text: "Continue" }) }}
+{% endblock %}

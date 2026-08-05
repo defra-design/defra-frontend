@@ -1,0 +1,12 @@
+[
+  { "name": "timeout", "type": "integer", "required": false, "description": "Session length in seconds. Defaults to 900. Must match the server's real session length — a dialog that disagrees with the server is worse than none." },
+  { "name": "warning", "type": "integer", "required": false, "description": "Seconds before expiry to warn. Defaults to 120. WCAG 2.2.1 requires at least 20 seconds." },
+  { "name": "signOutUrl", "type": "string", "required": true, "description": "Where to send the user on expiry, and the destination of the Sign out link." },
+  { "name": "keepAliveUrl", "type": "string", "required": false, "description": "Endpoint fetched to extend the session. If the fetch fails the warning reappears rather than silently pretending to have succeeded." },
+  { "name": "title", "type": "string", "required": false, "description": "Dialog heading. Defaults to `You are about to be signed out`." },
+  { "name": "text", "type": "string", "required": false, "description": "Extra paragraph, for example what happens to unsaved answers." },
+  { "name": "keepAliveText", "type": "string", "required": false, "description": "Primary button text. Defaults to `Stay signed in`." },
+  { "name": "signOutText", "type": "string", "required": false, "description": "Sign out link text. Defaults to `Sign out`." },
+  { "name": "classes", "type": "string", "required": false, "description": "Classes to add to the dialog." },
+  { "name": "attributes", "type": "object", "required": false, "description": "HTML attributes to add to the dialog." }
+]

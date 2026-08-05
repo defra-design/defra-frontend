@@ -1,0 +1,44 @@
+{# DEF-106 — session timeout dialog.
+
+   WCAG 2.2 success criterion 2.2.1 Timing Adjustable: where a session has a
+   time limit, the user must be warned and able to extend it. This is a
+   conformance obligation, not a courtesy.
+
+   Uses a native <dialog>. `showModal()` gives a focus trap, Escape handling,
+   inertness of the rest of the page and the correct implicit role for free —
+   all of which are laborious and easy to get subtly wrong by hand.
+
+   The element is empty of behaviour until JavaScript runs. That is the whole
+   risk of this component: if the script fails the user gets no warning, so
+   the SERVER must never treat the warning as the only protection. Give the
+   session enough slack that a silent expiry is recoverable. #}
+<dialog class="defra-timeout-dialog{{ ' ' + params.classes if params.classes }}"
+  data-module="defra-timeout-dialog"
+  data-timeout="{{ params.timeout | default(900) }}"
+  data-warning="{{ params.warning | default(120) }}"
+  data-sign-out-url="{{ params.signOutUrl }}"
+  {%- if params.keepAliveUrl %} data-keep-alive-url="{{ params.keepAliveUrl }}"{% endif %}
+  aria-labelledby="defra-timeout-dialog-title"
+  {%- for attribute, value in params.attributes %} {{ attribute }}="{{ value }}"{% endfor %}>
+  <h2 class="govuk-heading-m" id="defra-timeout-dialog-title">
+    {{ params.title | default("You are about to be signed out") }}
+  </h2>
+
+  <p class="govuk-body">
+    For your security, we will sign you out in
+    <strong class="defra-timeout-dialog__countdown" data-countdown>2 minutes</strong>.
+  </p>
+
+  {% if params.text %}
+    <p class="govuk-body">{{ params.text }}</p>
+  {% endif %}
+
+  <div class="govuk-button-group">
+    <button type="button" class="govuk-button" data-keep-alive>
+      {{ params.keepAliveText | default("Stay signed in") }}
+    </button>
+    <a class="govuk-link" href="{{ params.signOutUrl }}" data-sign-out>
+      {{ params.signOutText | default("Sign out") }}
+    </a>
+  </div>
+</dialog>

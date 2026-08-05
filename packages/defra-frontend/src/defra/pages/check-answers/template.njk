@@ -1,0 +1,48 @@
+{% extends "defra/pages/layout.njk" %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ text: "Back", href: "#" }) }}
+{% endblock %}
+
+{% block content %}
+  <h1 class="govuk-heading-l">Check your answers before sending your application</h1>
+
+  {{ govukSummaryList({
+    rows: [
+      {
+        key: { text: "Abstraction point" },
+        value: { text: "SU 1234 5678" },
+        actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "abstraction point" }] }
+      },
+      {
+        key: { text: "Water source" },
+        value: { text: "River Kennet" },
+        actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "water source" }] }
+      },
+      {
+        key: { text: "Daily volume" },
+        value: { text: "450 cubic metres" },
+        actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "daily volume" }] }
+      },
+      {
+        key: { text: "Abstraction period" },
+        value: { text: "1 April to 31 October, excluding periods of low flow as notified by the Environment Agency" },
+        actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "abstraction period" }] }
+      },
+      {
+        key: { text: "Use" },
+        value: { text: "Spray irrigation" },
+        actions: { items: [{ href: "#", text: "Change", visuallyHiddenText: "use" }] }
+      }
+    ]
+  }) }}
+
+  <h2 class="govuk-heading-m">Now send your application</h2>
+  {{ govukWarningText({ text: "You may be prosecuted if you give false information.", iconFallbackText: "Warning" }) }}
+
+  {{ govukButton({ text: "Accept and send" }) }}
+{% endblock %}

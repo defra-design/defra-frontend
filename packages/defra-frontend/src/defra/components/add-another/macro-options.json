@@ -1,0 +1,14 @@
+[
+  {
+    "name": "items",
+    "type": "array",
+    "required": true,
+    "description": "The repeated groups. Each takes `html` containing the fields for one item. Index ids and names consistently, for example `points[0][grid]` and `points-0-grid`, so they can be renumbered.",
+    "params": [
+      { "name": "html", "type": "string", "required": true, "description": "The fields for one item." }
+    ]
+  },
+  { "name": "itemName", "type": "string", "required": false, "description": "Singular noun used in legends and button text, for example `abstraction point`. Defaults to `item`." },
+  { "name": "classes", "type": "string", "required": false, "description": "Classes to add to the container." },
+  { "name": "attributes", "type": "object", "required": false, "description": "HTML attributes to add to the container." }
+]

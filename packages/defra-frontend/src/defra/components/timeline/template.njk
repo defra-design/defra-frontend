@@ -1,0 +1,36 @@
+{# DEF-101 — chronological case history.
+
+   An ordered list, not a stack of divs: the order carries meaning, and a
+   screen reader announces "list, 5 items" and the position of each entry for
+   free. The visual markers are drawn with CSS on the list item, so no
+   decorative markup reaches assistive technology.
+
+   Each entry is a heading so the case history is navigable by heading, and
+   the date uses <time datetime> so it is machine readable regardless of how
+   it is displayed. #}
+{% set headingLevel = params.headingLevel | default(3) %}
+<ol class="defra-timeline{{ ' ' + params.classes if params.classes }}"
+  {%- for attribute, value in params.attributes %} {{ attribute }}="{{ value }}"{% endfor %}>
+  {% for item in params.items %}
+  <li class="defra-timeline__item">
+    <h{{ headingLevel }} class="defra-timeline__title govuk-heading-s">
+      {{ item.title | default("") }}
+    </h{{ headingLevel }}>
+    <p class="defra-timeline__meta govuk-body-s">
+      {% if item.datetime %}
+        <time datetime="{{ item.datetime }}">{{ item.date }}</time>
+      {% else %}
+        {{ item.date }}
+      {% endif %}
+      {% if item.byline %}
+        <span class="defra-timeline__byline">by {{ item.byline }}</span>
+      {% endif %}
+    </p>
+    {% if item.html %}
+      <div class="defra-timeline__description">{{ item.html | safe }}</div>
+    {% elif item.text %}
+      <p class="defra-timeline__description govuk-body">{{ item.text }}</p>
+    {% endif %}
+  </li>
+  {% endfor %}
+</ol>

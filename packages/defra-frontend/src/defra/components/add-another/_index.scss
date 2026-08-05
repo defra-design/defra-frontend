@@ -1,0 +1,57 @@
+// DEF-103 — add another
+
+.defra-add-another__item {
+  @include govuk-responsive-margin(6, "bottom");
+
+  padding-top: govuk-spacing(4);
+  border-top: 1px solid govuk-functional-colour(border);
+}
+
+.defra-add-another__legend {
+  margin-bottom: govuk-spacing(3);
+}
+
+// Remove is styled as a link, not a button.
+//
+// With Add another and Remove both secondary buttons, three controls with
+// three different consequences looked identical — and identical to every other
+// secondary button on the page. Weight should follow consequence: the page's
+// primary action stays a primary button, Add another (structural, repeatable)
+// stays secondary, and Remove (subordinate to the one item it sits under)
+// drops to link weight.
+//
+// It remains a <button type="submit"> so it still posts without JavaScript.
+// Assistive technology announces "button" regardless of the styling, so the
+// semantics do not change — only the visual weight does. The trade-off is that
+// this reads as a link while behaving as a button; it is accepted here because
+// the alternative was three indistinguishable controls.
+// NOTE: govuk-link-style-default cannot be used here. It sets colour through
+// `:link` and `:visited`, and a <button> matches neither — the rule applies to
+// nothing, leaving the browser's default black at the default 13px button
+// size. The colours are therefore taken from the same functional tokens that
+// mixin would have used, applied directly.
+.defra-add-another__remove {
+  @include govuk-font($size: 19);
+  @include govuk-link-decoration;
+
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: govuk-functional-colour(link);
+  background: none;
+  cursor: pointer;
+
+  &:hover {
+    @include govuk-link-hover-decoration;
+
+    color: govuk-functional-colour(link-hover);
+  }
+
+  &:focus {
+    @include govuk-focused-text;
+  }
+}
+
+.defra-add-another__add {
+  @include govuk-responsive-margin(6, "bottom");
+}

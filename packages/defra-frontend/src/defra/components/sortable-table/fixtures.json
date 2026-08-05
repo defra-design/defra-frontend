@@ -1,0 +1,42 @@
+{
+  "component": "sortable-table",
+  "fixtures": [
+    {
+      "name": "default",
+      "options": {
+        "caption": "Abstraction applications",
+        "sort": "reference",
+        "order": "ascending",
+        "firstCellIsHeader": true,
+        "head": [
+          { "text": "Reference", "key": "reference", "sortable": true },
+          { "text": "Applicant", "key": "applicant", "sortable": true },
+          { "text": "Received", "key": "received", "sortable": true },
+          { "text": "Status" }
+        ],
+        "rows": [
+          [
+            { "text": "AB/2026/0148" },
+            { "text": "Kennet Farms Ltd" },
+            { "text": "14 January 2026", "sortValue": "2026-01-14" },
+            { "text": "Awaiting inspection" }
+          ],
+          [
+            { "text": "AB/2026/0091" },
+            { "text": "Avon Water Co" },
+            { "text": "3 March 2026", "sortValue": "2026-03-03" },
+            { "text": "Approved" }
+          ],
+          [
+            { "text": "AB/2026/0233" },
+            { "text": "Blackwater Estates" },
+            { "text": "27 February 2026", "sortValue": "2026-02-27" },
+            { "text": "Withdrawn" }
+          ]
+        ]
+      },
+      "hidden": false,
+      "description": "Headers are links carrying the sort in the query string, so this works server-side with no JavaScript. The Received column sorts on `sortValue` (an ISO date), because sorting on the displayed text would order it alphabetically. Not every column has to be sortable."
+    }
+  ]
+}

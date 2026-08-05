@@ -1,0 +1,30 @@
+// DEF-106 — timeout dialog
+//
+// Native <dialog> supplies the backdrop, the focus trap and the centring, so
+// there is very little to style. Resisting the urge to restyle it is the
+// point: a hand-built modal is where the accessibility bugs live.
+
+.defra-timeout-dialog {
+  @include govuk-font($size: 19);
+
+  max-width: 30em;
+  padding: govuk-spacing(6);
+  border: 1px solid govuk-functional-colour(input-border);
+  color: govuk-functional-colour(text);
+  background: govuk-functional-colour(body-background);
+
+  &::backdrop {
+    background: rgba(11, 12, 12, 0.7);
+  }
+
+  > :last-child {
+    margin-bottom: 0;
+  }
+}
+
+// The countdown changes every second. Tabular figures stop the text jittering
+// as the digits change width, which is distracting on something the user is
+// being asked to read under time pressure.
+.defra-timeout-dialog__countdown {
+  font-variant-numeric: tabular-nums;
+}

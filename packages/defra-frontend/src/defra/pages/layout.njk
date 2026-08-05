@@ -1,0 +1,29 @@
+{# Shared page shell for the Defra page types. Composition only — every element
+   is an upstream macro or a registered Defra deviation, nothing new is styled
+   here. Kept in the package (not the Storybook app) so the carbon check and
+   the prototype kit render exactly what designers review. #}
+{% from "govuk/components/generic-header/macro.njk" import govukGenericHeader %}
+{% from "govuk/components/phase-banner/macro.njk" import govukPhaseBanner %}
+{% from "defra/components/footer/macro.njk" import defraFooter %}
+<div class="defra-page">
+  {{ govukGenericHeader({ logoText: params.serviceName | default("Defra"), url: "/" }) }}
+  <div class="govuk-width-container">
+    {{ govukPhaseBanner({
+      tag: { text: params.phase | default("Alpha") },
+      html: 'This is a new service. Your <a class="govuk-link" href="#">feedback</a> will help us improve it.'
+    }) }}
+    {% block beforeContent %}{% endblock %}
+    <main class="govuk-main-wrapper" id="main-content">
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+          {% block content %}{% endblock %}
+        </div>
+      </div>
+    </main>
+  </div>
+  {{ defraFooter({ items: [
+    { text: "Accessibility statement", href: "#" },
+    { text: "Cookies", href: "#" },
+    { text: "Privacy", href: "#" }
+  ] }) }}
+</div>

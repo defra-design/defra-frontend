@@ -1,0 +1,32 @@
+[
+  {
+    "name": "head",
+    "type": "array",
+    "required": true,
+    "description": "Header cells.",
+    "params": [
+      { "name": "text", "type": "string", "required": true, "description": "Header text." },
+      { "name": "key", "type": "string", "required": false, "description": "Column identifier used in the sort query string. Required if `sortable`." },
+      { "name": "sortable", "type": "boolean", "required": false, "description": "Whether the column can be sorted." },
+      { "name": "classes", "type": "string", "required": false, "description": "Classes for the header cell." }
+    ]
+  },
+  {
+    "name": "rows",
+    "type": "array",
+    "required": true,
+    "description": "Array of rows, each an array of cells.",
+    "params": [
+      { "name": "text", "type": "string", "required": true, "description": "Cell text." },
+      { "name": "sortValue", "type": "string", "required": false, "description": "Value to sort on instead of the displayed text. Use for dates and amounts, where the display format does not sort correctly." },
+      { "name": "classes", "type": "string", "required": false, "description": "Classes for the cell." }
+    ]
+  },
+  { "name": "sort", "type": "string", "required": false, "description": "`key` of the column currently sorted, so the server's sort state is reflected in `aria-sort`." },
+  { "name": "order", "type": "string", "required": false, "description": "`ascending` or `descending`. Defaults to `ascending`." },
+  { "name": "firstCellIsHeader", "type": "boolean", "required": false, "description": "Render the first cell of each row as a row header." },
+  { "name": "caption", "type": "string", "required": false, "description": "Table caption." },
+  { "name": "captionClasses", "type": "string", "required": false, "description": "Classes for the caption. Defaults to `govuk-table__caption--m`." },
+  { "name": "classes", "type": "string", "required": false, "description": "Classes to add to the table." },
+  { "name": "attributes", "type": "object", "required": false, "description": "HTML attributes to add to the table." }
+]

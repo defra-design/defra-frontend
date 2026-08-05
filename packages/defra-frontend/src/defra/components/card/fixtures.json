@@ -1,0 +1,73 @@
+{
+  "component": "card",
+  "fixtures": [
+    {
+      "name": "default",
+      "options": {
+        "title": "Water abstraction licence",
+        "text": "Apply for a licence to take water from a river, stream, canal or underground source."
+      },
+      "hidden": false,
+      "description": "Heading and description only."
+    },
+    {
+      "name": "with whole card link",
+      "options": {
+        "title": "Apply for a water abstraction licence",
+        "href": "#",
+        "meta": "Takes around 20 minutes",
+        "text": "For abstractions of more than 20 cubic metres a day."
+      },
+      "hidden": false,
+      "description": "The whole card is clickable, but the link stays on the heading text — so the accessible name is the heading, not the whole block of copy. The pointer target is the card; the tab target is the heading."
+    },
+    {
+      "name": "with actions",
+      "options": {
+        "title": "AB/2026/0148 — River Kennet",
+        "meta": "Submitted 14 January 2026",
+        "text": "Awaiting site inspection.",
+        "actions": [
+          { "href": "#", "text": "View", "visuallyHiddenText": "application AB/2026/0148" },
+          { "href": "#", "text": "Withdraw", "visuallyHiddenText": "application AB/2026/0148" }
+        ]
+      },
+      "hidden": false,
+      "description": "Actions each carry visually hidden text, so \"View\" is distinguishable from every other \"View\" on the page when a screen reader lists the links."
+    },
+    {
+      "name": "with green header",
+      "options": {
+        "headerColour": "green",
+        "title": "Water abstraction licence",
+        "meta": "Environment Agency",
+        "text": "Apply for a licence to take water from a river, stream, canal or underground source."
+      },
+      "hidden": false,
+      "description": "The Defra brand green (#00a33b) in the role the branding guidance sanctions for it — a header band, used sparingly. White on this green is 3.33:1, which conforms because the banded title is large text (19px bold, where the threshold is 3:1 rather than 4.5:1). The size and weight are pinned in CSS for that reason: shrink them and the contrast silently stops conforming."
+    },
+    {
+      "name": "with green header and whole card link",
+      "options": {
+        "headerColour": "green",
+        "href": "#",
+        "title": "Apply for a water abstraction licence",
+        "meta": "Takes around 20 minutes",
+        "text": "For abstractions of more than 20 cubic metres a day."
+      },
+      "hidden": false,
+      "description": "A linked heading on the band takes the same white rather than the link green, which would be close to invisible against the brand green. It stays underlined, so it still reads as a link. Focus keeps the upstream yellow block, which reads correctly on the band."
+    },
+    {
+      "name": "href ignored when actions are present",
+      "options": {
+        "title": "Both href and actions supplied",
+        "href": "#",
+        "text": "The card does not become clickable, because a whole-card overlay would cover the actions and make them unreachable.",
+        "actions": [{ "href": "#", "text": "View" }]
+      },
+      "hidden": false,
+      "description": "The heading still links, but the whole-card behaviour is dropped. Enforced in the template rather than left to documentation."
+    }
+  ]
+}

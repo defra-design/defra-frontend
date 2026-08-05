@@ -1,0 +1,74 @@
+// DEF-101 — timeline
+//
+// Every value comes from a govuk helper: govuk-spacing for the 5px scale,
+// govuk-colour via the functional palette, and the upstream typography
+// classes on the elements themselves. Nothing here invents a measurement.
+
+.defra-timeline {
+  @include govuk-responsive-margin(6, "bottom");
+
+  margin-top: 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.defra-timeline__item {
+  position: relative;
+  padding-left: govuk-spacing(6);
+  padding-bottom: govuk-spacing(5);
+
+  // The rule connecting entries. Drawn on the item rather than added as an
+  // element so it never reaches assistive technology.
+  &::before {
+    content: "";
+    position: absolute;
+    top: govuk-spacing(2);
+    bottom: 0;
+    left: govuk-spacing(1);
+    width: 2px;
+    background: govuk-functional-colour(border);
+  }
+
+  // The marker.
+  &::after {
+    content: "";
+    position: absolute;
+    top: govuk-spacing(2);
+    left: 0;
+    width: govuk-spacing(3);
+    height: govuk-spacing(3);
+    border-radius: 50%;
+    background: govuk-functional-colour(brand);
+  }
+
+  // The last entry's rule would otherwise run past the final marker.
+  &:last-child {
+    padding-bottom: 0;
+
+    &::before {
+      display: none;
+    }
+  }
+}
+
+.defra-timeline__title {
+  margin-bottom: govuk-spacing(1);
+}
+
+.defra-timeline__meta {
+  color: govuk-functional-colour(secondary-text);
+
+  margin-bottom: govuk-spacing(2);
+}
+
+.defra-timeline__byline::before {
+  content: " · ";
+}
+
+.defra-timeline__description {
+  margin-bottom: 0;
+
+  > :last-child {
+    margin-bottom: 0;
+  }
+}

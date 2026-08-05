@@ -1,0 +1,135 @@
+// DEF-102 — card
+
+.defra-card {
+  @include govuk-responsive-margin(4, "bottom");
+
+  border: 1px solid govuk-functional-colour(border);
+  background: govuk-functional-colour(body-background);
+}
+
+// Padding lives on the header and content rather than the card, so a coloured
+// header band can run edge to edge.
+.defra-card__header {
+  padding: govuk-spacing(4) govuk-spacing(4) 0;
+}
+
+.defra-card__content {
+  padding: govuk-spacing(2) govuk-spacing(4) govuk-spacing(4);
+}
+
+.defra-card__title {
+  margin-bottom: govuk-spacing(1);
+}
+
+.defra-card__meta {
+  color: govuk-functional-colour(secondary-text);
+
+  margin-bottom: govuk-spacing(2);
+}
+
+.defra-card__description {
+  margin-bottom: 0;
+
+  > :last-child {
+    margin-bottom: 0;
+  }
+}
+
+.defra-card__actions {
+  @include govuk-font($size: 16);
+
+  margin-bottom: 0;
+  margin-top: govuk-spacing(3);
+  display: flex;
+  flex-wrap: wrap;
+  gap: govuk-spacing(4);
+}
+
+.defra-card__action {
+  margin-bottom: 0;
+}
+
+// -- Coloured header ---------------------------------------------------------
+// The Defra brand green, in the role the branding guidance sanctions for it:
+// a header band, used sparingly.
+//
+// CONTRAST — read before changing anything here.
+//
+// White on #00a33b is 3.33:1. That fails the 4.5:1 body-text threshold, but
+// WCAG allows 3:1 for "large text" (18.66px+ bold, or 24px+), and the banded
+// title is 19px at weight 800 at every breakpoint. So white conforms — but
+// ONLY because the title is large, and only by 11% over the threshold.
+//
+// That condition is therefore enforced below rather than left to chance. Drop
+// the size or the weight of this title and white silently becomes a failure
+// that nothing in the build will catch, because contrast is not something the
+// drift or carbon checks can see.
+//
+// (Black on the same green measures 5.88:1 and is the safer number in the
+// abstract. White is used because it is markedly clearer to read here —
+// WCAG 2.x luminance maths is known to misjudge saturated mid-tones, green
+// most of all, which is the problem APCA exists to solve. The measurement and
+// the eye disagree; both were checked.)
+.defra-card--header-green {
+  .defra-card__header {
+    padding-bottom: govuk-spacing(3);
+    background: $defra-brand-green;
+  }
+
+  // Load-bearing for contrast conformance — see above. Not decorative.
+  .defra-card__title {
+    font-size: 19px;
+    font-weight: 700;
+    color: govuk-functional-colour(inverse-text);
+  }
+
+  .defra-card__content {
+    padding-top: govuk-spacing(3);
+  }
+
+  // A linked heading takes the same white: the default link green on brand
+  // green is close to invisible. The underline still marks it as a link.
+  .defra-card__link {
+    &:link,
+    &:visited,
+    &:hover,
+    &:active {
+      color: govuk-functional-colour(inverse-text);
+    }
+
+    // Focus is deliberately left to the upstream link styles: the yellow focus
+    // block with black text reads correctly on the green band, and overriding
+    // it would make this the one focus indicator on the page that behaves
+    // differently.
+  }
+}
+
+// Whole-card click target. The link itself stays on the heading text, so the
+// accessible name and the tab stop are unchanged — this only enlarges the
+// POINTER target. Applied only when the card has no actions, since the
+// overlay would otherwise cover them.
+.defra-card--clickable {
+  position: relative;
+
+  .defra-card__link::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+
+  // Hover feedback for the enlarged target, so the whole card visibly
+  // responds rather than only the heading.
+  &:hover {
+    background: govuk-functional-colour(surface-background);
+  }
+
+  // Focus is driven by the link, not the card: focusing the heading link must
+  // show the standard focus style in the standard place. Anything else would
+  // make the focus indicator inconsistent with every other link on the page.
+  &:focus-within {
+    background: govuk-functional-colour(body-background);
+  }
+}

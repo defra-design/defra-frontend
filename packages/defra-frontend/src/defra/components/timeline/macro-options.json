@@ -1,0 +1,24 @@
+[
+  {
+    "name": "items",
+    "type": "array",
+    "required": true,
+    "description": "The entries, newest first. Each takes `title`, `date`, and optionally `datetime`, `byline`, `text` or `html`.",
+    "params": [
+      { "name": "title", "type": "string", "required": true, "description": "What happened." },
+      { "name": "date", "type": "string", "required": true, "description": "Date as displayed, for example `12 March 2026`." },
+      { "name": "datetime", "type": "string", "required": false, "description": "Machine-readable date for the `<time>` element, for example `2026-03-12`. Omitting it renders plain text instead." },
+      { "name": "byline", "type": "string", "required": false, "description": "Who did it." },
+      { "name": "text", "type": "string", "required": false, "description": "Description. Ignored if `html` is set." },
+      { "name": "html", "type": "string", "required": false, "description": "Description as HTML, for lists or multiple paragraphs." }
+    ]
+  },
+  {
+    "name": "headingLevel",
+    "type": "integer",
+    "required": false,
+    "description": "Heading level for each entry, 2 to 6. Defaults to 3. Set it so the timeline does not skip a level in the page's heading order."
+  },
+  { "name": "classes", "type": "string", "required": false, "description": "Classes to add to the timeline." },
+  { "name": "attributes", "type": "object", "required": false, "description": "HTML attributes to add to the timeline." }
+]

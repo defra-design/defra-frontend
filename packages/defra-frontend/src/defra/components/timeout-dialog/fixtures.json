@@ -1,0 +1,27 @@
+{
+  "component": "timeout-dialog",
+  "fixtures": [
+    {
+      "name": "default",
+      "options": {
+        "timeout": 900,
+        "warning": 120,
+        "signOutUrl": "#signed-out",
+        "keepAliveUrl": "#keep-alive"
+      },
+      "hidden": false,
+      "description": "A 15 minute session warned at 2 minutes. The dialog is closed until the warning fires — see the demo story to open it immediately."
+    },
+    {
+      "name": "demo, warns after two seconds",
+      "options": {
+        "timeout": 12,
+        "warning": 10,
+        "signOutUrl": "#signed-out",
+        "text": "Shortened so the behaviour is visible. Real services should give the full session length."
+      },
+      "hidden": false,
+      "description": "Warns almost immediately so the countdown, focus placement and Escape-to-extend can be exercised. The visible countdown ticks every second; the screen reader announcement fires only at 120, 60, 30, 20, 10 and 5 seconds, because a live region updating every second is unusable."
+    }
+  ]
+}

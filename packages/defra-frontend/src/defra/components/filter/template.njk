@@ -1,0 +1,64 @@
+{# DEF-104 — filter.
+
+   A plain form. Without JavaScript it is always visible and the submit button
+   applies the filters — which is the whole component. JavaScript adds a
+   disclosure button at narrow widths so the filters can be collapsed out of
+   the way of the results.
+
+   Selected filters are listed as links that REMOVE them, each with visually
+   hidden text, because a screen reader reading "Approved" out of context
+   cannot tell it is a remove control. #}
+<div class="defra-filter{{ ' ' + params.classes if params.classes }}"
+  data-module="defra-filter"
+  {%- for attribute, value in params.attributes %} {{ attribute }}="{{ value }}"{% endfor %}>
+  <div class="defra-filter__header">
+    <h2 class="govuk-heading-m defra-filter__heading">{{ params.heading | default("Filter") }}</h2>
+  </div>
+
+  <div class="defra-filter__content" id="{{ params.id | default('defra-filter') }}-content">
+    {% if params.selected and params.selected | length %}
+      <div class="defra-filter__selected">
+        <div class="defra-filter__selected-header">
+          <h3 class="govuk-heading-s">Selected filters</h3>
+          {% if params.clearHref %}
+            <a class="govuk-link govuk-body-s" href="{{ params.clearHref }}">Clear all filters</a>
+          {% endif %}
+        </div>
+        <ul class="govuk-list defra-filter__tags">
+          {% for tag in params.selected %}
+            <li>
+              <a class="defra-filter__tag" href="{{ tag.href }}">
+                <span class="govuk-visually-hidden">Remove filter </span>{{ tag.text }}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    {% for group in params.groups %}
+      <div class="govuk-form-group defra-filter__group">
+        <fieldset class="govuk-fieldset">
+          <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">{{ group.legend }}</legend>
+          <div class="govuk-checkboxes govuk-checkboxes--small">
+            {% for item in group.items %}
+              <div class="govuk-checkboxes__item">
+                <input class="govuk-checkboxes__input"
+                  id="{{ group.name }}-{{ loop.index }}"
+                  name="{{ group.name }}"
+                  type="checkbox"
+                  value="{{ item.value }}"
+                  {{ 'checked' if item.checked }}>
+                <label class="govuk-label govuk-checkboxes__label" for="{{ group.name }}-{{ loop.index }}">
+                  {{ item.text }}
+                </label>
+              </div>
+            {% endfor %}
+          </div>
+        </fieldset>
+      </div>
+    {% endfor %}
+
+    <button type="submit" class="govuk-button">Apply filters</button>
+  </div>
+</div>

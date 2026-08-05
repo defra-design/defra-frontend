@@ -1,0 +1,21 @@
+{% extends "defra/pages/layout.njk" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+
+{% block content %}
+  <h1 class="govuk-heading-xl">{{ params.title | default("Apply for a water abstraction licence") }}</h1>
+  <p class="govuk-body-l">Use this service to apply for a licence to take water from a river, stream, canal, reservoir or underground source.</p>
+  <p class="govuk-body">It takes around 20 minutes to apply. You can save your answers and come back later.</p>
+
+  <h2 class="govuk-heading-m">Before you start</h2>
+  <p class="govuk-body">You will need:</p>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>the grid reference of the abstraction point</li>
+    <li>the volume of water you need, in cubic metres per day</li>
+    <li>details of how the water will be used</li>
+  </ul>
+
+  {{ govukInsetText({ text: "You cannot use this service to vary an existing licence. Contact the National Customer Contact Centre instead." }) }}
+
+  {{ govukButton({ text: "Start now", href: "#", isStartButton: true }) }}
+{% endblock %}
