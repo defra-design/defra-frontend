@@ -214,7 +214,7 @@ Dependabot/Renovate.
 5. Prototype kit plugin — the adoption lever, designers won't read docs
 6. Eleventy docs site via `govuk-eleventy-plugin`, reading the same fixtures
 
-## Maps — use `@defra/interactive-map`, do not depend on it
+## Maps — demonstrated, not depended on
 
 https://github.com/DEFRA/interactive-map — MIT, public, accessibility-first,
 Nunjucks + SCSS, provider-based so the map engine is a separate entry point.
@@ -236,9 +236,26 @@ Also weigh, if it is ever adopted:
   a real measurement, rather than loosening the existing ones.
 - Published as `0.0.1-alpha` / `0.0.37-alpha`. Alpha.
 
-Until then: services that need a map install it themselves alongside this
-package. The unblocking action is upstream — ask them to move `govuk-frontend`
-to a peerDependency supporting v6, which also fixes it for every other consumer.
+**How it is included today.** It is a devDependency of `apps/storybook` only,
+with a hand-written story under `apps/storybook/stories/`. That placement is the
+boundary: nothing a service installs from `@defra/frontend` pulls it in, and
+`npm run boundary` fails the build if it ever appears in the package's
+dependencies (verified by temporarily adding it — the check exits 1). npm nests
+the v5 copy under the map package, so `@defra/frontend` still resolves 6.4.0;
+the boundary check prints both so the situation stays visible rather than
+becoming folklore.
+
+Two integration notes, both found by running it:
+- `maplibre-gl` must be pinned to the major the map package expects (`^5`).
+  Installing the current major gave two copies and a silent failure.
+- The provider throws `p is not a constructor` unless Vite dedupes and
+  pre-bundles `maplibre-gl`. Fixed in `main.js` via `resolve.dedupe` and
+  `optimizeDeps.include`. Symptom: map chrome renders, no `<canvas>`.
+
+Services that need a map install it themselves alongside this package. The
+unblocking action for real adoption is upstream — ask them to move
+`govuk-frontend` to a peerDependency supporting v6, which fixes it for every
+consumer, not just this one.
 
 ## Open decisions — ask, don't guess
 

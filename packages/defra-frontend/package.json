@@ -1,7 +1,7 @@
 {
   "name": "@defra/frontend",
   "version": "0.1.0",
-  "description": "Defra Frontend — GOV.UK Frontend, themed for Defra services, built for minimum payload.",
+  "description": "Defra Frontend \u2014 GOV.UK Frontend, themed for Defra services, built for minimum payload.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -24,7 +24,8 @@
     "build": "sass --load-path=../../node_modules --style=compressed --no-source-map src/defra-frontend.scss dist/defra-frontend.min.css",
     "drift": "node scripts/drift.mjs",
     "carbon": "node scripts/carbon.mjs",
-    "stories": "node scripts/generate-stories.mjs"
+    "stories": "node scripts/generate-stories.mjs",
+    "boundary": "node scripts/boundary.mjs"
   },
   "peerDependencies": {
     "govuk-frontend": "^6.4.0"

@@ -66,7 +66,12 @@ const WIP_BANNER = `
 
 export default {
   framework: '@storybook/html-vite',
-  stories: ['../../../packages/defra-frontend/src/stories/generated/*.stories.js'],
+  stories: [
+    '../../../packages/defra-frontend/src/stories/generated/*.stories.js',
+    // Hand-written stories for companion packages. They live in this app, not
+    // in the package, because their dependencies do too.
+    '../stories/*.stories.js'
+  ],
   addons: ['@storybook/addon-docs'],
   staticDirs: [
     { from: '../../../node_modules/govuk-frontend/dist/govuk/assets', to: '/assets' }
@@ -81,6 +86,24 @@ export default {
     }
     config.base = BASE
     config.server = { ...config.server, fs: { allow: [repoRoot] } }
+
+    // @defra/interactive-map's maplibre provider fails with "p is not a
+    // constructor" unless maplibre-gl resolves to a single instance that Vite
+    // has pre-bundled. Two copies exist (this app's and the one nested under
+    // the map package), and the provider's interop only works against one.
+    config.resolve = {
+      ...config.resolve,
+      dedupe: [...(config.resolve?.dedupe ?? []), 'maplibre-gl']
+    }
+    config.optimizeDeps = {
+      ...config.optimizeDeps,
+      include: [
+        ...(config.optimizeDeps?.include ?? []),
+        'maplibre-gl',
+        '@defra/interactive-map',
+        '@defra/interactive-map/providers/maplibre'
+      ]
+    }
     config.css = {
       ...config.css,
       preprocessorOptions: {

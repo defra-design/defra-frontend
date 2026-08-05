@@ -35,7 +35,11 @@ export default {
   parameters: {
     layout: 'padded',
     options: {
-      storySort: { order: ['Pages', 'Defra', 'GOV.UK (Defra themed)'] }
+      // Companion packages sort last: they are demonstrated here, not shipped
+      // by @defra/frontend, and the ordering should say so.
+      storySort: {
+        order: ['Pages', 'Defra', 'Defra additions', 'GOV.UK (Defra themed)', 'Companion packages']
+      }
     },
     docs: {
       // The Docs page "Show code" defaults to the JavaScript render function,
