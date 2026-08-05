@@ -214,6 +214,32 @@ Dependabot/Renovate.
 5. Prototype kit plugin — the adoption lever, designers won't read docs
 6. Eleventy docs site via `govuk-eleventy-plugin`, reading the same fixtures
 
+## Maps — use `@defra/interactive-map`, do not depend on it
+
+https://github.com/DEFRA/interactive-map — MIT, public, accessibility-first,
+Nunjucks + SCSS, provider-based so the map engine is a separate entry point.
+It is the right map component for Defra and this repo should never build one.
+
+**But it must not become a dependency of `@defra/frontend`, today.** It declares
+`govuk-frontend: ^5.13.0` as a *direct* dependency, not a peer. We are on 6.4.0
+as a peer. Installing it puts two copies of govuk-frontend in the tree — the
+precise failure the first paragraph of this file says the architecture exists to
+prevent. The drift check would still read the root v6 and pass, while a built
+page shipped both. A check that passes while the thing it guards against is
+happening is worse than no check.
+
+Also weigh, if it is ever adopted:
+- `preact` is a direct dependency, against "vanilla JavaScript, no React, no Vue".
+  Consumers never write it, but it is in the bundle.
+- `maplibre-gl` is a direct dependency. A map page cannot live inside the 12 KB
+  JS budget and should not pretend to: give it its own `map-page` budget set from
+  a real measurement, rather than loosening the existing ones.
+- Published as `0.0.1-alpha` / `0.0.37-alpha`. Alpha.
+
+Until then: services that need a map install it themselves alongside this
+package. The unblocking action is upstream — ask them to move `govuk-frontend`
+to a peerDependency supporting v6, which also fixes it for every other consumer.
+
 ## Open decisions — ask, don't guess
 
 - **`@use` migration.** Sass emits ~172 `@import` deprecation warnings. v6 ships
