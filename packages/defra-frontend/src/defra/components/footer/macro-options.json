@@ -1,0 +1,12 @@
+[
+  {
+    "name": "items",
+    "type": "array",
+    "required": false,
+    "description": "Footer links. Each item takes `text` and `href`.",
+    "params": [
+      { "name": "text", "type": "string", "required": true, "description": "Link text." },
+      { "name": "href", "type": "string", "required": true, "description": "Link destination." }
+    ]
+  }
+]
