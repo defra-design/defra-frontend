@@ -83,6 +83,17 @@ export default {
         footer. Services elsewhere do not, and instead use a system font stack with
         Defra chrome. Defra's published branding guidance takes the same position.
       </p>
+      <p class="govuk-body">
+        The typeface is settled by that licence, but it is also the single largest
+        carbon saving in the system. GDS Transport is two WOFF2 files, around 63 KB
+        on a first uncached load, and a system font stack removes them rather than
+        making them smaller: the fonts are already on the device. On a question page
+        that is a reduction of about two thirds of the estimated emissions, which is
+        more than every other decision here put together. It is worth being plain
+        that this is a consequence of the licence rather than a design choice made
+        for its own sake — but it is a welcome one, and it is why the fonts budget
+        for every page type is zero rather than merely small.
+      </p>
 
       <h2 class="govuk-heading-m">Where things are</h2>
       <div id="defra-intro-sections"></div>
