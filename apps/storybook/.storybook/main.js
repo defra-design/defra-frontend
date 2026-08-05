@@ -29,6 +29,42 @@ const budgets = existsSync(budgetsPath) ? JSON.parse(readFileSync(budgetsPath, '
 // Defaults to "/" so local dev is unaffected.
 const BASE = process.env.STORYBOOK_BASE_PATH || '/'
 
+// Status banner across the top of the whole Storybook UI.
+//
+// This site is published publicly from an internal repository, so the warning
+// has to be on the artefact itself and not only in the README — anyone
+// arriving from a link never sees the repo. It states the same thing CLAUDE.md
+// and the README do: no Defra design authority has approved this.
+//
+// Injected through managerHead rather than built as an addon: a manager addon
+// is React, which this repo does not use. Plain CSS and one element instead.
+//
+// The height override on the layout container is what keeps it from covering
+// the sidebar header. Storybook's layout element is emotion-generated, so if a
+// future upgrade changes that structure the banner will overlay rather than
+// shift — visible breakage, not a silent loss of the warning.
+const WIP_BANNER = `
+<style>
+  #defra-wip {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100000;
+    box-sizing: border-box; height: 36px;
+    display: flex; align-items: center; gap: 10px; padding: 0 16px;
+    background: #ffdd00; color: #0b0c0c; border-bottom: 3px solid #0b0c0c;
+    font: 600 13px/1.3 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  #defra-wip span { font-weight: 400; }
+  /* Hide the supporting sentence before it would collide with the heading. */
+  @media (max-width: 40em) { #defra-wip span { display: none; } }
+  #root > div:first-child {
+    height: calc(100vh - 36px) !important;
+    margin-top: 36px !important;
+  }
+</style>
+<div id="defra-wip">
+  <strong>Work in progress &mdash; not for use</strong>
+  <span>Unapproved prototype. No Defra design authority has approved this library.</span>
+</div>`
+
 export default {
   framework: '@storybook/html-vite',
   stories: ['../../../packages/defra-frontend/src/stories/generated/*.stories.js'],
@@ -36,6 +72,7 @@ export default {
   staticDirs: [
     { from: '../../../node_modules/govuk-frontend/dist/govuk/assets', to: '/assets' }
   ],
+  managerHead: (head) => head + WIP_BANNER,
   viteFinal: (config) => {
     config.define = {
       ...config.define,
