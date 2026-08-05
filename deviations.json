@@ -1,8 +1,68 @@
 {
-  "footer": {
-    "id": "DEF-001",
-    "reason": "GOV.UK footer asserts Royal Arms + OGL; not permitted outside the GOV.UK proposition",
-    "approvedBy": "TBC - Defra design authority",
-    "review": "each govuk-frontend minor"
+  "components": {
+    "footer": {
+      "id": "DEF-001",
+      "reason": "GOV.UK footer asserts Royal Arms + OGL; not permitted outside the GOV.UK proposition",
+      "approvedBy": "TBC - Defra design authority",
+      "review": "each govuk-frontend minor"
+    }
+  },
+  "additions": {
+    "_note": "Components that do not exist in GOV.UK Frontend. Each one is permanent surface area with a cost on every upstream bump, so each must record why GDS has no equivalent, the cross-government prior art it follows rather than invents, and whether it has been proposed back to the community. The Design System's own guidance is to contribute, not to fork quietly. Remove an entry only by removing the component.",
+    "timeline": {
+      "id": "DEF-101",
+      "whyNotUpstream": "GOV.UK Frontend has no component for chronological case history. Proposed to the GDS community backlog by others and not adopted.",
+      "priorArt": "MoJ Design System - Timeline",
+      "proposedUpstream": "No - raise once the Defra pattern has been used in a live service",
+      "javascript": "none"
+    },
+    "card": {
+      "id": "DEF-102",
+      "whyNotUpstream": "GDS deliberately has no generic card; summary-list cards cover the check-answers case only. Kept intentionally narrow: heading, optional description, optional meta, an optional brand-green header band, and EITHER a whole-card link OR footer actions. No images, no nested cards. If a request needs a new option, that is a signal the layout wants a different component.",
+      "headerColour": "Only `green` (#00a33b) is supported, which is the role the Defra branding guidance sanctions for that colour. The banded title is white at 3.33:1, which conforms ONLY because it is large text (19px bold, threshold 3:1 not 4.5:1) — so its size and weight are pinned in CSS rather than inherited. Black would measure 5.88:1 and be safer on paper, but reads markedly worse on a saturated mid-tone green, which is a known weakness of the WCAG 2.x luminance formula and the reason APCA exists. Do not add further header colours, or shrink this title, without re-checking contrast against the text colour and size they would carry.",
+      "priorArt": "GOV.UK publishing components, and card components in several departmental systems",
+      "proposedUpstream": "No - generic cards have been rejected upstream before; treat this as a Defra-local convenience",
+      "javascript": "none"
+    },
+    "add-another": {
+      "id": "DEF-103",
+      "whyNotUpstream": "No upstream component for repeating a group of fields. Needed for multiple abstraction points, land parcels and holdings.",
+      "priorArt": "MoJ Design System - Add another",
+      "proposedUpstream": "No",
+      "javascript": "progressive enhancement only - submits to the server without it"
+    },
+    "filter": {
+      "id": "DEF-104",
+      "whyNotUpstream": "No upstream component for filtering a list of results.",
+      "priorArt": "MoJ Design System - Filter",
+      "proposedUpstream": "No",
+      "javascript": "progressive enhancement only - a plain form without it"
+    },
+    "sortable-table": {
+      "id": "DEF-105",
+      "whyNotUpstream": "govukTable has no sortable header support.",
+      "priorArt": "MoJ Design System - Sortable table",
+      "proposedUpstream": "No",
+      "javascript": "progressive enhancement only - headers are server-sort links without it"
+    },
+    "timeout-dialog": {
+      "id": "DEF-106",
+      "whyNotUpstream": "No upstream component, but WCAG 2.2 success criterion 2.2.1 Timing Adjustable requires warning and extension on a session limit. This is a conformance obligation on any Defra service with a session timeout, not a convenience.",
+      "priorArt": "HMRC Frontend - Timeout dialog",
+      "proposedUpstream": "No",
+      "javascript": "required - the component does nothing without it, which is why the server must never rely on it alone"
+    }
+  },
+  "design": {
+    "typeface": {
+      "id": "DEF-002",
+      "deviatesFrom": "https://digital.defra.gov.uk/design/branding",
+      "requirement": "Off-GOV.UK services must use Helvetica or Arial CSS font stacks",
+      "actual": "system-ui, -apple-system, \"Segoe UI\", Roboto, \"Helvetica Neue\", arial, sans-serif",
+      "reason": "Helvetica and Arial ship regular and bold only. The guidance is met on every point it exists to protect - New Transport is not used, no webfont is downloaded, zero font bytes - but the two-weight limit collapses the Defra weight scale (400/500/600/700/800) to two tiers, and with a restrained palette and no imagery weight is the primary carrier of hierarchy. The stack still ends in Helvetica Neue and arial, so any system without a richer face lands on the mandated fonts anyway.",
+      "risk": "Users on Helvetica/Arial-only systems see a flatter hierarchy, not a broken one - weights round down to regular and bold, which is upstream GOV.UK's own appearance.",
+      "approvedBy": "TBC - Defra design authority. Raise with the AI Capability and Enablement team, who maintain the branding guidance.",
+      "review": "on any change to the published branding guidance"
+    }
   }
 }

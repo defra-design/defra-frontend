@@ -1,0 +1,5 @@
+{
+  "start-page": { "css": 20000, "js": 12000, "fonts": 0, "html": 2500 },
+  "question-page": { "css": 20000, "js": 12000, "fonts": 0, "html": 2500 },
+  "check-answers": { "css": 20000, "js": 12000, "fonts": 0, "html": 3500 }
+}

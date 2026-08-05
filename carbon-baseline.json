@@ -1,0 +1,17 @@
+{
+  "css": 16762,
+  "pages": {
+    "check-answers": {
+      "html": 1209,
+      "js": 11152
+    },
+    "question-page": {
+      "html": 1160,
+      "js": 11152
+    },
+    "start-page": {
+      "html": 1266,
+      "js": 11152
+    }
+  }
+}

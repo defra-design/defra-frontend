@@ -1,0 +1,57 @@
+name: pages
+
+on:
+  push: { branches: [main] }
+  workflow_dispatch:
+
+# Only one deployment at a time, and let a running one finish rather than
+# cancelling it — a half-deployed Pages site is worse than a slightly stale one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      # Generated stories are gitignored, so they must be built here. The CSS
+      # must be built too: the carbon readout reads the compiled stylesheet.
+      - name: Build stylesheet and stories
+        run: npm run build && npm run stories
+
+      # base_path comes from configure-pages, so this is correct for both a
+      # project site (/defra-frontend/) and a user or custom-domain site (/).
+      - name: Build Storybook
+        run: npm run build -w @defra/storybook
+        env:
+          STORYBOOK_BASE_PATH: ${{ steps.pages.outputs.base_path }}/
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/storybook/storybook-static
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
