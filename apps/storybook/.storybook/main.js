@@ -33,8 +33,7 @@ const BASE = process.env.STORYBOOK_BASE_PATH || '/'
 //
 // This site is published publicly from an internal repository, so the warning
 // has to be on the artefact itself and not only in the README — anyone
-// arriving from a link never sees the repo. It states the same thing CLAUDE.md
-// and the README do: no Defra design authority has approved this.
+// arriving from a link never sees the repo.
 //
 // Injected through managerHead rather than built as an addon: a manager addon
 // is React, which this repo does not use. Plain CSS and one element instead.
@@ -62,7 +61,7 @@ const WIP_BANNER = `
 </style>
 <div id="defra-wip">
   <strong>Work in progress &mdash; not for use</strong>
-  <span>Unapproved prototype. No Defra design authority has approved this library.</span>
+  <span>Unapproved prototype.</span>
 </div>`
 
 export default {
