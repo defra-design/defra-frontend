@@ -1,0 +1,19 @@
+{
+  "name": "@defra/storybook",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "storybook dev -p 6006 --no-open",
+    "build": "storybook build"
+  },
+  "devDependencies": {
+    "@storybook/addon-docs": "^10.5.6",
+    "@storybook/html-vite": "^10.5.6",
+    "@tgwf/co2": "^0.19.0",
+    "nunjucks": "^3.2.4",
+    "sass": "^1.102.0",
+    "storybook": "^10.5.6",
+    "vite": "^7.1.0"
+  }
+}

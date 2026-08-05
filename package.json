@@ -10,8 +10,9 @@
   },
   "scripts": {
     "drift": "npm run drift -w @defra/frontend",
-    "carbon": "npm run carbon -w @defra/frontend",
+    "carbon": "npm run carbon -w @defra/frontend --",
     "stories": "npm run stories -w @defra/frontend",
+    "storybook": "npm run build -w @defra/frontend && npm run dev -w @defra/storybook",
     "build": "npm run build -w @defra/frontend",
     "check": "npm run build && npm run drift && npm run carbon"
   },
