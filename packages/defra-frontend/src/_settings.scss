@@ -1,0 +1,70 @@
+// Settings layer — everything that must be set BEFORE govuk-frontend compiles.
+//
+// Split out so it can be loaded in two places: this package's own stylesheet,
+// and the GOV.UK Prototype Kit, which imports user settings before plugins
+// precisely so plugin settings can be configured. Without the split, a kit
+// prototype would compile govuk-frontend before any Defra token was set and
+// silently render stock GOV.UK.
+// ---------------------------------------------------------------------------
+// defra-frontend
+// A settings-layer override of GOV.UK Frontend v6. No forked components.
+// Everything below is a variable, not a redefinition.
+// ---------------------------------------------------------------------------
+
+// -- Brand mode -------------------------------------------------------------
+// "govuk"  = service is on *.service.gov.uk. MUST use GDS Transport + GOV.UK
+//            header/footer. Licence and Service Manual both require it.
+// "defra"  = everything else (internal, defra.gov.uk, caseworking).
+//            MUST NOT use GDS Transport. System fonts only.
+$defra-brand-mode: "defra" !default;
+
+// -- Typography -------------------------------------------------------------
+// DEF-002 — a registered deviation. Defra branding guidance requires Helvetica
+// or Arial stacks; those ship two weights, which would collapse the weight
+// scale that carries hierarchy here. See deviations.json for the full
+// reasoning. The stack still ends in "Helvetica Neue", arial, so a system
+// without a richer face lands on the mandated fonts.
+//
+// The single highest-impact carbon decision in the system.
+// Overriding $govuk-font-family also flips $govuk-include-default-font-face
+// to false automatically (it derives from whether "GDS Transport" is present),
+// so the @font-face blocks and the WOFF2 payload disappear with one variable.
+$defra-font-stack:
+  system-ui,
+  -apple-system,
+  "Segoe UI",
+  Roboto,
+  "Helvetica Neue",
+  arial,
+  sans-serif;
+
+@if $defra-brand-mode == "defra" {
+  $govuk-font-family: $defra-font-stack !global;
+  $govuk-font-family-print: $defra-font-stack !global;
+}
+
+// -- Colour ------------------------------------------------------------------
+// PLACEHOLDER until the Defra estate brand audit (see CLAUDE.md). Direction:
+// re-point the functional brand from blue to v6's own green ramp — every value
+// below is an upstream palette entry with GDS-derived tints/shades, so nothing
+// here is an invented colour. Link green #0f7a52 is 5.4:1 on white (AA).
+// Focus yellow, error red, and visited purple are accessibility affordances,
+// not brand surfaces — never re-point them. The upstream map validates keys,
+// so a typo fails the build rather than silently keeping blue.
+@if $defra-brand-mode == "defra" {
+  $govuk-functional-colours: (
+    "brand": (name: "green"),
+    "link": (name: "green"),
+    "link-hover": (name: "green", variant: "shade-50"),
+    "template-background": (name: "green", variant: "tint-95"),
+    "surface-background": (name: "green", variant: "tint-95"),
+    "surface-border": (name: "green", variant: "tint-50")
+  ) !global;
+}
+
+// -- Assets -----------------------------------------------------------------
+$govuk-assets-path: "/assets/" !default;
+
+// -- Import GOV.UK Frontend -------------------------------------------------
+// Selective import keeps the payload honest. Comment out what a page type
+// does not use; the budget check in CI will tell you if you got greedy.

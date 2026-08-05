@@ -211,7 +211,7 @@ Dependabot/Renovate.
 3. ~~carbon budgets~~ done
 4. ~~Storybook (`apps/storybook`) + carbon readout~~ done — badge lives in the
    preview iframe (vanilla JS), not a manager addon (manager UI is React)
-5. Prototype kit plugin — the adoption lever, designers won't read docs
+5. ~~Prototype kit plugin~~ done — `npx @defra/create-prototype`, verified in a real kit
 6. Eleventy docs site via `govuk-eleventy-plugin`, reading the same fixtures
 
 ## Maps — demonstrated, not depended on
@@ -256,6 +256,45 @@ Services that need a map install it themselves alongside this package. The
 unblocking action for real adoption is upstream — ask them to move
 `govuk-frontend` to a peerDependency supporting v6, which fixes it for every
 consumer, not just this one.
+
+## Prototyping
+
+Spin-up deliberately mirrors the GDS command, so every Defra instruction can be
+"the same as the GOV.UK one, with our package name":
+
+```bash
+npx @defra/create-prototype my-service
+```
+
+`packages/create-prototype` does not reimplement the kit. It runs the real
+`govuk-prototype-kit create`, then applies the four things a Defra prototype
+needs. Each one is load-bearing:
+
+1. **`govuk-frontend@6` at the project root.** The kit pins 5.x for itself but
+   resolves plugins from the *project* root (`getPathFromProjectRoot`), so the
+   root copy is what gets compiled. This layer is v6-only —
+   `govuk-functional-colour` and `govuk-colour($variant:)` do not exist in v5,
+   so on the kit's own v5 nothing here compiles at all. Verified working: the
+   kit builds against v6 and emits only v6 deprecation warnings.
+2. **`@defra/frontend`, which is itself the kit plugin.** No separate plugin
+   package — `govuk-frontend` ships its own `govuk-prototype-kit.config.json`
+   and this follows that precedent. One install, one version, no skew.
+   The config file must stay in the package's `files` array or the plugin
+   silently does nothing once published.
+3. **Two sass imports, in the two files the kit reserves for this.** The kit
+   imports user *settings* before plugins and user *application* after, which
+   is the only ordering in which a token layer can work: settings have to reach
+   govuk-frontend before it compiles. Hence the `_settings.scss` / `_post.scss`
+   split — the standalone stylesheet composes the same two halves.
+4. **The Defra layout.** The kit's default layout renders the GOV.UK header and
+   a footer asserting the Royal Arms and the OGL, which a service outside the
+   GOV.UK proposition may not use. Swapping it is the licence boundary, not
+   decoration. Services on `*.service.gov.uk` should extend the kit's
+   `govuk-branded` layout instead.
+
+Verified end to end in a real kit prototype: GDS Transport absent, system stack
+and Defra greens applied, `.defra-*` components compiled, and no Crown or OGL
+in the rendered page.
 
 ## Open decisions — ask, don't guess
 

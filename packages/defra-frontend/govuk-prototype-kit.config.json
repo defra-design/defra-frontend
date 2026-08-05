@@ -1,0 +1,44 @@
+{
+  "meta": {
+    "description": "Defra Frontend — GOV.UK Frontend themed for Defra services. Work in progress, not approved for live services.",
+    "urls": {
+      "documentation": "https://defra-design.github.io/defra-frontend/",
+      "releaseNotes": "https://github.com/defra-design/defra-frontend/releases"
+    }
+  },
+  "nunjucksPaths": [
+    "/src"
+  ],
+  "nunjucksMacros": [
+    { "importFrom": "defra/components/footer/macro.njk", "macroName": "defraFooter" },
+    { "importFrom": "defra/components/card/macro.njk", "macroName": "defraCard" },
+    { "importFrom": "defra/components/timeline/macro.njk", "macroName": "defraTimeline" },
+    { "importFrom": "defra/components/add-another/macro.njk", "macroName": "defraAddAnother" },
+    { "importFrom": "defra/components/filter/macro.njk", "macroName": "defraFilter" },
+    { "importFrom": "defra/components/sortable-table/macro.njk", "macroName": "defraSortableTable" },
+    { "importFrom": "defra/components/timeout-dialog/macro.njk", "macroName": "defraTimeoutDialog" }
+  ],
+  "assets": [
+    "/src"
+  ],
+  "scripts": [
+    { "path": "/src/defra-frontend.mjs", "type": "module" }
+  ],
+  "templates": [
+    {
+      "name": "Defra start page",
+      "path": "/src/defra/prototype-kit/templates/start-page.html",
+      "type": "nunjucks"
+    },
+    {
+      "name": "Defra question page",
+      "path": "/src/defra/prototype-kit/templates/question-page.html",
+      "type": "nunjucks"
+    },
+    {
+      "name": "Defra check answers page",
+      "path": "/src/defra/prototype-kit/templates/check-answers.html",
+      "type": "nunjucks"
+    }
+  ]
+}

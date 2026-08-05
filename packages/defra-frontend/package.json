@@ -18,7 +18,8 @@
   "files": [
     "src",
     "lib",
-    "README.md"
+    "README.md",
+    "govuk-prototype-kit.config.json"
   ],
   "scripts": {
     "build": "sass --load-path=../../node_modules --style=compressed --no-source-map src/defra-frontend.scss dist/defra-frontend.min.css",

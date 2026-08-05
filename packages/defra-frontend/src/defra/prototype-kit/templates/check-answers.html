@@ -1,0 +1,37 @@
+{% extends "layouts/main.html" %}
+
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+
+{% block beforeContent %}
+  {{ govukBackLink({ text: "Back", href: "javascript: window.history.go(-1)" }) }}
+{% endblock %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      <h1 class="govuk-heading-l">Check your answers before sending your application</h1>
+
+      {{ govukSummaryList({
+        rows: [
+          {
+            key: { text: "First question" },
+            value: { text: data['answer'] or "Not answered" },
+            actions: { items: [{ href: "/question-page", text: "Change", visuallyHiddenText: "first question" }] }
+          }
+        ]
+      }) }}
+
+      <h2 class="govuk-heading-m">Now send your application</h2>
+      {{ govukWarningText({ text: "You may be prosecuted if you give false information.", iconFallbackText: "Warning" }) }}
+
+      <form method="post">
+        {{ govukButton({ text: "Accept and send" }) }}
+      </form>
+
+    </div>
+  </div>
+{% endblock %}

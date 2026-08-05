@@ -1,0 +1,22 @@
+{
+  "name": "@defra/create-prototype",
+  "version": "0.1.0",
+  "description": "Create a Defra-themed GOV.UK Prototype Kit prototype.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/defra-design/defra-frontend.git",
+    "directory": "packages/create-prototype"
+  },
+  "type": "module",
+  "bin": {
+    "create-prototype": "./bin/create.mjs"
+  },
+  "files": [
+    "bin",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=22"
+  }
+}

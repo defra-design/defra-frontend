@@ -1,0 +1,33 @@
+{#
+  Defra layout for the GOV.UK Prototype Kit.
+
+  Extends the kit's own layout and replaces only the chrome. This is not
+  cosmetic: the GOV.UK header carries the Crown and the GOV.UK footer asserts
+  the Royal Arms and the Open Government Licence, and neither may be used by a
+  service outside the GOV.UK proposition. A Defra prototype left on the kit's
+  default layout is making a claim it is not entitled to make.
+
+  Everything else — head, stylesheets, scripts, content blocks — is inherited,
+  so this stays correct as the kit changes.
+#}
+{% extends "govuk-prototype-kit/layouts/govuk-branded.njk" %}
+
+{% from "govuk/components/generic-header/macro.njk" import govukGenericHeader %}
+{% from "defra/components/footer/macro.njk" import defraFooter %}
+
+{% block header %}
+  {{ govukGenericHeader({
+    logoText: serviceName | default("Defra"),
+    url: "/"
+  }) }}
+{% endblock %}
+
+{% block govukFooter %}
+  {{ defraFooter({
+    items: [
+      { text: "Accessibility statement", href: "#" },
+      { text: "Cookies", href: "#" },
+      { text: "Privacy", href: "#" }
+    ]
+  }) }}
+{% endblock %}

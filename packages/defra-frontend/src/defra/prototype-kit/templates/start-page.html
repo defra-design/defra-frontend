@@ -1,0 +1,27 @@
+{% extends "layouts/main.html" %}
+
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      <h1 class="govuk-heading-xl">Service name</h1>
+      <p class="govuk-body-l">Use this service to do the thing the service does.</p>
+      <p class="govuk-body">It takes around X minutes.</p>
+
+      <h2 class="govuk-heading-m">Before you start</h2>
+      <p class="govuk-body">You will need:</p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>the first thing</li>
+        <li>the second thing</li>
+      </ul>
+
+      {{ govukInsetText({ text: "Something the user cannot do with this service, and where to go instead." }) }}
+
+      {{ govukButton({ text: "Start now", href: "/question-page", isStartButton: true }) }}
+
+    </div>
+  </div>
+{% endblock %}
