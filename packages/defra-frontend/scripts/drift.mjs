@@ -1,8 +1,15 @@
 import { listComponents, loadFixtures, render, normalise } from '../lib/render.mjs'
 import { readFileSync, existsSync } from 'node:fs'
 
-const registry = existsSync('deviations.json')
-  ? JSON.parse(readFileSync('deviations.json', 'utf8')) : {}
+// Runs with cwd = packages/defra-frontend; the registry lives at repo root.
+const deviations = existsSync('../../deviations.json')
+  ? JSON.parse(readFileSync('../../deviations.json', 'utf8')) : {}
+
+// Markup deviations, checked mechanically below.
+const registry = deviations.components ?? {}
+// Design deviations (typeface, colour) cannot be caught by comparing markup,
+// so they are reported rather than asserted — visible in CI instead of buried.
+const design = deviations.design ?? {}
 
 let total = 0, matched = 0
 const registered = new Map(), unregistered = [], errors = []
@@ -38,6 +45,17 @@ for (const [c, n] of registered) {
 }
 for (const u of unregistered.slice(0, 10)) console.log(`  UNREGISTERED  ${u}`)
 for (const e of errors.slice(0, 5)) console.log(`  ERROR  ${e}`)
+
+// Not assertable by markup comparison — surfaced so a reviewer sees them.
+const designEntries = Object.entries(design)
+if (designEntries.length) {
+  console.log('\nDesign deviations (declared, not markup-checkable)')
+  for (const [name, d] of designEntries) {
+    console.log(`  ${d.id}  ${name}`)
+    console.log(`        deviates from: ${d.deviatesFrom}`)
+    console.log(`        approved by:   ${d.approvedBy}`)
+  }
+}
 
 const fail = unregistered.length || errors.length
 console.log('─'.repeat(66))
