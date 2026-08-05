@@ -47,7 +47,7 @@ const WIP_BANNER = `
   #defra-wip {
     position: fixed; top: 0; left: 0; right: 0; z-index: 100000;
     box-sizing: border-box; height: 36px;
-    display: flex; align-items: center; gap: 10px; padding: 0 16px;
+    display: flex; align-items: center; justify-content: center; gap: 10px; padding: 0 16px;
     background: #ffdd00; color: #0b0c0c; border-bottom: 3px solid #0b0c0c;
     font: 600 13px/1.3 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   }
