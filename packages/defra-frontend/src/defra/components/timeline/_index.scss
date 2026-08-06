@@ -12,33 +12,32 @@
   list-style: none;
 }
 
+// Geometry. Declared once and derived from, because the previous version set
+// the rule and the marker independently and they did not line up: a 15px
+// marker at left 0 centres on 7.5px, a 2px rule at left 5px centres on 6px.
+// An odd marker size cannot centre cleanly on an even rule, so the size is
+// even and the rule position is calculated from it rather than guessed.
+$defra-timeline-marker: 16px;
+$defra-timeline-rule: 2px;
+$defra-timeline-gutter: govuk-spacing(6);
+$defra-timeline-rule-left: ($defra-timeline-marker - $defra-timeline-rule) * 0.5;
+
 .defra-timeline__item {
   position: relative;
-  padding-left: govuk-spacing(6);
+  padding-left: $defra-timeline-gutter;
   padding-bottom: govuk-spacing(5);
 
   // The rule connecting entries. Drawn on the item rather than added as an
-  // element so it never reaches assistive technology.
+  // element so it never reaches assistive technology. It spans the full height
+  // and the marker sits on top of it, so there is no seam to align.
   &::before {
     content: "";
     position: absolute;
-    top: govuk-spacing(2);
+    top: 0;
     bottom: 0;
-    left: govuk-spacing(1);
-    width: 2px;
+    left: $defra-timeline-rule-left;
+    width: $defra-timeline-rule;
     background: govuk-functional-colour(border);
-  }
-
-  // The marker.
-  &::after {
-    content: "";
-    position: absolute;
-    top: govuk-spacing(2);
-    left: 0;
-    width: govuk-spacing(3);
-    height: govuk-spacing(3);
-    border-radius: 50%;
-    background: govuk-functional-colour(brand);
   }
 
   // The last entry's rule would otherwise run past the final marker.
@@ -48,6 +47,55 @@
     &::before {
       display: none;
     }
+  }
+}
+
+// The marker hangs off the title rather than the list item, so it aligns with
+// the first line of the heading whatever size that heading is. Positioning it
+// from the top of the item meant re-tuning an offset every time the type
+// changed, and it was never quite right.
+//
+// 0.6em is the mid-point of the heading's line box; translateY centres the
+// marker on it. Both scale with the font size, so this holds at every
+// breakpoint and heading level.
+.defra-timeline__title {
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: -$defra-timeline-gutter;
+    top: 0.6em;
+    transform: translateY(-50%);
+    box-sizing: border-box;
+    width: $defra-timeline-marker;
+    height: $defra-timeline-marker;
+    border-radius: 50%;
+    background: govuk-functional-colour(brand);
+  }
+}
+
+// Not yet done. A hollow marker on the page background, so the rule does not
+// show through, and a dashed rule leading to it.
+//
+// Shape alone does not convey state — the template also renders visually
+// hidden text, because a screen reader user gets nothing from a circle being
+// hollow. Colour alone would not be enough either.
+.defra-timeline__item--todo {
+  &::before {
+    background: none;
+    border-left: $defra-timeline-rule dashed govuk-functional-colour(border);
+  }
+
+  .defra-timeline__title::before {
+    border: $defra-timeline-rule solid govuk-functional-colour(border);
+    background: govuk-functional-colour(body-background);
+  }
+
+  // Pending entries are secondary to what has actually happened.
+  .defra-timeline__title,
+  .defra-timeline__description {
+    color: govuk-functional-colour(secondary-text);
   }
 }
 

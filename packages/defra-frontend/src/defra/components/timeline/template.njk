@@ -12,8 +12,13 @@
 <ol class="defra-timeline{{ ' ' + params.classes if params.classes }}"
   {%- for attribute, value in params.attributes %} {{ attribute }}="{{ value }}"{% endfor %}>
   {% for item in params.items %}
-  <li class="defra-timeline__item">
+  {% set isTodo = item.status == "todo" %}
+  <li class="defra-timeline__item{{ ' defra-timeline__item--todo' if isTodo }}">
     <h{{ headingLevel }} class="defra-timeline__title govuk-heading-s">
+      {# The marker is a shape and a colour, neither of which a screen reader
+         conveys. State is announced in words, first, so it is heard before the
+         entry rather than deduced from it. #}
+      <span class="govuk-visually-hidden">{{ "Not yet done: " if isTodo else "Completed: " }}</span>
       {{ item.title | default("") }}
     </h{{ headingLevel }}>
     <p class="defra-timeline__meta govuk-body-s">

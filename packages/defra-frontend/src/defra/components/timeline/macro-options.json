@@ -8,6 +8,7 @@
       { "name": "title", "type": "string", "required": true, "description": "What happened." },
       { "name": "date", "type": "string", "required": true, "description": "Date as displayed, for example `12 March 2026`." },
       { "name": "datetime", "type": "string", "required": false, "description": "Machine-readable date for the `<time>` element, for example `2026-03-12`. Omitting it renders plain text instead." },
+      { "name": "status", "type": "string", "required": false, "description": "`done` (the default) or `todo`. A `todo` entry gets a hollow marker, a dashed rule and secondary text, and is announced as \"Not yet done\" — the shape and colour are not relied on alone." },
       { "name": "byline", "type": "string", "required": false, "description": "Who did it." },
       { "name": "text", "type": "string", "required": false, "description": "Description. Ignored if `html` is set." },
       { "name": "html", "type": "string", "required": false, "description": "Description as HTML, for lists or multiple paragraphs." }

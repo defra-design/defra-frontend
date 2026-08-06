@@ -43,6 +43,34 @@
       "description": "Every field except title and date is optional."
     },
     {
+      "name": "with steps still to do",
+      "options": {
+        "items": [
+          {
+            "title": "Decision issued",
+            "date": "Expected by 30 April 2026",
+            "status": "todo"
+          },
+          {
+            "title": "Consultation closes",
+            "date": "31 March 2026",
+            "datetime": "2026-03-31",
+            "status": "todo",
+            "text": "Responses from the Environment Agency and the local authority are still outstanding."
+          },
+          {
+            "title": "Application published",
+            "date": "14 January 2026",
+            "datetime": "2026-01-14",
+            "byline": "R Patel",
+            "text": "Advertised in the local press and on the public register."
+          }
+        ]
+      },
+      "hidden": false,
+      "description": "A `todo` entry gets a hollow marker, a dashed rule and secondary text. None of that reaches a screen reader, so each entry is also announced as \"Completed\" or \"Not yet done\" before its title."
+    },
+    {
       "name": "with html content",
       "options": {
         "headingLevel": 2,
