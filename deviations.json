@@ -45,6 +45,20 @@
       "proposedUpstream": "No",
       "javascript": "progressive enhancement only - headers are server-sort links without it"
     },
+    "sub-navigation": {
+      "id": "DEF-107",
+      "whyNotUpstream": "GOV.UK Frontend has service-navigation for primary navigation but nothing for secondary navigation within a section. govukTabs is NOT the alternative: it links to same-page anchors and shows and hides panels, so using it to move between pages breaks the URL, the back button and bookmarking, and announces panels rather than links. This component exists largely so teams stop reaching for tabs.",
+      "priorArt": "MoJ Design System - Sub navigation",
+      "proposedUpstream": "No",
+      "javascript": "none"
+    },
+    "side-navigation": {
+      "id": "DEF-108",
+      "whyNotUpstream": "No upstream component for navigating sections of a long page or areas of a case record.",
+      "priorArt": "MoJ Design System - Side navigation, and the GOV.UK publishing components contents list",
+      "proposedUpstream": "No",
+      "javascript": "none"
+    },
     "timeout-dialog": {
       "id": "DEF-106",
       "whyNotUpstream": "No upstream component, but WCAG 2.2 success criterion 2.2.1 Timing Adjustable requires warning and extension on a session limit. This is a conformance obligation on any Defra service with a session timeout, not a convenience.",

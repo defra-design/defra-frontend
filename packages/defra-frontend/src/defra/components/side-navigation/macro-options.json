@@ -1,0 +1,18 @@
+[
+  {
+    "name": "items",
+    "type": "array",
+    "required": true,
+    "description": "The links. Each may contain its own `items` for one level of nesting.",
+    "params": [
+      { "name": "text", "type": "string", "required": true, "description": "Link text." },
+      { "name": "href", "type": "string", "required": true, "description": "Link destination." },
+      { "name": "current", "type": "boolean", "required": false, "description": "Marks the current page with `aria-current=\"page\"`." },
+      { "name": "items", "type": "array", "required": false, "description": "Subsections. One level only." }
+    ]
+  },
+  { "name": "heading", "type": "string", "required": false, "description": "Heading above the list, for example the section or case reference." },
+  { "name": "ariaLabel", "type": "string", "required": false, "description": "Accessible name for the navigation landmark. Defaults to `Side navigation`." },
+  { "name": "classes", "type": "string", "required": false, "description": "Classes to add to the navigation." },
+  { "name": "attributes", "type": "object", "required": false, "description": "HTML attributes to add to the navigation." }
+]

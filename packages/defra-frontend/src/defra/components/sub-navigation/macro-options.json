@@ -1,0 +1,16 @@
+[
+  {
+    "name": "items",
+    "type": "array",
+    "required": true,
+    "description": "The links.",
+    "params": [
+      { "name": "text", "type": "string", "required": true, "description": "Link text." },
+      { "name": "href", "type": "string", "required": true, "description": "Link destination. A real URL — this component is navigation, not tabs." },
+      { "name": "current", "type": "boolean", "required": false, "description": "Marks the current page with `aria-current=\"page\"`. The visual treatment follows from that attribute, so it cannot be applied without also being announced." }
+    ]
+  },
+  { "name": "ariaLabel", "type": "string", "required": false, "description": "Accessible name for the navigation landmark. Defaults to `Sub navigation`. Set it when a page has more than one, so they are distinguishable." },
+  { "name": "classes", "type": "string", "required": false, "description": "Classes to add to the navigation." },
+  { "name": "attributes", "type": "object", "required": false, "description": "HTML attributes to add to the navigation." }
+]

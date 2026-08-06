@@ -1,0 +1,40 @@
+{# DEF-108 — side navigation.
+
+   Sections of a long page, or areas of a case record. A nested list, so the
+   relationship between a section and its subsections is in the markup rather
+   than only in the indentation — a screen reader announces the nesting and the
+   number of items at each level.
+
+   As with sub navigation, the current page is marked with aria-current="page"
+   and the visual treatment follows from that attribute. #}
+<nav class="defra-side-navigation{{ ' ' + params.classes if params.classes }}"
+  aria-label="{{ params.ariaLabel | default('Side navigation') }}"
+  {%- for attribute, value in params.attributes %} {{ attribute }}="{{ value }}"{% endfor %}>
+  {% if params.heading %}
+    <h2 class="defra-side-navigation__heading govuk-heading-s">{{ params.heading }}</h2>
+  {% endif %}
+  <ul class="defra-side-navigation__list">
+    {% for item in params.items %}
+      <li class="defra-side-navigation__item">
+        <a class="defra-side-navigation__link"
+          href="{{ item.href }}"
+          {%- if item.current %} aria-current="page"{% endif %}>
+          {{ item.text }}
+        </a>
+        {% if item.items %}
+          <ul class="defra-side-navigation__list defra-side-navigation__list--nested">
+            {% for child in item.items %}
+              <li class="defra-side-navigation__item">
+                <a class="defra-side-navigation__link"
+                  href="{{ child.href }}"
+                  {%- if child.current %} aria-current="page"{% endif %}>
+                  {{ child.text }}
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+</nav>

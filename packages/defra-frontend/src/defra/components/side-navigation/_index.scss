@@ -1,0 +1,62 @@
+// DEF-108 — side navigation
+
+.defra-side-navigation {
+  @include govuk-responsive-margin(6, "bottom");
+}
+
+.defra-side-navigation__heading {
+  padding-bottom: govuk-spacing(2);
+  border-bottom: 1px solid govuk-functional-colour(border);
+}
+
+.defra-side-navigation__list {
+  @include govuk-font($size: 19);
+
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.defra-side-navigation__item {
+  margin-bottom: 0;
+  border-bottom: 1px solid govuk-functional-colour(border);
+}
+
+// Nested sections sit inside their parent item, so the parent keeps the
+// border and the children do not draw a second one against it.
+.defra-side-navigation__list--nested {
+  @include govuk-font($size: 16);
+
+  margin-left: govuk-spacing(4);
+
+  .defra-side-navigation__item:last-child {
+    border-bottom: 0;
+  }
+}
+
+.defra-side-navigation__link {
+  @include govuk-link-common;
+  @include govuk-link-style-default;
+  @include govuk-link-style-no-visited-state;
+
+  display: block;
+  padding: govuk-spacing(2) govuk-spacing(2) govuk-spacing(2) govuk-spacing(3);
+  text-decoration: none;
+  // As with sub navigation, reserved so the current marker does not shift
+  // anything when it moves.
+  border-left: 4px solid transparent;
+
+  &:hover {
+    background: govuk-functional-colour(surface-background);
+  }
+
+  &:focus {
+    @include govuk-focused-text;
+  }
+
+  &[aria-current="page"] {
+    color: govuk-functional-colour(text);
+    border-left-color: govuk-functional-colour(brand);
+    font-weight: $govuk-font-weight-bold;
+  }
+}

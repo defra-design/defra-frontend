@@ -1,0 +1,31 @@
+{
+  "component": "sub-navigation",
+  "fixtures": [
+    {
+      "name": "default",
+      "options": {
+        "ariaLabel": "Application sections",
+        "items": [
+          { "text": "Details", "href": "#details", "current": true },
+          { "text": "Documents", "href": "#documents" },
+          { "text": "History", "href": "#history" },
+          { "text": "Notes", "href": "#notes" }
+        ]
+      },
+      "hidden": false,
+      "description": "Real links to real URLs, so the back button, bookmarking and open-in-new-tab all work. Use this rather than govukTabs for moving between pages: tabs link to same-page anchors and toggle panels, which breaks all three and announces panels instead of links."
+    },
+    {
+      "name": "with no current page",
+      "options": {
+        "items": [
+          { "text": "All applications", "href": "#all" },
+          { "text": "Awaiting inspection", "href": "#awaiting" },
+          { "text": "Approved", "href": "#approved" }
+        ]
+      },
+      "hidden": false,
+      "description": "The space for the current-page marker is reserved on every item, so nothing shifts when one becomes current."
+    }
+  ]
+}

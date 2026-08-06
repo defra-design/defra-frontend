@@ -98,7 +98,14 @@ therefore high, and the process is fixed:
    fails `npm run stories`.
 
 Registered so far: DEF-101 timeline, DEF-102 card, DEF-103 add-another,
-DEF-104 filter, DEF-105 sortable-table, DEF-106 timeout-dialog.
+DEF-104 filter, DEF-105 sortable-table, DEF-106 timeout-dialog,
+DEF-107 sub-navigation, DEF-108 side-navigation.
+
+**`govukTabs` is not navigation.** It links to same-page anchors and toggles
+panels, so using it to move between pages breaks the URL, the back button and
+bookmarking, and announces panels rather than links. DEF-107 sub-navigation
+exists largely so teams have the correct thing to reach for. Primary navigation
+is already covered upstream by `service-navigation` — do not build one.
 
 DEF-102 card is deliberately narrow — heading, optional description, optional
 meta, and *either* a whole-card link *or* footer actions, never both, because a

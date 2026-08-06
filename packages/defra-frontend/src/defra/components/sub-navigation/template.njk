@@ -1,0 +1,27 @@
+{# DEF-107 — sub navigation.
+
+   Secondary navigation within a section. Looks like tabs; is not tabs.
+
+   govukTabs links to same-page anchors and toggles panels. These are real
+   links to real URLs, so the back button, bookmarking and opening in a new tab
+   all work, and a screen reader hears a list of links rather than a set of
+   panels.
+
+   The current page is marked with aria-current="page", which is what conveys
+   "you are here". The visual treatment is a consequence of that attribute, not
+   a separate class, so the two cannot drift apart. #}
+<nav class="defra-sub-navigation{{ ' ' + params.classes if params.classes }}"
+  aria-label="{{ params.ariaLabel | default('Sub navigation') }}"
+  {%- for attribute, value in params.attributes %} {{ attribute }}="{{ value }}"{% endfor %}>
+  <ul class="defra-sub-navigation__list">
+    {% for item in params.items %}
+      <li class="defra-sub-navigation__item">
+        <a class="defra-sub-navigation__link"
+          href="{{ item.href }}"
+          {%- if item.current %} aria-current="page"{% endif %}>
+          {{ item.text }}
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+</nav>

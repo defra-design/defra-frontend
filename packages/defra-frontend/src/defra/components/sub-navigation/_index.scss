@@ -1,0 +1,54 @@
+// DEF-107 — sub navigation
+//
+// The current-page treatment hangs off aria-current, not a separate class.
+// A modifier class could be applied without the attribute, which would look
+// right and tell assistive technology nothing; this way the visual state
+// cannot exist without the announced one.
+
+.defra-sub-navigation {
+  @include govuk-responsive-margin(6, "bottom");
+
+  border-bottom: 1px solid govuk-functional-colour(border);
+}
+
+.defra-sub-navigation__list {
+  @include govuk-font($size: 19);
+
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: govuk-spacing(4);
+}
+
+.defra-sub-navigation__item {
+  margin-bottom: 0;
+}
+
+.defra-sub-navigation__link {
+  @include govuk-link-common;
+  @include govuk-link-style-default;
+  @include govuk-link-style-no-visited-state;
+
+  display: inline-block;
+  padding: govuk-spacing(2) 0;
+  text-decoration: none;
+  // Reserve the current-page underline on every item, so nothing shifts by
+  // 4px when the current page changes.
+  border-bottom: 4px solid transparent;
+
+  &:hover {
+    border-bottom-color: govuk-functional-colour(border);
+  }
+
+  &:focus {
+    @include govuk-focused-text;
+  }
+
+  &[aria-current="page"] {
+    color: govuk-functional-colour(text);
+    border-bottom-color: govuk-functional-colour(brand);
+    font-weight: $govuk-font-weight-bold;
+  }
+}
