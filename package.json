@@ -22,5 +22,8 @@
     "govuk-frontend": "^6.4.0",
     "nunjucks": "^3.2.4",
     "sass": "^1.102.0"
+  },
+  "bin": {
+    "defra-create-prototype": "./packages/create-prototype/bin/create.mjs"
   }
 }

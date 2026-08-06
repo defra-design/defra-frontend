@@ -2,35 +2,266 @@
 layout: base.njk
 title: Prototyping
 ---
-<h1 class="govuk-heading-xl">Prototyping</h1>
+<h1 class="govuk-heading-xl">Make a prototype</h1>
 
 <p class="govuk-body-l">
-  Spin-up mirrors the GOV.UK Prototype Kit command, so instructions for a Defra
-  prototype are the same as the GOV.UK ones with a different package name.
+  A step-by-step guide to building a Defra prototype. You do not need to be able
+  to code, and you do not need to have used a terminal before.
 </p>
 
-<pre class="govuk-body" style="padding:1rem;background:#f3f2f1;border:1px solid #b1b4b6;overflow-x:auto"><code>npx @defra/create-prototype my-service
-cd my-service
+<div class="govuk-inset-text">
+  A prototype is for showing ideas and testing them with users. It is not a real
+  service. Never put real personal data into one.
+</div>
+
+<h2 class="govuk-heading-l">Before you start</h2>
+
+<p class="govuk-body">You need two things installed on your computer. Both are free.</p>
+
+<h3 class="govuk-heading-m">1. Node.js</h3>
+<p class="govuk-body">
+  This runs the prototype on your machine. Go to
+  <a class="govuk-link" href="https://nodejs.org">nodejs.org</a> and download the
+  version marked <strong>LTS</strong>. Open the file you downloaded and follow the
+  instructions.
+</p>
+
+<h3 class="govuk-heading-m">2. Git</h3>
+<p class="govuk-body">
+  This saves versions of your work and lets you share it. On a Mac it is usually
+  already installed. On Windows, download it from
+  <a class="govuk-link" href="https://git-scm.com/downloads">git-scm.com</a>.
+</p>
+
+<h2 class="govuk-heading-l">Open a terminal</h2>
+
+<p class="govuk-body">
+  A terminal is a window where you type commands instead of clicking. You will
+  copy and paste into it — you do not need to memorise anything.
+</p>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li><strong>Mac</strong> — press Command and Space, type <code>Terminal</code>, press Enter</li>
+  <li><strong>Windows</strong> — press the Start button, type <code>PowerShell</code>, press Enter</li>
+</ul>
+
+<p class="govuk-body">
+  To check Node.js installed correctly, type this and press Enter:
+</p>
+<pre class="govuk-body" style="padding:1rem;background:#f3f2f1;border:1px solid #b1b4b6;overflow-x:auto"><code>node --version</code></pre>
+<p class="govuk-body">
+  You should see a number like <code>v22.20.0</code>. If the number is lower than
+  20, or you see an error, install Node.js again from the link above and then
+  close and reopen the terminal.
+</p>
+
+<h2 class="govuk-heading-l">Choose where to keep your prototypes</h2>
+
+<p class="govuk-body">
+  Make a folder to keep prototypes in, so they are not scattered around your
+  computer. These commands make a folder called <code>prototypes</code> in your
+  home folder and move into it. Run them one at a time.
+</p>
+
+<pre class="govuk-body" style="padding:1rem;background:#f3f2f1;border:1px solid #b1b4b6;overflow-x:auto"><code>cd ~
+mkdir prototypes
+cd prototypes</code></pre>
+
+<dl class="govuk-summary-list govuk-summary-list--no-border govuk-body-s">
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key"><code>cd ~</code></dt>
+    <dd class="govuk-summary-list__value">Go to your home folder. <code>cd</code> means "change directory"</dd>
+  </div>
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key"><code>mkdir prototypes</code></dt>
+    <dd class="govuk-summary-list__value">Make a new folder called <code>prototypes</code></dd>
+  </div>
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key"><code>cd prototypes</code></dt>
+    <dd class="govuk-summary-list__value">Move into that folder</dd>
+  </div>
+</dl>
+
+<p class="govuk-body-s">
+  You only need to do this once. Next time, just run <code>cd ~/prototypes</code>.
+</p>
+
+<h2 class="govuk-heading-l">Create the prototype</h2>
+
+<p class="govuk-body">
+  Replace <code>my-service</code> with a short name for what you are prototyping,
+  using hyphens instead of spaces — for example <code>water-abstraction</code>.
+</p>
+
+<pre class="govuk-body" style="padding:1rem;background:#f3f2f1;border:1px solid #b1b4b6;overflow-x:auto"><code>npx github:defra-design/defra-frontend my-service</code></pre>
+
+<p class="govuk-body">
+  This takes a few minutes. It will print a lot of text — that is normal. If it
+  asks <code>Ok to proceed? (y)</code>, type <code>y</code> and press Enter.
+</p>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">If that command does not work</span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      You need access to the Defra GitHub organisation for it to fetch the code.
+      If it cannot, download the code first and run it from there instead:
+    </p>
+    <pre class="govuk-body" style="padding:1rem;background:#fff;border:1px solid #b1b4b6;overflow-x:auto"><code>git clone https://github.com/defra-design/defra-frontend.git
+node defra-frontend/packages/create-prototype/bin/create.mjs my-service</code></pre>
+    <p class="govuk-body">
+      Both routes produce exactly the same prototype.
+    </p>
+  </div>
+</details>
+
+<p class="govuk-body">It creates the folder and sets up everything for you:</p>
+<ul class="govuk-list govuk-list--bullet govuk-body-s">
+  <li>the GOV.UK Prototype Kit</li>
+  <li>Defra styling, so your pages look like a Defra service</li>
+  <li>Defra page templates</li>
+  <li>a README explaining how to run it, so you do not have to remember</li>
+  <li>a first saved version, so your work is protected from the start</li>
+</ul>
+
+<p class="govuk-body-s">
+  Defra Frontend is not on npm yet, so a copy is placed in a <code>vendor</code>
+  folder inside your prototype and installed from there. You do not need to do
+  anything with it — it is included when you share the prototype, so it works on
+  a colleague's machine too.
+</p>
+
+<h2 class="govuk-heading-l">Start it</h2>
+
+<pre class="govuk-body" style="padding:1rem;background:#f3f2f1;border:1px solid #b1b4b6;overflow-x:auto"><code>cd my-service
 npm start</code></pre>
 
 <p class="govuk-body">
-  This runs the real <code>govuk-prototype-kit create</code>, then adds what a Defra
-  prototype needs: GOV.UK Frontend 6, this package as a kit plugin, the two sass
-  imports the kit reserves for plugin settings, and the Defra layout.
+  Open <a class="govuk-link" href="http://localhost:3000">http://localhost:3000</a>
+  in your browser. You should see your prototype.
 </p>
 
-<h2 class="govuk-heading-m">Why the layout matters</h2>
 <p class="govuk-body">
-  The kit's default layout renders the GOV.UK header and a footer asserting the
-  Royal Arms and the Open Government Licence. A service outside the GOV.UK
-  proposition may not use either, so a Defra prototype left on the default layout
-  is making a claim it is not entitled to make. Services on
-  <code>*.service.gov.uk</code> should extend the kit's own
-  <code>govuk-branded</code> layout instead.
+  Leave the terminal open while you work — it is running the prototype. To stop
+  it, click the terminal and press <strong>Ctrl</strong> and <strong>C</strong>
+  together.
 </p>
 
-<h2 class="govuk-heading-m">Page templates</h2>
+<h2 class="govuk-heading-l">Make your first page</h2>
+
 <p class="govuk-body">
-  Defra start, question and check answers pages are available under
-  <strong>Create a new page</strong> in the kit's manage-prototype screens.
+  Go to
+  <a class="govuk-link" href="http://localhost:3000/manage-prototype">http://localhost:3000/manage-prototype</a>
+  and choose <strong>Create a new page</strong>. Pick one of the Defra templates:
+</p>
+
+<ul class="govuk-list govuk-list--bullet">
+  <li><strong>Defra start page</strong> — the first page of a service</li>
+  <li><strong>Defra question page</strong> — one question, as the service pattern requires</li>
+  <li><strong>Defra check answers page</strong> — the summary before submitting</li>
+</ul>
+
+<p class="govuk-body">
+  Pages live in the <code>app/views</code> folder and are ordinary HTML. A file at
+  <code>app/views/apply/name.html</code> appears at <code>/apply/name</code>.
+  Open them in any text editor —
+  <a class="govuk-link" href="https://code.visualstudio.com/">Visual Studio Code</a>
+  is free and widely used.
+</p>
+
+<h2 class="govuk-heading-l">Putting your prototype on GitHub</h2>
+
+<p class="govuk-body">
+  Put your prototype on GitHub so it is backed up, so colleagues can see it, and
+  so it can be handed over. Your prototype is already saving versions locally —
+  this puts those versions somewhere safe.
+</p>
+
+<h3 class="govuk-heading-m">1. Create an empty repository</h3>
+<p class="govuk-body">
+  Go to <a class="govuk-link" href="https://github.com/new">github.com/new</a> and:
+</p>
+<ul class="govuk-list govuk-list--bullet">
+  <li>choose the Defra organisation as the owner, if you can</li>
+  <li>name it the same as your folder</li>
+  <li>leave it <strong>private</strong> unless your team has agreed otherwise</li>
+  <li>do <strong>not</strong> tick "Add a README" — you already have one</li>
+</ul>
+
+<h3 class="govuk-heading-m">2. Connect and upload</h3>
+<p class="govuk-body">
+  GitHub shows you a page of commands. Use the two under
+  <strong>"…or push an existing repository"</strong>. They look like this, with
+  your own names in place of <code>DEFRA</code> and <code>my-service</code>:
+</p>
+<pre class="govuk-body" style="padding:1rem;background:#f3f2f1;border:1px solid #b1b4b6;overflow-x:auto"><code>git remote add origin https://github.com/DEFRA/my-service.git
+git push -u origin main</code></pre>
+
+<h3 class="govuk-heading-m">3. Save your work as you go</h3>
+<p class="govuk-body">
+  Each time you finish something worth keeping, run these three lines. The
+  message should say what you changed.
+</p>
+<pre class="govuk-body" style="padding:1rem;background:#f3f2f1;border:1px solid #b1b4b6;overflow-x:auto"><code>git add -A
+git commit -m "Add the eligibility questions"
+git push</code></pre>
+
+<div class="govuk-inset-text">
+  Before pushing, check you have not written anything real into your pages —
+  names, addresses, case references. A private repository is not a safe place for
+  personal data, and once something is pushed it stays in the history even if you
+  delete it later.
+</div>
+
+<h2 class="govuk-heading-l">Sharing with users for research</h2>
+
+<p class="govuk-body">
+  <code>localhost</code> only works on your own machine, so you cannot send that
+  address to anyone. To test with users remotely the prototype needs hosting
+  somewhere, which needs a password on it.
+</p>
+<p class="govuk-body">
+  Hosting is a team decision and depends on what your programme already uses, so
+  ask your technical lead rather than setting one up alone. The Prototype Kit
+  documentation covers
+  <a class="govuk-link" href="https://prototype-kit.service.gov.uk/docs/publishing-on-the-web">the options and how to password-protect them</a>.
+</p>
+
+<h2 class="govuk-heading-l">If something goes wrong</h2>
+
+<dl class="govuk-summary-list govuk-body-s">
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key"><code>command not found: npx</code></dt>
+    <dd class="govuk-summary-list__value">Node.js is not installed, or the terminal was open before you installed it. Close the terminal, open a new one, and try again.</dd>
+  </div>
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key"><code>EADDRINUSE</code> or "port already in use"</dt>
+    <dd class="govuk-summary-list__value">A prototype is already running in another terminal window. Find it and press Ctrl and C, or close that window.</dd>
+  </div>
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">The page looks unstyled</dt>
+    <dd class="govuk-summary-list__value">Stop the prototype with Ctrl and C, then run <code>npm start</code> again. The styles are rebuilt on start.</dd>
+  </div>
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">A change does not appear</dt>
+    <dd class="govuk-summary-list__value">Save the file, then refresh the browser. If it still does not appear, check you edited a file inside <code>app/views</code>.</dd>
+  </div>
+</dl>
+
+<h2 class="govuk-heading-l">Which layout to use</h2>
+
+<p class="govuk-body">
+  Your prototype uses the Defra layout: a Defra header and footer, and system
+  fonts rather than the GOV.UK typeface. That is not a style preference — GDS
+  Transport and the GOV.UK header and footer are licensed for services on
+  <code>*.service.gov.uk</code> only.
+</p>
+<p class="govuk-body">
+  If your service <em>will</em> be on <code>*.service.gov.uk</code>, change the
+  first line of <code>app/views/layouts/main.html</code> to extend
+  <code>"govuk-prototype-kit/layouts/govuk-branded.njk"</code> instead. If you are
+  not sure which applies, ask before you show the prototype to anyone outside the
+  team.
 </p>
