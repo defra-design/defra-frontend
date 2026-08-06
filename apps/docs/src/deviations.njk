@@ -1,0 +1,105 @@
+---
+layout: base.njk
+title: Deviations
+permalink: /deviations/
+---
+<h1 class="govuk-heading-xl">Deviations</h1>
+
+<p class="govuk-body-l">
+  Everything this library does differently from GOV.UK Frontend or from the
+  published Defra branding guidance, and why.
+</p>
+
+<p class="govuk-body">
+  Generated from <code>deviations.json</code>, which is the same file the drift
+  check reads. A deviation that is not in that file fails the build, so this page
+  is the whole list rather than a summary of it.
+</p>
+
+<h2 class="govuk-heading-l">Markup deviations</h2>
+<p class="govuk-body-s">
+  Checked mechanically: the drift check renders all 692 upstream fixtures and
+  fails on any divergence that is not declared here.
+</p>
+{% for name, d in system.deviations.components %}
+  <h3 class="govuk-heading-m">{{ d.id }} — {{ name | title }}</h3>
+  <dl class="govuk-summary-list govuk-body-s">
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">Reason</dt>
+      <dd class="govuk-summary-list__value">{{ d.reason }}</dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">Approved by</dt>
+      <dd class="govuk-summary-list__value">{{ d.approvedBy }}</dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">Review</dt>
+      <dd class="govuk-summary-list__value">{{ d.review }}</dd>
+    </div>
+  </dl>
+{% endfor %}
+
+<h2 class="govuk-heading-l">Design deviations</h2>
+<p class="govuk-body-s">
+  These cannot be caught by comparing markup, so the drift check prints them
+  rather than asserting them. Printing is the point: an unassertable deviation
+  must still be visible to a reviewer.
+</p>
+{% for name, d in system.deviations.design %}
+  <h3 class="govuk-heading-m">{{ d.id }} — {{ name | title }}</h3>
+  <dl class="govuk-summary-list govuk-body-s">
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">Deviates from</dt>
+      <dd class="govuk-summary-list__value"><a class="govuk-link" href="{{ d.deviatesFrom }}">{{ d.deviatesFrom }}</a></dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">Requirement</dt>
+      <dd class="govuk-summary-list__value">{{ d.requirement }}</dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">What we do</dt>
+      <dd class="govuk-summary-list__value"><code>{{ d.actual }}</code></dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">Reason</dt>
+      <dd class="govuk-summary-list__value">{{ d.reason }}</dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">Risk</dt>
+      <dd class="govuk-summary-list__value">{{ d.risk }}</dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">Approved by</dt>
+      <dd class="govuk-summary-list__value">{{ d.approvedBy }}</dd>
+    </div>
+  </dl>
+{% endfor %}
+
+<h2 class="govuk-heading-l">Additions</h2>
+<p class="govuk-body-s">
+  Components with no upstream equivalent. Each records why GOV.UK Frontend has
+  none, the cross-government work it follows rather than invents, and whether it
+  has been proposed back.
+</p>
+<table class="govuk-table govuk-body-s">
+  <thead class="govuk-table__head">
+    <tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">Reference</th>
+      <th scope="col" class="govuk-table__header">Component</th>
+      <th scope="col" class="govuk-table__header">Prior art</th>
+      <th scope="col" class="govuk-table__header">Proposed upstream</th>
+    </tr>
+  </thead>
+  <tbody class="govuk-table__body">
+    {% for name, d in system.deviations.additions %}
+      {% if d.id %}
+      <tr class="govuk-table__row">
+        <th scope="row" class="govuk-table__header">{{ d.id }}</th>
+        <td class="govuk-table__cell"><a class="govuk-link" href="{{ '/components/' | url }}#{{ name }}">{{ name | title }}</a></td>
+        <td class="govuk-table__cell">{{ d.priorArt }}</td>
+        <td class="govuk-table__cell">{{ d.proposedUpstream }}</td>
+      </tr>
+      {% endif %}
+    {% endfor %}
+  </tbody>
+</table>

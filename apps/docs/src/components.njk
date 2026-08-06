@@ -1,0 +1,107 @@
+---
+layout: base.njk
+title: Components
+permalink: /components/
+---
+<h1 class="govuk-heading-xl">Components</h1>
+
+<p class="govuk-body-l">
+  Components in the <code>defra</code> namespace. Everything else is an upstream
+  GOV.UK Frontend component restyled by tokens, unchanged in markup.
+</p>
+
+<p class="govuk-body">
+  Each entry is generated from the component's own fixtures and from
+  <code>deviations.json</code>, so this page cannot describe a component that no
+  longer exists or miss one that does.
+</p>
+
+{% for c in system.components %}
+  <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+
+  <h2 class="govuk-heading-l" id="{{ c.name }}">{{ c.name | title }}</h2>
+
+  <p class="govuk-body">
+    {% if c.kind == 'addition' %}
+      <strong class="govuk-tag govuk-tag--blue">Addition</strong>
+      No GOV.UK Frontend equivalent.
+    {% elif c.kind == 'override' %}
+      <strong class="govuk-tag govuk-tag--red">Deviation</strong>
+      Replaces an upstream component.
+    {% elif c.kind == 'usage' %}
+      <strong class="govuk-tag govuk-tag--green">Configuration</strong>
+      Upstream <code>{{ c.macro }}</code>, configured for Defra. Not a fork.
+    {% else %}
+      <strong class="govuk-tag govuk-tag--yellow">Unregistered</strong>
+    {% endif %}
+  </p>
+
+  <p class="govuk-body">Macro <code>{{ c.macro }}</code></p>
+
+  {% if c.registered %}
+    <dl class="govuk-summary-list govuk-summary-list--no-border govuk-body-s">
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Reference</dt>
+        <dd class="govuk-summary-list__value">{{ c.registered.id }}</dd>
+      </div>
+      {% if c.registered.whyNotUpstream %}
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Why not upstream</dt>
+        <dd class="govuk-summary-list__value">{{ c.registered.whyNotUpstream }}</dd>
+      </div>
+      {% endif %}
+      {% if c.registered.reason %}
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Reason</dt>
+        <dd class="govuk-summary-list__value">{{ c.registered.reason }}</dd>
+      </div>
+      {% endif %}
+      {% if c.registered.priorArt %}
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Prior art</dt>
+        <dd class="govuk-summary-list__value">{{ c.registered.priorArt }}</dd>
+      </div>
+      {% endif %}
+      {% if c.registered.javascript %}
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">JavaScript</dt>
+        <dd class="govuk-summary-list__value">{{ c.registered.javascript }}</dd>
+      </div>
+      {% endif %}
+      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">Approved by</dt>
+        <dd class="govuk-summary-list__value">{{ c.registered.approvedBy | default("Not recorded") }}</dd>
+      </div>
+    </dl>
+  {% endif %}
+
+  {% for ex in c.examples %}
+    <h3 class="govuk-heading-s">{{ ex.name }}</h3>
+    {% if ex.description %}<p class="govuk-body-s">{{ ex.description }}</p>{% endif %}
+    <div style="padding:1rem;border:1px solid #b1b4b6;margin-bottom:1rem">
+      {{ ex.html | safe }}
+    </div>
+  {% endfor %}
+
+  {% if c.options | length %}
+    <h3 class="govuk-heading-s">Options</h3>
+    <table class="govuk-table govuk-body-s">
+      <thead class="govuk-table__head">
+        <tr class="govuk-table__row">
+          <th scope="col" class="govuk-table__header">Name</th>
+          <th scope="col" class="govuk-table__header">Type</th>
+          <th scope="col" class="govuk-table__header">Description</th>
+        </tr>
+      </thead>
+      <tbody class="govuk-table__body">
+        {% for o in c.options %}
+        <tr class="govuk-table__row">
+          <th scope="row" class="govuk-table__header"><code>{{ o.name }}</code></th>
+          <td class="govuk-table__cell">{{ o.type }}{% if o.required %} <strong>required</strong>{% endif %}</td>
+          <td class="govuk-table__cell">{{ o.description }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+{% endfor %}

@@ -1,0 +1,74 @@
+---
+layout: base.njk
+title: Carbon
+permalink: /carbon/
+---
+<h1 class="govuk-heading-xl">Carbon</h1>
+
+<p class="govuk-body-l">
+  Page-type byte budgets, measured from the pages as they actually render. The
+  build fails if a budget is exceeded.
+</p>
+
+<div class="govuk-inset-text">
+  Directional figures for comparing design decisions, not audited emissions data.
+  SWDM v4 via CO2.js, GB grid intensity, green hosting assumed false. There is
+  deliberately no rating: an absolute figure is not good or bad on its own.
+</div>
+
+<h2 class="govuk-heading-m">Budgets and current measurements</h2>
+<p class="govuk-body-s">
+  Budgets from <code>carbon-budgets.json</code>, measurements from the committed
+  baseline. Both are the files the check itself reads.
+</p>
+
+<table class="govuk-table govuk-body-s">
+  <thead class="govuk-table__head">
+    <tr class="govuk-table__row">
+      <th scope="col" class="govuk-table__header">Page type</th>
+      <th scope="col" class="govuk-table__header">HTML</th>
+      <th scope="col" class="govuk-table__header">JavaScript</th>
+      <th scope="col" class="govuk-table__header">Fonts</th>
+    </tr>
+  </thead>
+  <tbody class="govuk-table__body">
+    {% for p in system.pages %}
+    <tr class="govuk-table__row">
+      <th scope="row" class="govuk-table__header">{{ p.name | title }}</th>
+      <td class="govuk-table__cell">
+        {% if p.measured %}{{ p.measured.html | bytes }} / {% endif %}{{ p.budget.html | bytes }}
+      </td>
+      <td class="govuk-table__cell">
+        {% if p.measured %}{{ p.measured.js | bytes }} / {% endif %}{{ p.budget.js | bytes }}
+      </td>
+      <td class="govuk-table__cell">{{ p.budget.fonts | bytes }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<p class="govuk-body-s">
+  Shared stylesheet: {{ system.baseline.css | bytes }} gzipped, against a
+  {{ system.budgets['question-page'].css | bytes }} budget.
+</p>
+
+<h2 class="govuk-heading-m">Why the fonts budget is zero</h2>
+<p class="govuk-body">
+  Outside the GOV.UK proposition a service must not use GDS Transport, so Defra
+  mode uses a system font stack. That removes two font files rather than making
+  them smaller — around 63 KB on a first uncached load, which is the largest
+  single saving here and more than every other decision put together. The budget
+  is zero rather than merely small because there is nothing left to download.
+</p>
+
+<h2 class="govuk-heading-m">What the number is not</h2>
+<p class="govuk-body">
+  It is not a score, and nothing here is graded. The uncertainty in the model
+  cannot support a grade, and a grade travels out of context in a way a raw
+  number does not. Compare against the committed baseline, or against the
+  alternative design decision, and publish the method alongside any figure.
+</p>
+<p class="govuk-body">
+  Green hosting is the largest lever and is not in this repository: it sits with
+  Core Delivery Platform. Report that alongside any figure taken from here.
+</p>

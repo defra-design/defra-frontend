@@ -42,9 +42,24 @@ jobs:
         env:
           STORYBOOK_BASE_PATH: ${{ steps.pages.outputs.base_path }}/
 
+      # Docs site is generated from fixtures, deviations.json and the carbon
+      # files, so it must build after the stylesheet exists.
+      - name: Build docs
+        run: npm run build -w @defra/docs
+        env:
+          DOCS_PATH_PREFIX: ${{ steps.pages.outputs.base_path }}/docs/
+
+      # Storybook keeps the published root URL; the docs sit beneath it.
+      - name: Combine sites
+        run: |
+          mkdir -p _pages
+          cp -r apps/storybook/storybook-static/. _pages/
+          mkdir -p _pages/docs
+          cp -r apps/docs/_site/. _pages/docs/
+
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: apps/storybook/storybook-static
+          path: _pages
 
   deploy:
     needs: build

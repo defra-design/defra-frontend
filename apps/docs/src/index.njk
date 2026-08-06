@@ -1,0 +1,56 @@
+---
+layout: base.njk
+title: Overview
+---
+<h1 class="govuk-heading-xl">Defra Frontend</h1>
+
+<p class="govuk-body-l">
+  A theme layer over GOV.UK Frontend for Defra services. It does not fork
+  GOV.UK Frontend and it does not replace it.
+</p>
+
+<div class="govuk-inset-text">
+  This is an unapproved prototype. The colour and typeface values are placeholders
+  rather than the result of a brand audit, and the library is not yet approved for
+  use in a live service.
+</div>
+
+<h2 class="govuk-heading-m">What is here</h2>
+<dl class="govuk-summary-list">
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">Upstream components</dt>
+    <dd class="govuk-summary-list__value">{{ system.counts.upstream }}, restyled through tokens alone</dd>
+  </div>
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">Defra additions</dt>
+    <dd class="govuk-summary-list__value">{{ system.counts.additions }}, each registered with its prior art</dd>
+  </div>
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">Markup deviations</dt>
+    <dd class="govuk-summary-list__value">{{ system.counts.overrides }}</dd>
+  </div>
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">Design deviations</dt>
+    <dd class="govuk-summary-list__value">{{ system.counts.design }}</dd>
+  </div>
+</dl>
+
+<h2 class="govuk-heading-m">Brand modes</h2>
+<p class="govuk-body">
+  A licence boundary rather than a preference. Services on
+  <code>*.service.gov.uk</code> use GDS Transport with the GOV.UK header and footer.
+  Services elsewhere do not, and instead use a system font stack with Defra chrome.
+</p>
+<p class="govuk-body">
+  The typeface is settled by that licence, and it is also the largest single carbon
+  saving here: GDS Transport is two font files removed rather than made smaller.
+  See <a class="govuk-link" href="{{ '/carbon/' | url }}">carbon</a>.
+</p>
+
+<h2 class="govuk-heading-m">Live examples</h2>
+<p class="govuk-body">
+  Every component has interactive examples, prop tables and the Nunjucks and HTML
+  for each one in
+  <a class="govuk-link" href="https://defra-design.github.io/defra-frontend/">the Storybook</a>.
+  This site holds the guidance and the governance; the Storybook holds the examples.
+</p>

@@ -212,7 +212,7 @@ Dependabot/Renovate.
 4. ~~Storybook (`apps/storybook`) + carbon readout~~ done — badge lives in the
    preview iframe (vanilla JS), not a manager addon (manager UI is React)
 5. ~~Prototype kit plugin~~ done — `npx @defra/create-prototype`, verified in a real kit
-6. Eleventy docs site via `govuk-eleventy-plugin`, reading the same fixtures
+6. ~~Docs site~~ done — Eleventy at `/docs/`, generated from the same fixtures. NOT `govuk-eleventy-plugin`: it depends on govuk-frontend ^4 with no v5 or v6 line, so it would render the docs three majors behind the library they document.
 
 ## Maps — demonstrated, not depended on
 

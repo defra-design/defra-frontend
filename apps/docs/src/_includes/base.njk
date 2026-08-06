@@ -1,0 +1,69 @@
+{# Themed by the package itself, so the docs are a live demonstration of the
+   tokens rather than a description of them. The chrome is the Defra chrome:
+   generic header and Defra footer, no Crown and no OGL, because this site is
+   not on the GOV.UK proposition either. #}
+<!DOCTYPE html>
+<html lang="en" class="govuk-template">
+<head>
+  <meta charset="utf-8">
+  <title>{{ title }} — Defra Frontend</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#00a33b">
+  <link rel="stylesheet" href="{{ '/assets/defra-frontend.min.css' | url }}">
+</head>
+<body class="govuk-template__body">
+<script>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
+
+<div class="govuk-generic-header">
+  <div class="govuk-generic-header__container govuk-width-container">
+    <div class="govuk-generic-header__logo">
+      <a href="{{ '/' | url }}" class="govuk-generic-header__homepage-link">Defra Frontend</a>
+    </div>
+  </div>
+</div>
+
+<div class="govuk-width-container">
+  <div class="govuk-phase-banner">
+    <p class="govuk-phase-banner__content">
+      <strong class="govuk-tag govuk-phase-banner__content__tag">Work in progress</strong>
+      <span class="govuk-phase-banner__text">
+        Unapproved prototype. Not approved for use in a live service.
+      </span>
+    </p>
+  </div>
+
+  <main class="govuk-main-wrapper" id="main-content">
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-one-quarter">
+        <nav class="govuk-!-margin-bottom-6" aria-label="Sections">
+          <ul class="govuk-list govuk-body-s">
+            <li><a class="govuk-link" href="{{ '/' | url }}">Overview</a></li>
+            <li><a class="govuk-link" href="{{ '/components/' | url }}">Components</a></li>
+            <li><a class="govuk-link" href="{{ '/deviations/' | url }}">Deviations</a></li>
+            <li><a class="govuk-link" href="{{ '/carbon/' | url }}">Carbon</a></li>
+            <li><a class="govuk-link" href="{{ '/prototyping/' | url }}">Prototyping</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div class="govuk-grid-column-three-quarters">
+        {{ content | safe }}
+      </div>
+    </div>
+  </main>
+</div>
+
+<footer class="govuk-footer defra-footer">
+  <div class="govuk-width-container">
+    <div class="govuk-footer__meta">
+      <div class="govuk-footer__meta-item govuk-footer__meta-item--grow">
+        <a class="govuk-footer__link" href="https://github.com/defra-design/defra-frontend">Source</a> &middot;
+        <a class="govuk-footer__link" href="https://defra-design.github.io/defra-frontend/">Storybook</a> &middot;
+        <a class="govuk-footer__link" href="https://design-system.service.gov.uk/">GOV.UK Design System</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script type="module" src="{{ '/assets/defra-frontend.mjs' | url }}"></script>
+</body>
+</html>

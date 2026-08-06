@@ -1,0 +1,36 @@
+---
+layout: base.njk
+title: Prototyping
+---
+<h1 class="govuk-heading-xl">Prototyping</h1>
+
+<p class="govuk-body-l">
+  Spin-up mirrors the GOV.UK Prototype Kit command, so instructions for a Defra
+  prototype are the same as the GOV.UK ones with a different package name.
+</p>
+
+<pre class="govuk-body" style="padding:1rem;background:#f3f2f1;border:1px solid #b1b4b6;overflow-x:auto"><code>npx @defra/create-prototype my-service
+cd my-service
+npm start</code></pre>
+
+<p class="govuk-body">
+  This runs the real <code>govuk-prototype-kit create</code>, then adds what a Defra
+  prototype needs: GOV.UK Frontend 6, this package as a kit plugin, the two sass
+  imports the kit reserves for plugin settings, and the Defra layout.
+</p>
+
+<h2 class="govuk-heading-m">Why the layout matters</h2>
+<p class="govuk-body">
+  The kit's default layout renders the GOV.UK header and a footer asserting the
+  Royal Arms and the Open Government Licence. A service outside the GOV.UK
+  proposition may not use either, so a Defra prototype left on the default layout
+  is making a claim it is not entitled to make. Services on
+  <code>*.service.gov.uk</code> should extend the kit's own
+  <code>govuk-branded</code> layout instead.
+</p>
+
+<h2 class="govuk-heading-m">Page templates</h2>
+<p class="govuk-body">
+  Defra start, question and check answers pages are available under
+  <strong>Create a new page</strong> in the kit's manage-prototype screens.
+</p>
