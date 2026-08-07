@@ -7,10 +7,23 @@
         "heading": "Abstraction licensing",
         "ariaLabel": "Guidance sections",
         "items": [
-          { "text": "Who needs a licence", "href": "#who" },
-          { "text": "Before you apply", "href": "#before", "current": true },
-          { "text": "How to apply", "href": "#apply" },
-          { "text": "After you apply", "href": "#after" }
+          {
+            "text": "Who needs a licence",
+            "href": "#who"
+          },
+          {
+            "text": "Before you apply",
+            "href": "#before",
+            "current": true
+          },
+          {
+            "text": "How to apply",
+            "href": "#apply"
+          },
+          {
+            "text": "After you apply",
+            "href": "#after"
+          }
         ]
       },
       "hidden": false,
@@ -21,22 +34,42 @@
       "options": {
         "heading": "Case AB/2026/0148",
         "items": [
-          { "text": "Overview", "href": "#overview" },
+          {
+            "text": "Overview",
+            "href": "#overview"
+          },
           {
             "text": "Application",
             "href": "#application",
             "items": [
-              { "text": "Abstraction points", "href": "#points" },
-              { "text": "Volumes", "href": "#volumes", "current": true },
-              { "text": "Supporting evidence", "href": "#evidence" }
+              {
+                "text": "Abstraction points",
+                "href": "#points"
+              },
+              {
+                "text": "Volumes",
+                "href": "#volumes",
+                "current": true
+              },
+              {
+                "text": "Supporting evidence",
+                "href": "#evidence"
+              }
             ]
           },
-          { "text": "Correspondence", "href": "#correspondence" },
-          { "text": "History", "href": "#history" }
+          {
+            "text": "Correspondence",
+            "href": "#correspondence"
+          },
+          {
+            "text": "History",
+            "href": "#history"
+          }
         ]
       },
       "hidden": false,
-      "description": "Nesting is in the markup, not just the indentation, so a screen reader announces the structure and the number of items at each level. One level of nesting only — a third would be a sign the page needs splitting."
+      "description": "Nesting is in the markup, not just the indentation, so a screen reader announces the structure and the number of items at each level. One level of nesting only \u2014 a third would be a sign the page needs splitting."
     }
-  ]
+  ],
+  "column": "one-third"
 }

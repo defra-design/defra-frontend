@@ -39,7 +39,7 @@ function argTypes (opts) {
   return map
 }
 
-function storiesFile ({ renderArg, storyTitle, macro, importPath, renderFn, description, fixtures, opts }) {
+function storiesFile ({ renderArg, storyTitle, macro, importPath, renderFn, description, fixtures, opts, column }) {
   let out = `// GENERATED — do not edit.
 import { ${renderFn} } from '../../../lib/render.mjs'
 
@@ -49,7 +49,7 @@ export default {
     macro: '${macro}',
     // Where a service would import this from — the code panel reconstructs the
     // Nunjucks call from these two, so it can never drift from the real name.
-    importPath: '${importPath}',
+    importPath: '${importPath}',${column ? `\n    // The column this component really sits in, so the story is judged at a\n    // realistic width rather than stretched across the canvas.\n    column: '${column}',` : ''}
     docs: { description: { component: ${JSON.stringify(description)} } }
   },
   argTypes: ${JSON.stringify(argTypes(opts), null, 2).replace(/\n/g, '\n  ')},
@@ -76,7 +76,7 @@ const index = []
 // of an upstream macro, rendered through the ordinary govuk render path.
 const defra = listDefraComponents().map((dir) => {
   const fx = loadDefraFixtures(dir)
-  return { dir, use: fx.use, fixtures: fx.fixtures }
+  return { dir, use: fx.use, column: fx.column, fixtures: fx.fixtures }
 })
 const overriddenUpstream = new Set(defra.filter(d => !d.use).map(d => d.dir))
 const usedUpstream = new Map(defra.filter(d => d.use).map(d => [d.use, d.dir]))
@@ -108,7 +108,7 @@ for (const component of listComponents()) {
 }
 
 // --- Defra components: forks from their own fixtures, usages from upstream --
-for (const { dir, use, fixtures } of defra) {
+for (const { dir, use, column, fixtures } of defra) {
   const visible = fixtures.filter(f => !f.hidden)
   if (!visible.length) continue
 
@@ -144,6 +144,7 @@ for (const { dir, use, fixtures } of defra) {
     renderFn: use ? 'render' : 'renderDefra',
     description,
     fixtures: visible,
+    column,
     opts: use ? loadMacroOptions(use) : loadDefraMacroOptions(dir)
   }))
   storyCount += visible.length

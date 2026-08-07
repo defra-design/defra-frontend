@@ -1,36 +1,44 @@
 // DEF-108 — side navigation
+//
+// Nesting is signalled by indentation alone. An earlier version also changed
+// the type size and drew a rule under every item, so three signals competed to
+// say one thing and the result was noisy. Depth is a spatial relationship, so
+// space is the right tool for it; size and rules were doing nothing the indent
+// was not already doing.
 
 .defra-side-navigation {
   @include govuk-responsive-margin(6, "bottom");
 }
 
 .defra-side-navigation__heading {
-  padding-bottom: govuk-spacing(2);
-  border-bottom: 1px solid govuk-functional-colour(border);
+  margin-bottom: govuk-spacing(2);
 }
 
+// One continuous rule down the whole list. Every link carries a transparent
+// border of the same width sitting on top of it, so the current item can
+// colour its own segment without changing any width — nothing shifts as the
+// current page moves.
 .defra-side-navigation__list {
   @include govuk-font($size: 19);
 
   margin: 0;
   padding: 0;
   list-style: none;
+  border-left: 2px solid govuk-functional-colour(border);
 }
 
 .defra-side-navigation__item {
   margin-bottom: 0;
-  border-bottom: 1px solid govuk-functional-colour(border);
 }
 
-// Nested sections sit inside their parent item, so the parent keeps the
-// border and the children do not draw a second one against it.
+// The nested list must not be indented itself — indenting it would move its
+// left rule inward and leave the vertical line ragged. The indent goes on the
+// link's padding instead, so every rule stays on the same axis.
 .defra-side-navigation__list--nested {
-  @include govuk-font($size: 16);
+  border-left: 0;
 
-  margin-left: govuk-spacing(4);
-
-  .defra-side-navigation__item:last-child {
-    border-bottom: 0;
+  .defra-side-navigation__link {
+    padding-left: govuk-spacing(7);
   }
 }
 
@@ -40,11 +48,10 @@
   @include govuk-link-style-no-visited-state;
 
   display: block;
-  padding: govuk-spacing(2) govuk-spacing(2) govuk-spacing(2) govuk-spacing(3);
+  padding: govuk-spacing(2) govuk-spacing(3);
+  margin-left: -2px;
+  border-left: 2px solid transparent;
   text-decoration: none;
-  // As with sub navigation, reserved so the current marker does not shift
-  // anything when it moves.
-  border-left: 4px solid transparent;
 
   &:hover {
     background: govuk-functional-colour(surface-background);
@@ -54,9 +61,13 @@
     @include govuk-focused-text;
   }
 
+  // Current page: the rule segment takes the brand colour, the row takes a
+  // tint, and the text goes to full contrast and bold. Three quiet signals
+  // rather than one loud one, and none of them changes the layout.
   &[aria-current="page"] {
     color: govuk-functional-colour(text);
-    border-left-color: govuk-functional-colour(brand);
     font-weight: $govuk-font-weight-bold;
+    background: govuk-functional-colour(surface-background);
+    border-left-color: govuk-functional-colour(brand);
   }
 }

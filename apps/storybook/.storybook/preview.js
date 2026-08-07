@@ -8,6 +8,25 @@ import { installPseudoStateRules } from './pseudo-states.js'
 // govuk-frontend components refuse to init without these body signals.
 document.body.classList.add('js-enabled', 'govuk-frontend-supported')
 
+// Some components only make sense at the width they actually occupy. A side
+// navigation stretched across the full canvas is not the component anyone will
+// ship, and judging it there leads to fixing problems that do not exist. A
+// fixture can declare its column and the story is rendered inside one.
+const withColumn = (story, context) => {
+  const column = context.parameters?.column
+  const out = story()
+  if (!column) return out
+
+  const row = document.createElement('div')
+  row.className = 'govuk-grid-row'
+  const col = document.createElement('div')
+  col.className = `govuk-grid-column-${column}`
+  if (typeof out === 'string') col.innerHTML = out
+  else col.appendChild(out)
+  row.appendChild(col)
+  return row
+}
+
 // Re-init behaviours after every render. Each render replaces the DOM, so
 // nothing is double-bound; errors from stories rendered without required
 // options are upstream's problem, not ours to mask.
@@ -31,7 +50,8 @@ const withGovukJs = (story) => {
 export default {
   tags: ['autodocs'],
   // withCode runs outermost so it sees the story's final markup.
-  decorators: [withGovukJs, withCarbon, withCode],
+  // withColumn runs first so the others see the wrapped markup.
+  decorators: [withGovukJs, withCarbon, withCode, withColumn],
   parameters: {
     layout: 'padded',
     options: {
