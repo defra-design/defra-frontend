@@ -1,0 +1,20 @@
+[
+  { "name": "title", "type": "string", "required": true, "description": "The record reference. Carries the weight in the bar, but is deliberately not a heading." },
+  { "name": "caption", "type": "string", "required": false, "description": "What kind of record it is, shown before the reference." },
+  { "name": "meta", "type": "string", "required": false, "description": "Supporting detail such as the applicant or the status." },
+  {
+    "name": "actions",
+    "type": "array",
+    "required": false,
+    "description": "Actions available on the record.",
+    "params": [
+      { "name": "text", "type": "string", "required": true, "description": "Link text." },
+      { "name": "href", "type": "string", "required": true, "description": "Link destination." },
+      { "name": "visuallyHiddenText", "type": "string", "required": false, "description": "Appended for screen readers, so repeated actions are distinguishable out of context." }
+    ]
+  },
+  { "name": "container", "type": "boolean", "required": false, "description": "Wraps the contents in `govuk-width-container`, for a bar that spans the full page width." },
+  { "name": "ariaLabel", "type": "string", "required": false, "description": "Accessible name for the landmark. Defaults to `Current record`." },
+  { "name": "classes", "type": "string", "required": false, "description": "Classes to add to the bar." },
+  { "name": "attributes", "type": "object", "required": false, "description": "HTML attributes to add to the bar." }
+]

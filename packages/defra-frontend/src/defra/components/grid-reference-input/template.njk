@@ -1,0 +1,31 @@
+{# DEF-111 — Ordnance Survey grid reference input.
+
+   Delegates entirely to govukInput. There is no forked markup here: the value
+   of the component is that the format, the hint, the width and the input
+   attributes are decided once instead of by every team that needs one.
+
+   Decisions worth keeping:
+
+   - autocapitalize="characters". The two-letter prefix is always upper case
+     and phone keyboards default to lower.
+   - No `pattern` by default. A pattern that rejects a valid reference is worse
+     than none, references vary in precision (SU 12 34 through SU 1234 5678),
+     and the server has to validate regardless. Callers can still pass one.
+   - width-10, which fits the longest common form without implying more
+     precision than is being asked for.
+   - spellcheck off — a grid reference is not a word. #}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+
+{{ govukInput({
+  id: params.id | default("grid-reference"),
+  name: params.name | default("gridReference"),
+  value: params.value,
+  classes: ("govuk-input--width-10 " + params.classes) if params.classes else "govuk-input--width-10",
+  label: params.label | default({ text: "Grid reference" }),
+  hint: params.hint | default({ text: "For example, SU 1234 5678" }),
+  errorMessage: params.errorMessage,
+  autocomplete: "off",
+  spellcheck: false,
+  autocapitalize: "characters",
+  attributes: params.attributes
+}) }}

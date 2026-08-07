@@ -1,0 +1,41 @@
+{# DEF-110 — identity bar.
+
+   Shows which record the user is working on, and the actions available on it.
+   Casework is long-running and interruptible, so this persists across the
+   pages of a case.
+
+   It is a complementary landmark with an accessible name, so it can be jumped
+   to and skipped over rather than being read again on every page. The title is
+   NOT a heading: the page still needs its own h1, and two competing headings
+   makes the page structure worse, not better. #}
+<div class="defra-identity-bar{{ ' ' + params.classes if params.classes }}"
+  role="complementary"
+  aria-label="{{ params.ariaLabel | default('Current record') }}"
+  {%- for attribute, value in params.attributes %} {{ attribute }}="{{ value }}"{% endfor %}>
+  <div class="defra-identity-bar__container{{ ' govuk-width-container' if params.container }}">
+    <div class="defra-identity-bar__details">
+      {% if params.caption %}
+        <span class="defra-identity-bar__caption">{{ params.caption }}</span>
+      {% endif %}
+      <span class="defra-identity-bar__title">{{ params.title }}</span>
+      {% if params.meta %}
+        <span class="defra-identity-bar__meta">{{ params.meta }}</span>
+      {% endif %}
+    </div>
+
+    {% if params.actions %}
+      <ul class="defra-identity-bar__actions govuk-list">
+        {% for action in params.actions %}
+          <li>
+            <a class="govuk-link defra-identity-bar__action" href="{{ action.href }}">
+              {{ action.text }}
+              {% if action.visuallyHiddenText %}
+                <span class="govuk-visually-hidden"> {{ action.visuallyHiddenText }}</span>
+              {% endif %}
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </div>
+</div>

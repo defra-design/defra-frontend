@@ -1,0 +1,27 @@
+{
+  "component": "search",
+  "column": "two-thirds",
+  "fixtures": [
+    {
+      "name": "default",
+      "options": {
+        "label": "Search applications",
+        "hint": "You can search by reference, applicant or river",
+        "action": "#results"
+      },
+      "hidden": false,
+      "description": "A real label, not a placeholder. Placeholder-as-label vanishes on typing, usually fails contrast, and is announced inconsistently — it is the most common accessibility failure in search boxes. Use `hideLabel` if it must not be seen."
+    },
+    {
+      "name": "with a visually hidden label",
+      "options": {
+        "label": "Search applications",
+        "hideLabel": true,
+        "value": "River Kennet",
+        "buttonText": "Search"
+      },
+      "hidden": false,
+      "description": "The label is still in the markup and still announced — only hidden visually."
+    }
+  ]
+}

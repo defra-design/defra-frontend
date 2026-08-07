@@ -1,0 +1,29 @@
+{
+  "component": "identity-bar",
+  "fixtures": [
+    {
+      "name": "default",
+      "options": {
+        "caption": "Abstraction licence application",
+        "title": "AB/2026/0148",
+        "meta": "Kennet Farms Ltd",
+        "actions": [
+          { "href": "#assign", "text": "Assign", "visuallyHiddenText": "application AB/2026/0148" },
+          { "href": "#print", "text": "Print", "visuallyHiddenText": "application AB/2026/0148" }
+        ]
+      },
+      "hidden": false,
+      "description": "A complementary landmark with an accessible name, so it can be jumped to and skipped rather than re-read on every page of a case. The reference is not a heading — the page still needs its own h1, and two competing headings makes the structure worse."
+    },
+    {
+      "name": "without actions",
+      "options": {
+        "caption": "Case",
+        "title": "AB/2026/0233",
+        "meta": "Withdrawn 3 March 2026"
+      },
+      "hidden": false,
+      "description": "Context alone, where the page offers no actions on the record."
+    }
+  ]
+}

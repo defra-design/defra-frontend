@@ -1,0 +1,13 @@
+[
+  { "name": "label", "type": "string", "required": false, "description": "Label text. Defaults to `Search`. Always present in the markup — use `hideLabel` rather than removing it." },
+  { "name": "hideLabel", "type": "boolean", "required": false, "description": "Hides the label visually while keeping it for screen readers." },
+  { "name": "hint", "type": "string", "required": false, "description": "Hint text, for example what can be searched." },
+  { "name": "id", "type": "string", "required": false, "description": "Input id. Defaults to `search`. Set it when a page has more than one." },
+  { "name": "name", "type": "string", "required": false, "description": "Form field name. Defaults to `q`." },
+  { "name": "value", "type": "string", "required": false, "description": "Current search term, so it persists on the results page." },
+  { "name": "buttonText", "type": "string", "required": false, "description": "Button text. Defaults to `Search`." },
+  { "name": "action", "type": "string", "required": false, "description": "Form action." },
+  { "name": "method", "type": "string", "required": false, "description": "Form method. Defaults to `get`, so a search is linkable and shareable." },
+  { "name": "classes", "type": "string", "required": false, "description": "Classes to add to the form." },
+  { "name": "attributes", "type": "object", "required": false, "description": "HTML attributes to add to the form." }
+]

@@ -99,7 +99,17 @@ therefore high, and the process is fixed:
 
 Registered so far: DEF-101 timeline, DEF-102 card, DEF-103 add-another,
 DEF-104 filter, DEF-105 sortable-table, DEF-106 timeout-dialog,
-DEF-107 sub-navigation, DEF-108 side-navigation.
+DEF-107 sub-navigation, DEF-108 side-navigation, DEF-109 search,
+DEF-110 identity-bar, DEF-111 grid-reference-input.
+
+Checked and deliberately NOT built, so they are not proposed again:
+multi-file upload (v6 `file-upload` already takes `multiple` and ships a
+JS-enhanced drop zone), unit inputs (`input` has `prefix`/`suffix`; a unit
+selector is input + select composed, a pattern not a component), date picker
+(GDS research favours a text date input for dates people know — build only on
+evidence of the choosing-a-future-date case), and autocomplete
+(`alphagov/accessible-autocomplete` exists and should be a companion package,
+like the map, not a rebuild).
 
 **`govukTabs` is not navigation.** It links to same-page anchors and toggles
 panels, so using it to move between pages breaks the URL, the back button and

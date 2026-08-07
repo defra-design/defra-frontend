@@ -1,0 +1,57 @@
+// DEF-110 — identity bar
+
+.defra-identity-bar {
+  @include govuk-responsive-margin(6, "bottom");
+
+  padding: govuk-spacing(3) 0;
+  border-bottom: 1px solid govuk-functional-colour(border);
+  background: govuk-functional-colour(surface-background);
+}
+
+.defra-identity-bar__container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: govuk-spacing(2) govuk-spacing(4);
+}
+
+.defra-identity-bar__details {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: govuk-spacing(2);
+  min-width: 0;
+}
+
+.defra-identity-bar__caption {
+  @include govuk-font($size: 16);
+
+  color: govuk-functional-colour(secondary-text);
+}
+
+// The record reference is the point of the bar, so it carries the weight —
+// but it is not a heading, and must not be mistaken for one. The page's own
+// h1 says what the page is; this says which record it is about.
+.defra-identity-bar__title {
+  @include govuk-font($size: 19, $weight: bold);
+}
+
+.defra-identity-bar__meta {
+  @include govuk-font($size: 16);
+
+  color: govuk-functional-colour(secondary-text);
+}
+
+.defra-identity-bar__actions {
+  @include govuk-font($size: 16);
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: govuk-spacing(4);
+  margin-bottom: 0;
+
+  li {
+    margin-bottom: 0;
+  }
+}

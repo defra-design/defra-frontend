@@ -1,0 +1,30 @@
+{
+  "component": "grid-reference-input",
+  "column": "two-thirds",
+  "fixtures": [
+    {
+      "name": "default",
+      "options": {},
+      "hidden": false,
+      "description": "Delegates to govukInput — no forked markup. The value is that the format, hint, width and input attributes are decided once rather than by every team that needs one."
+    },
+    {
+      "name": "with a value",
+      "options": {
+        "value": "SU 1234 5678",
+        "label": { "text": "Abstraction point grid reference" }
+      },
+      "hidden": false,
+      "description": "`autocapitalize=\"characters\"` because the two-letter prefix is always upper case and phone keyboards default to lower."
+    },
+    {
+      "name": "with an error",
+      "options": {
+        "value": "SU 12",
+        "errorMessage": { "text": "Enter a grid reference with at least 6 figures, like SU 123 456" }
+      },
+      "hidden": false,
+      "description": "No `pattern` is applied by default: references vary in precision from SU 12 34 to SU 1234 5678, a pattern that rejects a valid one is worse than none, and the server must validate regardless."
+    }
+  ]
+}

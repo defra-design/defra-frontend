@@ -1,0 +1,36 @@
+{# DEF-109 — search.
+
+   A form with a label, an input and a button. Everything here is either an
+   upstream class or a small amount of layout, because that is genuinely all a
+   search box is.
+
+   The label is real, not a placeholder. Placeholder-as-label disappears the
+   moment someone types, fails contrast in most browsers, and is not announced
+   reliably — it is the single most common accessibility failure in search
+   boxes. If it must not be seen, hide it visually and keep it in the markup. #}
+{% set id = params.id | default("search") %}
+<form class="defra-search{{ ' ' + params.classes if params.classes }}"
+  method="{{ params.method | default('get') }}"
+  {%- if params.action %} action="{{ params.action }}"{% endif %}
+  role="search"
+  {%- for attribute, value in params.attributes %} {{ attribute }}="{{ value }}"{% endfor %}>
+  <div class="govuk-form-group">
+    <label class="govuk-label{{ ' govuk-visually-hidden' if params.hideLabel }}" for="{{ id }}">
+      {{ params.label | default("Search") }}
+    </label>
+    {% if params.hint %}
+      <div id="{{ id }}-hint" class="govuk-hint">{{ params.hint }}</div>
+    {% endif %}
+    <div class="defra-search__controls">
+      <input class="govuk-input defra-search__input"
+        id="{{ id }}"
+        name="{{ params.name | default('q') }}"
+        type="search"
+        {%- if params.value %} value="{{ params.value }}"{% endif %}
+        {%- if params.hint %} aria-describedby="{{ id }}-hint"{% endif %}>
+      <button type="submit" class="govuk-button defra-search__button" data-module="govuk-button">
+        {{ params.buttonText | default("Search") }}
+      </button>
+    </div>
+  </div>
+</form>

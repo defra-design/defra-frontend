@@ -45,6 +45,27 @@
       "proposedUpstream": "No",
       "javascript": "progressive enhancement only - headers are server-sort links without it"
     },
+    "search": {
+      "id": "DEF-109",
+      "whyNotUpstream": "GOV.UK Frontend has no search component. Completes the set with DEF-104 filter and DEF-105 sortable-table: without it, finding a case means filtering to it.",
+      "priorArt": "GOV.UK publishing components - search, and MoJ Design System",
+      "proposedUpstream": "No",
+      "javascript": "none"
+    },
+    "identity-bar": {
+      "id": "DEF-110",
+      "whyNotUpstream": "No upstream component for showing which record a caseworker is currently working on. Regulation and permitting work is long-running and interruptible, so the context has to persist across pages.",
+      "priorArt": "MoJ Design System - Identity bar",
+      "proposedUpstream": "No",
+      "javascript": "none"
+    },
+    "grid-reference-input": {
+      "id": "DEF-111",
+      "whyNotUpstream": "Net new. Ordnance Survey grid references appear across abstraction licensing, flood risk and land parcel services, and nothing cross-government covers them because no other department needs them. Built on govukInput rather than beside it — the pattern, hint and error live in one place instead of each team re-deriving the format.",
+      "priorArt": "None. Format follows the Ordnance Survey national grid convention.",
+      "proposedUpstream": "No - too Defra-specific to be useful upstream",
+      "javascript": "none"
+    },
     "sub-navigation": {
       "id": "DEF-107",
       "whyNotUpstream": "GOV.UK Frontend has service-navigation for primary navigation but nothing for secondary navigation within a section. govukTabs is NOT the alternative: it links to same-page anchors and shows and hides panels, so using it to move between pages breaks the URL, the back button and bookmarking, and announces panels rather than links. This component exists largely so teams stop reaching for tabs.",

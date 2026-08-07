@@ -1,0 +1,10 @@
+[
+  { "name": "id", "type": "string", "required": false, "description": "Input id. Defaults to `grid-reference`." },
+  { "name": "name", "type": "string", "required": false, "description": "Form field name. Defaults to `gridReference`." },
+  { "name": "value", "type": "string", "required": false, "description": "Current value." },
+  { "name": "label", "type": "object", "required": false, "description": "Label options, as govukInput. Defaults to `Grid reference`." },
+  { "name": "hint", "type": "object", "required": false, "description": "Hint options, as govukInput. Defaults to a worked example — replace it rather than removing it." },
+  { "name": "errorMessage", "type": "object", "required": false, "description": "Error message options, as govukInput. Say what a valid reference looks like, not just that this one is wrong." },
+  { "name": "classes", "type": "string", "required": false, "description": "Classes added alongside the default width." },
+  { "name": "attributes", "type": "object", "required": false, "description": "HTML attributes to add to the input." }
+]

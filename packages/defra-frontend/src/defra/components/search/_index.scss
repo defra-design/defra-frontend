@@ -1,0 +1,26 @@
+// DEF-109 — search
+
+.defra-search {
+  @include govuk-responsive-margin(6, "bottom");
+}
+
+// Input and button on one line, the input taking the remaining space. They sit
+// flush so they read as one control, and the button keeps its own height
+// rather than being stretched to match.
+.defra-search__controls {
+  display: flex;
+  align-items: flex-start;
+}
+
+.defra-search__input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.defra-search__button {
+  // Cancels the button's default bottom margin so it aligns with the input
+  // rather than sitting a space below it.
+  margin-bottom: 0;
+  margin-left: govuk-spacing(2);
+  flex: 0 0 auto;
+}
