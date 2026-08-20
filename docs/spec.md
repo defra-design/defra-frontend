@@ -69,7 +69,7 @@ Caveats to publish alongside any number:
 - directional figures for comparing design decisions, **not audited emissions data**
 - green hosting is the most auditable lever and it sits with Core Delivery Platform, not with the DS
 
-## 6. Build order for Claude Code
+## 6. Build order
 
 1. `defra-frontend` package — settings layer + `defra/` namespace + footer. `govuk-frontend` as **peerDependency**, never a hard dep.
 2. `scripts/drift.mjs` + `deviations.json` — wire into CI. Unregistered divergence fails the build.

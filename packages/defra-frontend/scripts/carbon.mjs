@@ -6,7 +6,7 @@ import { listDefraPages, renderPage, renderDocument, needsJavaScript } from '../
 
 // This script deliberately does NOT grade a page. There is no A-F rating, no
 // "good/bad" verdict on a gCO2e figure, and there never should be — see the
-// carbon section of CLAUDE.md. The model carries far too much uncertainty to
+// carbon section of CONTRIBUTING.md. The model carries far too much uncertainty to
 // support a grade: SWDM v4 moved results 40-67% against v3, grid intensity is
 // a national average, and green hosting is assumed rather than verified. A
 // grade would imply precision the method does not have, and it travels well

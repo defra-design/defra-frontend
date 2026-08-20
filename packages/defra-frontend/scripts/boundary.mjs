@@ -32,7 +32,7 @@ for (const name of APP_ONLY) {
   if (declared[name]) {
     problems.push(
       `${pkg.name} declares ${name}. It is demonstration-only and must stay a\n` +
-      `    devDependency of an app. See the maps section of CLAUDE.md.`
+      `    devDependency of an app. See the maps section of CONTRIBUTING.md.`
     )
   }
 }

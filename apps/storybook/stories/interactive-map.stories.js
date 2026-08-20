@@ -8,7 +8,7 @@
 // Why it cannot simply be adopted: it depends on govuk-frontend ^5 directly
 // rather than as a peer, while this repo is built on 6. npm contains that (the
 // v5 copy nests under the map package and ours stays 6.4.0), but a service
-// bundling both would ship two copies of GOV.UK Frontend. See CLAUDE.md.
+// bundling both would ship two copies of GOV.UK Frontend. See CONTRIBUTING.md.
 import InteractiveMap from '@defra/interactive-map'
 import maplibreProvider from '@defra/interactive-map/providers/maplibre'
 import '@defra/interactive-map/css'

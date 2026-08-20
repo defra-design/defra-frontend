@@ -1,6 +1,6 @@
-# CLAUDE.md
+# Contributing to defra-frontend
 
-Context for working on `defra-frontend`. Read before changing anything.
+Context for working on this repository. Read before changing anything.
 
 ## What this is
 

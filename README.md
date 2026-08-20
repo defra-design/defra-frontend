@@ -16,7 +16,7 @@ not a replacement for it.
 | **[Components](https://defra-design.github.io/defra-frontend/)** | Storybook. Every component with live examples, the Nunjucks and HTML for each, and prop tables generated from the source. |
 | **[Guidance and governance](https://defra-design.github.io/defra-frontend/docs/)** | Why things are the way they are: brand modes, the deviation register, carbon budgets. |
 | **[Make a prototype](https://defra-design.github.io/defra-frontend/docs/prototyping/)** | Step by step, written for designers. Assumes no terminal experience. |
-| **[CLAUDE.md](CLAUDE.md)** | Working on this repo: the decisions, the traps, and the rules for adding a component. |
+| **[CONTRIBUTING.md](CONTRIBUTING.md)** | Working on this repo: the decisions, the traps, and the rules for adding a component. |
 
 ## Which part do I need?
 
@@ -149,7 +149,7 @@ HMRC or the GOV.UK publishing components have already solved it, and follow thei
 markup rather than re-deriving the accessibility.
 
 If it genuinely has no equivalent, the full process is in
-[CLAUDE.md](CLAUDE.md#adding-a-component-govuk-frontend-does-not-have). In short:
+[CONTRIBUTING.md](CONTRIBUTING.md#adding-a-component-govuk-frontend-does-not-have). In short:
 build it in the `defra` namespace with a `defra*` macro, make it work without
 JavaScript, and register it in `deviations.json`. An unregistered component fails
 `npm run stories`.
@@ -188,7 +188,7 @@ Alpha. Nothing here is stable.
   decision.
 
 Open governance questions are in [`docs/spec.md`](docs/spec.md) and the open
-decisions section of [CLAUDE.md](CLAUDE.md).
+decisions section of [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Licence
 
