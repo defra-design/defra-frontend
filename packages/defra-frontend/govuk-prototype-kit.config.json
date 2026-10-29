@@ -1,6 +1,6 @@
 {
   "meta": {
-    "description": "Defra Frontend — GOV.UK Frontend themed for Defra services. Work in progress, not approved for live services.",
+    "description": "Defra Frontend \u2014 GOV.UK Frontend themed for Defra services. Work in progress, not approved for live services.",
     "urls": {
       "documentation": "https://defra-design.github.io/defra-frontend/",
       "releaseNotes": "https://github.com/defra-design/defra-frontend/releases"
@@ -10,19 +10,43 @@
     "/src"
   ],
   "nunjucksMacros": [
-    { "importFrom": "defra/components/footer/macro.njk", "macroName": "defraFooter" },
-    { "importFrom": "defra/components/card/macro.njk", "macroName": "defraCard" },
-    { "importFrom": "defra/components/timeline/macro.njk", "macroName": "defraTimeline" },
-    { "importFrom": "defra/components/add-another/macro.njk", "macroName": "defraAddAnother" },
-    { "importFrom": "defra/components/filter/macro.njk", "macroName": "defraFilter" },
-    { "importFrom": "defra/components/sortable-table/macro.njk", "macroName": "defraSortableTable" },
-    { "importFrom": "defra/components/timeout-dialog/macro.njk", "macroName": "defraTimeoutDialog" }
+    {
+      "importFrom": "defra/components/footer/macro.njk",
+      "macroName": "defraFooter"
+    },
+    {
+      "importFrom": "defra/components/card/macro.njk",
+      "macroName": "defraCard"
+    },
+    {
+      "importFrom": "defra/components/timeline/macro.njk",
+      "macroName": "defraTimeline"
+    },
+    {
+      "importFrom": "defra/components/add-another/macro.njk",
+      "macroName": "defraAddAnother"
+    },
+    {
+      "importFrom": "defra/components/filter/macro.njk",
+      "macroName": "defraFilter"
+    },
+    {
+      "importFrom": "defra/components/sortable-table/macro.njk",
+      "macroName": "defraSortableTable"
+    },
+    {
+      "importFrom": "defra/components/timeout-dialog/macro.njk",
+      "macroName": "defraTimeoutDialog"
+    }
   ],
   "assets": [
     "/src"
   ],
   "scripts": [
-    { "path": "/src/defra-frontend.mjs", "type": "module" }
+    {
+      "path": "/src/defra/prototype-kit/init.mjs",
+      "type": "module"
+    }
   ],
   "templates": [
     {

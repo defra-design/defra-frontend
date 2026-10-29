@@ -3,10 +3,15 @@
     "name": "items",
     "type": "array",
     "required": false,
-    "description": "Footer links. Each item takes `text` and `href`.",
+    "description": "Footer links, rendered as a list. Omit entirely rather than passing placeholder `#` links — a link that goes nowhere is worse than no link.",
     "params": [
       { "name": "text", "type": "string", "required": true, "description": "Link text." },
-      { "name": "href", "type": "string", "required": true, "description": "Link destination." }
+      { "name": "href", "type": "string", "required": true, "description": "Link destination. A real URL." }
     ]
-  }
+  },
+  { "name": "visuallyHiddenTitle", "type": "string", "required": false, "description": "Accessible heading for the link list. Defaults to `Support links`." },
+  { "name": "text", "type": "string", "required": false, "description": "Additional text below the links, for example a department name." },
+  { "name": "html", "type": "string", "required": false, "description": "Additional content as HTML. Takes precedence over `text`." },
+  { "name": "classes", "type": "string", "required": false, "description": "Classes to add to the footer." },
+  { "name": "attributes", "type": "object", "required": false, "description": "HTML attributes to add to the footer." }
 ]

@@ -229,6 +229,44 @@ git push</code></pre>
   <a class="govuk-link" href="https://prototype-kit.service.gov.uk/docs/publishing-on-the-web">the options and how to password-protect them</a>.
 </p>
 
+<h2 class="govuk-heading-l">Publishing your prototype</h2>
+
+<p class="govuk-body">
+  A prototype is a small web application, not a set of files, so it needs
+  somewhere that can run it. That rules out the simplest options and is worth
+  knowing before you promise a link to anyone.
+</p>
+
+<dl class="govuk-summary-list govuk-body-s">
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">A hosting service</dt>
+    <dd class="govuk-summary-list__value">
+      The usual route, and the only one that supports every prototype. Your
+      programme almost certainly already uses something — ask your technical
+      lead rather than signing up for an account yourself. The kit documents
+      <a class="govuk-link" href="https://prototype-kit.service.gov.uk/docs/publishing-on-the-web">the options and how to password-protect them</a>.
+    </dd>
+  </div>
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">GitHub Pages</dt>
+    <dd class="govuk-summary-list__value">
+      Possible, but only for a prototype that is pages and links. Pages serves
+      files and cannot run anything, so you first have to export your prototype
+      to flat HTML. Anything that remembers an answer between pages — a form
+      post, branching based on what someone entered, the <code>data</code>
+      object — stops working. If your prototype only links from page to page,
+      this is the cheapest option; if it collects answers, it is not an option
+      at all.
+    </dd>
+  </div>
+</dl>
+
+<div class="govuk-inset-text">
+  Whatever you choose, put a password on it. A prototype looks like a real
+  service, and people who find one without context have no way of knowing it
+  is not. Never put real personal data in a published prototype.
+</div>
+
 <h2 class="govuk-heading-l">If something goes wrong</h2>
 
 <dl class="govuk-summary-list govuk-body-s">

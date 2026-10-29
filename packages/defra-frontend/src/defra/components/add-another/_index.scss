@@ -55,3 +55,11 @@
 .defra-add-another__add {
   @include govuk-responsive-margin(6, "bottom");
 }
+
+// The implicit-submission guard. govuk-visually-hidden already removes it
+// visually; this makes sure it can never take layout space or be clicked,
+// while remaining in the tree so the browser still uses it as the form's
+// default button.
+.defra-add-another__implicit-submit {
+  pointer-events: none;
+}

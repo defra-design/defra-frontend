@@ -313,6 +313,39 @@ Verified end to end in a real kit prototype: GDS Transport absent, system stack
 and Defra greens applied, `.defra-*` components compiled, and no Crown or OGL
 in the rendered page.
 
+## Prototype Kit layout — which blocks to override
+
+GOV.UK Frontend v6's template puts the landmarks in the OUTER blocks and the
+components in inner ones:
+
+```
+{% block header %}        <header class="govuk-template__header">
+  {% block govukHeader %}   <- the component
+{% block footer %}        <footer class="govuk-template__footer">
+  {% block govukFooter %}   <- the component
+```
+
+**Override the inner blocks.** Overriding `header` or `footer` replaces the
+landmark itself. Both mistakes were shipped and found in real use: the header
+landmark disappeared (axe: content outside landmarks) and `defraFooter`, which
+then still emitted its own `<footer>`, produced a footer inside a footer.
+
+`defraFooter` renders a `<div>`, exactly as v6's `govukFooter` does, because the
+landmark belongs to the page template. If you use it outside a template, supply
+the `<footer>` yourself.
+
+Two more things that layout gets wrong by default and this one fixes: the kit's
+page title ends in "GOV.UK", which a service outside the proposition must not
+claim; and placeholder footer links pointing at `#` are worse than no links,
+so there are none.
+
+**The kit does not call a plugin's JavaScript.** It loads `scripts` as files
+and nothing more. The plugin therefore points at
+`src/defra/prototype-kit/init.mjs`, whose only job is to call `initAll()` —
+the same split govuk-frontend uses. Pointing the kit at the library entry
+loaded every component and started none of them, which looks exactly like the
+components being broken.
+
 ## Open decisions — ask, don't guess
 
 - **`@use` migration.** Sass emits ~172 `@import` deprecation warnings. v6 ships

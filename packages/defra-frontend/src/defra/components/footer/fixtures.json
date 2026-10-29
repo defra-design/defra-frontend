@@ -5,19 +5,28 @@
       "name": "default",
       "options": {
         "items": [
-          { "text": "Accessibility statement", "href": "#" },
-          { "text": "Cookies", "href": "#" },
-          { "text": "Privacy", "href": "#" }
+          {
+            "text": "Accessibility statement",
+            "href": "/accessibility-statement"
+          },
+          {
+            "text": "Cookies",
+            "href": "/cookies"
+          },
+          {
+            "text": "Privacy",
+            "href": "/privacy"
+          }
         ]
       },
       "hidden": false,
-      "description": "DEF-001. Replaces govukFooter outside the GOV.UK proposition: no Royal Arms, no OGL assertion, 372 bytes against 3,411 upstream."
+      "description": "DEF-001. Replaces govukFooter outside the GOV.UK proposition: no Royal Arms, no OGL assertion. Renders a <div> exactly as v6's govukFooter does \u2014 the <footer> landmark belongs to the page template, and a component emitting its own produces a footer inside a footer."
     },
     {
       "name": "no links",
       "options": {},
       "hidden": false,
-      "description": "Bare footer for transactional pages that carry their own statutory links."
+      "description": "Omit `items` entirely rather than passing placeholder links. A prototype with three links to `#` tells a user less than a footer with none."
     }
   ]
 }

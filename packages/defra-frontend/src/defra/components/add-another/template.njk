@@ -11,6 +11,25 @@
   data-module="defra-add-another"
   data-item-name="{{ itemName }}"
   {%- for attribute, value in params.attributes %} {{ attribute }}="{{ value }}"{% endfor %}>
+  {# Implicit submission guard.
+
+     Pressing Enter in a text field submits the form using its FIRST submit
+     button. When this component sits above the form's real button, that first
+     submit is item 1's Remove — so Enter silently deleted an item.
+
+     This button is first in the form's tree order, so it becomes the default
+     instead. It carries no name, so the server sees an ordinary submit with
+     neither `add` nor `remove` — which is what Enter should do.
+
+     Hidden from pointer and assistive technology, and removed from the tab
+     order: it is not a control anyone should reach, only the one the browser
+     falls back to. `hidden` is not used, because a hidden button is skipped
+     for implicit submission and the guard would do nothing. #}
+  <button type="submit"
+    class="defra-add-another__implicit-submit govuk-visually-hidden"
+    tabindex="-1"
+    aria-hidden="true">Continue</button>
+
   <div class="defra-add-another__items">
     {% for item in params.items %}
       <div class="defra-add-another__item">

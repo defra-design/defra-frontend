@@ -5,10 +5,36 @@
     "required": true,
     "description": "The repeated groups. Each takes `html` containing the fields for one item. Index ids and names consistently, for example `points[0][grid]` and `points-0-grid`, so they can be renumbered.",
     "params": [
-      { "name": "html", "type": "string", "required": true, "description": "The fields for one item." }
+      {
+        "name": "html",
+        "type": "string",
+        "required": true,
+        "description": "The fields for one item."
+      }
     ]
   },
-  { "name": "itemName", "type": "string", "required": false, "description": "Singular noun used in legends and button text, for example `abstraction point`. Defaults to `item`." },
-  { "name": "classes", "type": "string", "required": false, "description": "Classes to add to the container." },
-  { "name": "attributes", "type": "object", "required": false, "description": "HTML attributes to add to the container." }
+  {
+    "name": "itemName",
+    "type": "string",
+    "required": false,
+    "description": "Singular noun used in legends and button text, for example `abstraction point`. Defaults to `item`."
+  },
+  {
+    "name": "classes",
+    "type": "string",
+    "required": false,
+    "description": "Classes to add to the container."
+  },
+  {
+    "name": "attributes",
+    "type": "object",
+    "required": false,
+    "description": "HTML attributes to add to the container."
+  },
+  {
+    "name": "_implicitSubmission",
+    "type": "note",
+    "required": false,
+    "description": "Not an option. The component renders a visually hidden submit button before everything else, so that pressing Enter in a field submits the form normally instead of activating the first Remove button and deleting an item. Keep it first in the component, and do not place another submit button above the component in the form."
+  }
 ]

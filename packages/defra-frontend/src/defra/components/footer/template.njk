@@ -1,12 +1,38 @@
 {# DEF-001 — replaces govukFooter for services outside the GOV.UK proposition.
    Drops the Royal Arms and the OGL assertion; keeps GOV.UK footer classes so
-   upstream footer styles still apply and only tokens differ. #}
-<footer class="govuk-footer defra-footer">
+   upstream footer styles still apply and only tokens differ.
+
+   Renders a <div>, NOT a <footer>, exactly as v6's govukFooter does. The
+   <footer class="govuk-template__footer"> landmark belongs to the page
+   template, so a component that emits its own produces a footer inside a
+   footer — two landmarks announced, and an axe failure. This component is a
+   drop-in for govukFooter and has to match its root element.
+
+   If you place it outside a page template, wrap it in a <footer> yourself. #}
+<div class="govuk-footer defra-footer{{ ' ' + params.classes if params.classes }}"
+  {%- for attribute, value in params.attributes %} {{ attribute }}="{{ value }}"{% endfor %}>
   <div class="govuk-width-container">
     <div class="govuk-footer__meta">
       <div class="govuk-footer__meta-item govuk-footer__meta-item--grow">
-        {% for item in params.items %}<a class="govuk-footer__link" href="{{ item.href }}">{{ item.text }}</a>{% if not loop.last %} &middot; {% endif %}{% endfor %}
+        {% if params.items and params.items | length %}
+          {# A list, like upstream's meta links, rather than middot-separated
+             inline anchors: a screen reader announces the number of links and
+             lets the user step through them. #}
+          <h2 class="govuk-visually-hidden">{{ params.visuallyHiddenTitle | default("Support links") }}</h2>
+          <ul class="govuk-footer__inline-list">
+            {% for item in params.items %}
+              <li class="govuk-footer__inline-list-item">
+                <a class="govuk-footer__link" href="{{ item.href }}">{{ item.text }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+        {% if params.html %}
+          {{ params.html | safe }}
+        {% elif params.text %}
+          <p class="govuk-footer__meta-custom">{{ params.text }}</p>
+        {% endif %}
       </div>
     </div>
   </div>
-</footer>
+</div>

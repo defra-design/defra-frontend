@@ -1,33 +1,67 @@
 {#
   Defra layout for the GOV.UK Prototype Kit.
 
-  Extends the kit's own layout and replaces only the chrome. This is not
-  cosmetic: the GOV.UK header carries the Crown and the GOV.UK footer asserts
-  the Royal Arms and the Open Government Licence, and neither may be used by a
-  service outside the GOV.UK proposition. A Defra prototype left on the kit's
-  default layout is making a claim it is not entitled to make.
+  Replaces only the chrome. This is not cosmetic: the GOV.UK header carries the
+  Crown and the GOV.UK footer asserts the Royal Arms and the Open Government
+  Licence, and neither may be used by a service outside the GOV.UK proposition.
+  A Defra prototype left on the kit's default layout is making a claim it is
+  not entitled to make.
 
-  Everything else — head, stylesheets, scripts, content blocks — is inherited,
-  so this stays correct as the kit changes.
+  WHICH BLOCKS TO OVERRIDE, and why it matters:
+
+  GOV.UK Frontend v6's template puts the landmarks in the OUTER blocks and the
+  components in inner ones:
+
+      {% block header %}        <header class="govuk-template__header">
+        {% block govukHeader %}   ← the component
+      {% block footer %}        <footer class="govuk-template__footer">
+        {% block govukFooter %}   ← the component
+
+  So override the INNER blocks. Overriding `header` drops the <header>
+  landmark, and screen reader users lose the ability to jump to it — axe
+  reports it as content outside landmarks. Both mistakes were in an earlier
+  version of this file and were found in real use.
 #}
 {% extends "govuk-prototype-kit/layouts/govuk-branded.njk" %}
 
 {% from "govuk/components/generic-header/macro.njk" import govukGenericHeader %}
 {% from "defra/components/footer/macro.njk" import defraFooter %}
 
-{% block header %}
+{# The kit's title ends in "GOV.UK", which contradicts the whole point of this
+   layout. A service outside the proposition should not claim to be part of
+   it, in the chrome or in the tab. #}
+{% block pageTitle %}
+  {% if pageName %}{{ pageName }} - {% endif %}{{ serviceName | default("Defra") }}
+{% endblock %}
+
+{# Inside <header class="govuk-template__header">, so the landmark survives. #}
+{% block govukHeader %}
   {{ govukGenericHeader({
     logoText: serviceName | default("Defra"),
     url: "/"
   }) }}
 {% endblock %}
 
+{# The generic header already shows the service name as its wordmark, so the
+   template's service navigation would repeat it. A prototype that needs
+   service navigation should override this block with real links. #}
+{% block govukServiceNavigation %}{% endblock %}
+
+{# Inside <footer class="govuk-template__footer">. defraFooter renders a
+   <div>, like v6's govukFooter, so there is exactly one footer landmark.
+
+   No placeholder links. Three links pointing at "#" tell a user less than no
+   links at all, and they invite being left in place.
+
+   `footerItems` is the kit's own variable, carrying its real "Manage your
+   prototype" and "Clear data" links, so it is a sensible default rather than
+   a dead one. Set `defraFooterItems` in your prototype to replace them with
+   your own:
+
+       {% set defraFooterItems = [
+         { text: "Accessibility statement", href: "/accessibility-statement" }
+       ] %}
+#}
 {% block govukFooter %}
-  {{ defraFooter({
-    items: [
-      { text: "Accessibility statement", href: "#" },
-      { text: "Cookies", href: "#" },
-      { text: "Privacy", href: "#" }
-    ]
-  }) }}
+  {{ defraFooter({ items: defraFooterItems | default(footerItems) }) }}
 {% endblock %}

@@ -12,7 +12,7 @@
         ]
       },
       "hidden": false,
-      "description": "One item to start. Remove is hidden while only one remains — removing it would leave the form with nothing to complete."
+      "description": "One item to start. Remove is hidden while only one remains \u2014 removing it would leave the form with nothing to complete. A visually hidden submit button sits first in the component: without it, pressing Enter in any field above the form's real button would activate item 1's Remove and silently delete it."
     },
     {
       "name": "with several items",
@@ -28,7 +28,7 @@
         ]
       },
       "hidden": false,
-      "description": "Adding or removing renumbers every legend, id, name, for and aria-describedby. A stale index breaks the hint and error association silently — invisible on screen, total for a screen reader."
+      "description": "Adding or removing renumbers every legend, id, name, for and aria-describedby. A stale index breaks the hint and error association silently \u2014 invisible on screen, total for a screen reader."
     }
   ]
 }

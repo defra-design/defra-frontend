@@ -21,9 +21,9 @@
       </div>
     </main>
   </div>
-  {{ defraFooter({ items: [
-    { text: "Accessibility statement", href: "#" },
-    { text: "Cookies", href: "#" },
-    { text: "Privacy", href: "#" }
-  ] }) }}
+  {# The <footer> landmark lives here, not in the component: defraFooter is a
+     drop-in for govukFooter and renders a <div>, as v6's does. #}
+  <footer class="govuk-template__footer">
+    {{ defraFooter({ items: params.footerItems }) }}
+  </footer>
 </div>
