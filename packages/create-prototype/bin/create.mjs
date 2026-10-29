@@ -2,7 +2,11 @@
 /**
  * Create a Defra-themed GOV.UK Prototype Kit prototype.
  *
- *   npx @defra/create-prototype my-service
+ *   npx @defra/create-prototype my-service   create a prototype
+ *   npx @defra/create-prototype --update     update the one you are in
+ *
+ * A prototype vendors its own copy of this package, so fixes here do not
+ * reach it on their own. --update re-vendors and reports what changed.
  *
  * Deliberately the same shape as `npx govuk-prototype-kit create`, because
  * designers already know that command and every Defra instruction can then be
@@ -27,16 +31,27 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { readdirSync, rmSync } from 'node:fs'
+
 const GOVUK_FRONTEND = 'govuk-frontend@^6.4.0'
 const DEFRA_FRONTEND = '@defra/frontend@^0.1.0'
 
-const name = process.argv[2]
-if (!name) {
-  console.error('\nUsage: npx @defra/create-prototype <directory>\n')
+const args = process.argv.slice(2)
+const isUpdate = args.includes('--update')
+const name = args.find((a) => !a.startsWith('--'))
+
+if (!isUpdate && !name) {
+  console.error(`
+Usage:
+  npx @defra/create-prototype <directory>   create a new prototype
+  npx @defra/create-prototype --update      update the prototype you are in
+`)
   process.exit(1)
 }
 
-const dir = resolve(process.cwd(), name)
+// Update runs against an existing prototype, which is normally the directory
+// the person is standing in.
+const dir = resolve(process.cwd(), name ?? '.')
 const run = (cmd, args, cwd = dir) => {
   const r = spawnSync(cmd, args, { cwd, stdio: 'inherit', shell: process.platform === 'win32' })
   if (r.status !== 0) {
@@ -99,27 +114,41 @@ the defra-frontend repository, so there is nowhere to install it from.
 
 Run it one of these two ways instead:
 
-  npx github:defra-design/defra-frontend ${name}
+  npx github:defra-design/defra-frontend ${name ?? '<directory>'}
 
 or:
 
   git clone https://github.com/defra-design/defra-frontend.git
-  node defra-frontend/packages/create-prototype/bin/create.mjs ${name}
+  node defra-frontend/packages/create-prototype/bin/create.mjs ${name ?? '<directory>'}
 `)
   process.exit(1)
 }
 
-console.log('\nCreating the GOV.UK Prototype Kit\n')
-run('npx', ['govuk-prototype-kit', 'create', dir], process.cwd())
+/** The installed version in a prototype, or null if it has none. */
+function installedVersion (prototypeDir) {
+  const p = join(prototypeDir, 'node_modules', '@defra', 'frontend', 'package.json')
+  try {
+    return JSON.parse(readFileSync(p, 'utf8')).version
+  } catch {
+    return null
+  }
+}
 
-console.log('\nAdding GOV.UK Frontend 6 and Defra Frontend\n')
-// Installed at the project root on purpose: the kit resolves plugin paths
-// from there, so this is the copy the kit compiles.
-if (onNpm) {
-  run('npm', ['install', GOVUK_FRONTEND, DEFRA_FRONTEND, '--save'])
-} else {
-  console.log('Using the local copy of Defra Frontend — it is not published yet.\n')
-  const vendor = join(dir, 'vendor')
+/**
+ * Install or re-install Defra Frontend into a prototype.
+ *
+ * From npm when it is published; otherwise packed from this checkout into the
+ * prototype's own `vendor` folder. The tarball is deliberate: a `file:` path
+ * records an absolute path from the machine that made it, so the prototype
+ * would break the moment a colleague cloned it. A tarball travels with it.
+ */
+function installDefraFrontend (prototypeDir) {
+  if (onNpm) {
+    run('npm', ['install', GOVUK_FRONTEND, DEFRA_FRONTEND, '--save'], prototypeDir)
+    return
+  }
+
+  const vendor = join(prototypeDir, 'vendor')
   mkdirSync(vendor, { recursive: true })
 
   // The stylesheet is a build artefact and is not in the repository, so build
@@ -136,8 +165,93 @@ if (onNpm) {
     process.exit(1)
   }
   const tarball = packed.stdout.trim().split('\n').pop()
-  run('npm', ['install', GOVUK_FRONTEND, `./vendor/${tarball}`, '--save'])
+
+  // Clear out tarballs from previous versions. Left alone they accumulate in
+  // the prototype's git history, and a stale one is easy to install by
+  // mistake when the version number has not changed.
+  for (const file of readdirSync(vendor)) {
+    if (file.endsWith('.tgz') && file !== tarball) {
+      rmSync(join(vendor, file))
+    }
+  }
+
+  run('npm', ['install', GOVUK_FRONTEND, `./vendor/${tarball}`, '--save'], prototypeDir)
 }
+
+// --- Update mode -----------------------------------------------------------
+// A prototype vendors a copy of Defra Frontend, so fixes in this repository do
+// not reach it by themselves. This is the path that brings one up to date.
+if (isUpdate) {
+  const pkgPath = join(dir, 'package.json')
+  const pkg = existsSync(pkgPath) ? JSON.parse(readFileSync(pkgPath, 'utf8')) : null
+  const deps = { ...pkg?.dependencies, ...pkg?.devDependencies }
+
+  if (!pkg || !deps['govuk-prototype-kit']) {
+    console.error(`
+This does not look like a prototype.
+
+Run the command from inside your prototype folder — the one containing
+package.json and an app folder:
+
+  cd my-service
+  npx github:defra-design/defra-frontend --update
+`)
+    process.exit(1)
+  }
+
+  const before = installedVersion(dir)
+  console.log(`\nUpdating Defra Frontend in ${pkg.name || dir}\n`)
+  installDefraFrontend(dir)
+  const after = installedVersion(dir)
+
+  // The workarounds people wrote while these were broken now do nothing, or
+  // worse, duplicate what the package does. Point at them rather than editing
+  // someone's prototype from under them.
+  const layout = join(dir, 'app', 'views', 'layouts', 'main.html')
+  const layoutText = existsSync(layout) ? readFileSync(layout, 'utf8') : ''
+  const leftovers = []
+  if (/initAll\s*\(/.test(layoutText)) {
+    leftovers.push('a call to initAll() — the plugin now starts its own components')
+  }
+  if (/type="submit"[^>]*(hidden|visually-hidden)/.test(layoutText)) {
+    leftovers.push('a hidden submit button — add-another now guards Enter itself')
+  }
+
+  console.log(`
+────────────────────────────────────────────────────────────────────────
+
+Updated${before && after ? ` from ${before} to ${after}` : ''}.
+
+Restart your prototype to pick it up:
+
+  npm start
+`)
+
+  if (leftovers.length) {
+    console.log(`You can now remove from app/views/layouts/main.html:
+${leftovers.map((l) => `  - ${l}`).join('\n')}
+
+Unless you have changed it for other reasons, that file can go back to one
+line:
+
+  {% extends "defra/prototype-kit/layouts/defra.html" %}
+`)
+  }
+
+  console.log('────────────────────────────────────────────────────────────────────────\n')
+  process.exit(0)
+}
+
+console.log('\nCreating the GOV.UK Prototype Kit\n')
+run('npx', ['govuk-prototype-kit', 'create', dir], process.cwd())
+
+console.log('\nAdding GOV.UK Frontend 6 and Defra Frontend\n')
+if (!onNpm) {
+  console.log('Using the local copy of Defra Frontend — it is not published yet.\n')
+}
+// Installed at the project root on purpose: the kit resolves plugin paths
+// from there, so this is the copy the kit compiles.
+installDefraFrontend(dir)
 
 // --- Sass wiring -----------------------------------------------------------
 // Paths are relative to the project root because the kit compiles sass with

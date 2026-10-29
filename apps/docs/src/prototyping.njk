@@ -229,6 +229,27 @@ git push</code></pre>
   <a class="govuk-link" href="https://prototype-kit.service.gov.uk/docs/publishing-on-the-web">the options and how to password-protect them</a>.
 </p>
 
+<h2 class="govuk-heading-l">Updating an existing prototype</h2>
+
+<p class="govuk-body">
+  Your prototype carries its own copy of Defra Frontend, so fixes and new
+  components do not reach it on their own. To bring it up to date, run this
+  from inside your prototype folder:
+</p>
+
+<pre class="govuk-body" style="padding:1rem;background:#f3f2f1;border:1px solid #b1b4b6;overflow-x:auto"><code>npx github:defra-design/defra-frontend --update</code></pre>
+
+<p class="govuk-body">
+  It reports the version before and after, and tells you if your prototype
+  contains workarounds that are no longer needed. Restart with
+  <code>npm start</code> afterwards.
+</p>
+
+<p class="govuk-body-s">
+  Nothing else in your prototype is touched — your pages, your layout and your
+  data stay exactly as they are.
+</p>
+
 <h2 class="govuk-heading-l">Publishing your prototype</h2>
 
 <p class="govuk-body">

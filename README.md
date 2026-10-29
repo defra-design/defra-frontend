@@ -57,6 +57,18 @@ covers installing Node, using a terminal, and putting your prototype on GitHub.
 Not published to npm yet, so the command above installs from this repository. It
 will switch to npm without the instructions changing.
 
+### Updating a prototype
+
+A prototype vendors its own copy of this package, so changes here do not reach
+it automatically. From inside the prototype:
+
+```bash
+npx github:defra-design/defra-frontend --update
+```
+
+It re-vendors the package, reports the version before and after, and flags any
+workarounds in the prototype that the package now handles itself.
+
 ## Using it in a service
 
 Defra services run Node.js with Hapi and GOV.UK Frontend Nunjucks templates.
