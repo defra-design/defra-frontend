@@ -18,6 +18,31 @@ not a replacement for it.
 | **[Make a prototype](https://defra-design.github.io/defra-frontend/docs/prototyping/)** | Step by step, written for designers. Assumes no terminal experience. |
 | **[CONTRIBUTING.md](CONTRIBUTING.md)** | Working on this repo: the decisions, the traps, and the rules for adding a component. |
 
+## Packages
+
+| Package | What it is |
+|---|---|
+| [`@defra-design/frontend`](https://www.npmjs.com/package/@defra-design/frontend) | The library: sass, Nunjucks macros, JavaScript, and the Prototype Kit plugin. |
+| [`@defra-design/create-prototype`](https://www.npmjs.com/package/@defra-design/create-prototype) | The command that creates and updates a Defra prototype. |
+
+Both are [Open Government Licence v3.0](LICENCE) and require GOV.UK Frontend 6
+as a peer dependency.
+
+### Why `@defra-design` and not `@defra`
+
+`@defra` is a live npm organisation belonging to Defra's delivery teams —
+`@defra/forms-model`, `@defra/hapi-tracing`, `@defra/interactive-map` and around
+twenty more, maintained by Defra digital staff accounts. Publishing into it would
+need membership of that organisation, and would assert a departmental ownership
+that nothing here has been granted: no Defra design authority has approved this
+library. See [Status](#status).
+
+`@defra-design` matches this GitHub organisation, which is where the work
+actually lives. If it becomes a production dependency, moving scope is one of the
+[open decisions](CONTRIBUTING.md). npm has no rename, so that move means
+publishing under the new name and deprecating the old one with a pointer — which
+gets more expensive with every prototype created, not less.
+
 ## Which part do I need?
 
 | I want to… | Go to |
@@ -44,7 +69,7 @@ follows and whether it has been proposed back — see the
 ## Making a prototype
 
 ```bash
-npx github:defra-design/defra-frontend my-service
+npx @defra-design/create-prototype my-service
 cd my-service
 npm start
 ```
@@ -54,33 +79,36 @@ templates and the Defra layout. The
 [step-by-step guide](https://defra-design.github.io/defra-frontend/docs/prototyping/)
 covers installing Node, using a terminal, and putting your prototype on GitHub.
 
-Not published to npm yet, so the command above installs from this repository. It
-will switch to npm without the instructions changing.
-
 ### Updating a prototype
 
-A prototype vendors its own copy of this package, so changes here do not reach
-it automatically. From inside the prototype:
+A prototype pins the version it was created with, so changes here do not reach
+it on their own. From inside the prototype:
 
 ```bash
-npx github:defra-design/defra-frontend --update
+npx @defra-design/create-prototype --update
 ```
 
-It re-vendors the package, reports the version before and after, and flags any
-workarounds in the prototype that the package now handles itself.
+It reports the version before and after, and flags any workarounds in the
+prototype that the package now handles itself.
+
+Prototypes made before this was published to npm carried a vendored copy of the
+package under the old `@defra` scope. Update moves those across — repointing the
+sass imports, removing the old dependency and deleting the `vendor` folder —
+because a half-migrated prototype would keep compiling the old copy and look
+correct while ignoring every change.
 
 ## Using it in a service
 
 Defra services run Node.js with Hapi and GOV.UK Frontend Nunjucks templates.
 
 ```bash
-npm install @defra/frontend govuk-frontend
+npm install @defra-design/frontend govuk-frontend
 ```
 
 **Styles.** Import the whole layer, which brings GOV.UK Frontend with it:
 
 ```scss
-@import "@defra/frontend/src/defra-frontend";
+@import "@defra-design/frontend/src/defra-frontend";
 ```
 
 Override tokens before that import — `$defra-brand-mode`, `$defra-font-stack`
@@ -98,7 +126,7 @@ the same way as GOV.UK ones:
 **JavaScript.** Four components enhance markup that already works without it:
 
 ```js
-import { initAll } from '@defra/frontend/javascript'
+import { initAll } from '@defra-design/frontend/javascript'
 initAll()
 ```
 
@@ -153,6 +181,41 @@ carbon-budgets.json        byte budgets, read by the check and by Storybook
 carbon-baseline.json       committed measurements, so weight changes show as a diff
 ```
 
+### Releasing
+
+```bash
+npm ci                 # the lockfile must be in sync, or CI fails where you passed
+npm run check
+npm publish -w @defra-design/frontend
+npm publish -w @defra-design/create-prototype
+```
+
+Bump both versions together. `create-prototype` installs
+`@defra-design/frontend@latest` so it needs no version range, but a prototype
+records what it installed, and two packages drifting apart makes "which version
+am I on" unanswerable from one number.
+
+Four things about the published tarball are deliberate:
+
+- **`files` carries a negation**, `"!src/stories"`, which keeps 53 generated
+  Storybook files out of the package — half the download and 69% of the unpacked
+  size. Storybook reads them from the workspace, not the package. Run
+  `npm pack --dry-run` after touching `files`; a published tarball cannot be
+  taken back.
+- **No prebuilt stylesheet ships.** Compiled CSS would bake in token values and
+  defeat the settings layer, which works only by reaching GOV.UK Frontend before
+  it compiles. `dist/` is a local artefact for the carbon check and Storybook.
+- **`publishConfig.access` is `public`** on both, without which npm treats a
+  scoped package as private and refuses to publish it on a free organisation.
+- **`create-prototype` finds its own source.** It runs `npm view` and falls back
+  to packing from a local checkout, so the same command works from a clone
+  before a release and from npm after. Don't replace that with a hardcoded
+  source.
+
+A fuller account, including why a scope rename needs a migration rather than a
+note in the changelog, is in
+[CONTRIBUTING.md](CONTRIBUTING.md#releasing-to-npm).
+
 ## Adding a component
 
 Check [GOV.UK Frontend](https://design-system.service.gov.uk/) first — v6
@@ -204,5 +267,10 @@ decisions section of [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Licence
 
-Code is MIT. Documentation is © Crown copyright, available under the Open
-Government Licence v3.
+[Open Government Licence v3.0](LICENCE), which is the licence Defra's other
+published packages use.
+
+GOV.UK Frontend is not redistributed here. It is a peer dependency, installed
+separately, and published by the Government Digital Service under the MIT
+Licence.
+

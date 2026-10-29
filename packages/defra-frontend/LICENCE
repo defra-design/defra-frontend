@@ -1,0 +1,12 @@
+The Open Government Licence (OGL) Version 3
+
+Copyright (c) 2026 Defra
+
+This source code is licensed under the Open Government Licence v3.0. To view this
+licence, visit www.nationalarchives.gov.uk/doc/open-government-licence/version/3
+or write to the Information Policy Team, The National Archives, Kew, Richmond,
+Surrey, TW9 4DU.
+
+This package is a theme layer over GOV.UK Frontend, which is published by the
+Government Digital Service under the MIT Licence and is not redistributed here.
+It is declared as a peer dependency and installed separately.

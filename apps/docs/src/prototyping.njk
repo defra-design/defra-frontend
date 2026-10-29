@@ -93,7 +93,7 @@ cd prototypes</code></pre>
   using hyphens instead of spaces — for example <code>water-abstraction</code>.
 </p>
 
-<pre class="govuk-body" style="padding:1rem;background:#f3f2f1;border:1px solid #b1b4b6;overflow-x:auto"><code>npx github:defra-design/defra-frontend my-service</code></pre>
+<pre class="govuk-body" style="padding:1rem;background:#f3f2f1;border:1px solid #b1b4b6;overflow-x:auto"><code>npx @defra-design/create-prototype my-service</code></pre>
 
 <p class="govuk-body">
   This takes a few minutes. It will print a lot of text — that is normal. If it
@@ -232,12 +232,12 @@ git push</code></pre>
 <h2 class="govuk-heading-l">Updating an existing prototype</h2>
 
 <p class="govuk-body">
-  Your prototype carries its own copy of Defra Frontend, so fixes and new
-  components do not reach it on their own. To bring it up to date, run this
-  from inside your prototype folder:
+  Your prototype stays on the version of Defra Frontend it was made with, so
+  fixes and new components do not reach it on their own. To bring it up to
+  date, run this from inside your prototype folder:
 </p>
 
-<pre class="govuk-body" style="padding:1rem;background:#f3f2f1;border:1px solid #b1b4b6;overflow-x:auto"><code>npx github:defra-design/defra-frontend --update</code></pre>
+<pre class="govuk-body" style="padding:1rem;background:#f3f2f1;border:1px solid #b1b4b6;overflow-x:auto"><code>npx @defra-design/create-prototype --update</code></pre>
 
 <p class="govuk-body">
   It reports the version before and after, and tells you if your prototype
@@ -249,6 +249,24 @@ git push</code></pre>
   Nothing else in your prototype is touched — your pages, your layout and your
   data stay exactly as they are.
 </p>
+
+<details class="govuk-details">
+  <summary class="govuk-details__summary">
+    <span class="govuk-details__summary-text">If you made your prototype before October 2026</span>
+  </summary>
+  <div class="govuk-details__text">
+    <p class="govuk-body">
+      Early prototypes kept their own copy of Defra Frontend in a
+      <code>vendor</code> folder, because the package had not been published
+      yet. The update command moves yours across to the published package and
+      deletes that folder.
+    </p>
+    <p class="govuk-body">
+      You will see a short list of what it changed. Commit those changes along
+      with your own work. Nothing you have built is affected.
+    </p>
+  </div>
+</details>
 
 <h2 class="govuk-heading-l">Publishing your prototype</h2>
 

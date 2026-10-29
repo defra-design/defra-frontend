@@ -2,11 +2,12 @@
 /**
  * Create a Defra-themed GOV.UK Prototype Kit prototype.
  *
- *   npx @defra/create-prototype my-service   create a prototype
- *   npx @defra/create-prototype --update     update the one you are in
+ *   npx @defra-design/create-prototype my-service   create a prototype
+ *   npx @defra-design/create-prototype --update     update the one you are in
  *
- * A prototype vendors its own copy of this package, so fixes here do not
- * reach it on their own. --update re-vendors and reports what changed.
+ * --update brings an existing prototype up to the current release and reports
+ * what changed. It also migrates prototypes made before this package was
+ * published, which installed a vendored tarball under the old @defra scope.
  *
  * Deliberately the same shape as `npx govuk-prototype-kit create`, because
  * designers already know that command and every Defra instruction can then be
@@ -19,7 +20,7 @@
  *      resolves plugins from the PROJECT root, so a root v6 is what gets
  *      compiled. Defra Frontend is a v6 token layer and cannot work on v5 —
  *      the functional colour API it depends on does not exist there.
- *   2. @defra/frontend, which is itself a kit plugin (the same pattern
+ *   2. @defra-design/frontend, which is itself a kit plugin (the same pattern
  *      govuk-frontend uses — it ships its own kit config).
  *   3. Two sass imports in the files the kit reserves for exactly this. The
  *      kit imports user settings BEFORE plugins and user application AFTER,
@@ -34,7 +35,22 @@ import { fileURLToPath } from 'node:url'
 import { readdirSync, rmSync } from 'node:fs'
 
 const GOVUK_FRONTEND = 'govuk-frontend@^6.4.0'
-const DEFRA_FRONTEND = '@defra/frontend@^0.1.0'
+const DEFRA_FRONTEND_NAME = '@defra-design/frontend'
+// `@latest` rather than a caret range. On 0.x a caret is narrow — ^0.1.0 stops
+// at 0.2.0 — so a range here would quietly refuse to bring --update forward
+// across exactly the releases it exists to deliver. npm still records a caret
+// range in package.json from whatever it installs.
+const DEFRA_FRONTEND = `${DEFRA_FRONTEND_NAME}@latest`
+
+// The name used before this package was published. Prototypes created then
+// carry it as a `file:vendor/*.tgz` dependency, and their sass imports point
+// into its node_modules path.
+const LEGACY_NAME = '@defra/frontend'
+
+const sassImports = (pkgName) => ({
+  settings: `@import "node_modules/${pkgName}/src/settings";`,
+  post: `@import "node_modules/${pkgName}/src/post";`
+})
 
 const args = process.argv.slice(2)
 const isUpdate = args.includes('--update')
@@ -43,8 +59,8 @@ const name = args.find((a) => !a.startsWith('--'))
 if (!isUpdate && !name) {
   console.error(`
 Usage:
-  npx @defra/create-prototype <directory>   create a new prototype
-  npx @defra/create-prototype --update      update the prototype you are in
+  npx @defra-design/create-prototype <directory>   create a new prototype
+  npx @defra-design/create-prototype --update      update the prototype you are in
 `)
   process.exit(1)
 }
@@ -81,7 +97,7 @@ terminal, then run this command again.
   process.exit(1)
 }
 
-// Where does @defra/frontend come from?
+// Where does @defra-design/frontend come from?
 //
 // Two sources, checked in order, so this works before the package is published
 // and keeps working afterwards without anyone changing the instructions:
@@ -98,7 +114,7 @@ terminal, then run this command again.
 const selfRoot = fileURLToPath(new URL('../../../', import.meta.url))
 const localPackage = join(selfRoot, 'packages', 'defra-frontend')
 
-const onNpm = spawnSync('npm', ['view', '@defra/frontend', 'version'], {
+const onNpm = spawnSync('npm', ['view', DEFRA_FRONTEND_NAME, 'version'], {
   stdio: 'ignore',
   shell: process.platform === 'win32'
 }).status === 0
@@ -125,8 +141,8 @@ or:
 }
 
 /** The installed version in a prototype, or null if it has none. */
-function installedVersion (prototypeDir) {
-  const p = join(prototypeDir, 'node_modules', '@defra', 'frontend', 'package.json')
+function installedVersion (prototypeDir, pkgName = DEFRA_FRONTEND_NAME) {
+  const p = join(prototypeDir, 'node_modules', ...pkgName.split('/'), 'package.json')
   try {
     return JSON.parse(readFileSync(p, 'utf8')).version
   } catch {
@@ -178,6 +194,66 @@ function installDefraFrontend (prototypeDir) {
   run('npm', ['install', GOVUK_FRONTEND, `./vendor/${tarball}`, '--save'], prototypeDir)
 }
 
+/**
+ * Move a prototype off the old @defra scope.
+ *
+ * This has to happen, and happen before the new package is installed, because
+ * the failure otherwise is silent rather than loud. The sass imports name a
+ * node_modules path, so a prototype left half-migrated still has the old
+ * package on disk, still compiles, and still looks right — while ignoring
+ * every change the update just installed. A prototype that visibly broke
+ * would be the better outcome; this is worse, so it is handled rather than
+ * documented.
+ *
+ * Returns a list of what it did, for the report at the end.
+ */
+function migrateFromLegacyScope (prototypeDir, pkg) {
+  const done = []
+  const deps = { ...pkg.dependencies, ...pkg.devDependencies }
+  if (!deps[LEGACY_NAME]) return done
+
+  // The two files the kit reserves for user settings and user application.
+  // Only the exact import line this script wrote is replaced — anything else
+  // in these files is the designer's own and is left alone.
+  const legacy = sassImports(LEGACY_NAME)
+  const current = sassImports(DEFRA_FRONTEND_NAME)
+  const sassDir = join(prototypeDir, 'app', 'assets', 'sass')
+
+  for (const [key, file] of [['settings', 'settings.scss'], ['post', 'application.scss']]) {
+    const path = join(sassDir, file)
+    if (!existsSync(path)) continue
+    const text = readFileSync(path, 'utf8')
+    if (!text.includes(legacy[key])) continue
+    writeFileSync(path, text.split(legacy[key]).join(current[key]))
+    done.push(`repointed the import in app/assets/sass/${file}`)
+  }
+
+  run('npm', ['uninstall', LEGACY_NAME], prototypeDir)
+  done.push(`removed the old ${LEGACY_NAME} dependency`)
+
+  // The vendored tarball existed only because there was nothing to install
+  // from. Once there is, it is dead weight sitting in the prototype's git
+  // history. Only when installing from npm, though: running from a clone,
+  // installDefraFrontend repacks into this same folder immediately after, so
+  // deleting it here would report a removal that did not survive the next step.
+  if (onNpm) {
+    const vendor = join(prototypeDir, 'vendor')
+    if (existsSync(vendor)) {
+      for (const file of readdirSync(vendor)) {
+        if (file.endsWith('.tgz')) rmSync(join(vendor, file))
+      }
+      if (readdirSync(vendor).length === 0) {
+        rmSync(vendor, { recursive: true })
+        done.push('deleted the vendor folder, which is no longer needed')
+      } else {
+        done.push('deleted the vendored tarballs, which are no longer needed')
+      }
+    }
+  }
+
+  return done
+}
+
 // --- Update mode -----------------------------------------------------------
 // A prototype vendors a copy of Defra Frontend, so fixes in this repository do
 // not reach it by themselves. This is the path that brings one up to date.
@@ -194,13 +270,14 @@ Run the command from inside your prototype folder — the one containing
 package.json and an app folder:
 
   cd my-service
-  npx github:defra-design/defra-frontend --update
+  npx @defra-design/create-prototype --update
 `)
     process.exit(1)
   }
 
-  const before = installedVersion(dir)
+  const before = installedVersion(dir) ?? installedVersion(dir, LEGACY_NAME)
   console.log(`\nUpdating Defra Frontend in ${pkg.name || dir}\n`)
+  const migrated = migrateFromLegacyScope(dir, pkg)
   installDefraFrontend(dir)
   const after = installedVersion(dir)
 
@@ -221,8 +298,22 @@ package.json and an app folder:
 ────────────────────────────────────────────────────────────────────────
 
 Updated${before && after ? ` from ${before} to ${after}` : ''}.
+`)
 
-Restart your prototype to pick it up:
+  if (migrated.length) {
+    console.log(`${onNpm
+      ? `Defra Frontend is now published to npm, so this prototype no longer
+carries its own copy. Moved it across:`
+      : `Defra Frontend has moved to the ${DEFRA_FRONTEND_NAME} package name.
+Moved this prototype across:`}
+
+${migrated.map((m) => `  - ${m}`).join('\n')}
+
+Commit those changes with the rest of your work.
+`)
+  }
+
+  console.log(`Restart your prototype to pick it up:
 
   npm start
 `)
@@ -260,7 +351,7 @@ const sassDir = join(dir, 'app', 'assets', 'sass')
 mkdirSync(sassDir, { recursive: true })
 
 const settingsPath = join(sassDir, 'settings.scss')
-const settingsImport = '@import "node_modules/@defra/frontend/src/settings";'
+const settingsImport = sassImports(DEFRA_FRONTEND_NAME).settings
 const settings = existsSync(settingsPath) ? readFileSync(settingsPath, 'utf8') : ''
 if (!settings.includes(settingsImport)) {
   writeFileSync(settingsPath,
@@ -272,7 +363,7 @@ ${settings}`.trimEnd() + '\n')
 }
 
 const appPath = join(sassDir, 'application.scss')
-const appImport = '@import "node_modules/@defra/frontend/src/post";'
+const appImport = sassImports(DEFRA_FRONTEND_NAME).post
 const application = existsSync(appPath) ? readFileSync(appPath, 'utf8') : ''
 if (!application.includes(appImport)) {
   writeFileSync(appPath,

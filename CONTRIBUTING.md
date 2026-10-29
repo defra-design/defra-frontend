@@ -228,8 +228,10 @@ Dependabot/Renovate.
 3. ~~carbon budgets~~ done
 4. ~~Storybook (`apps/storybook`) + carbon readout~~ done — badge lives in the
    preview iframe (vanilla JS), not a manager addon (manager UI is React)
-5. ~~Prototype kit plugin~~ done — `npx @defra/create-prototype`, verified in a real kit
+5. ~~Prototype kit plugin~~ done — `npx @defra-design/create-prototype`, verified in a real kit
 6. ~~Docs site~~ done — Eleventy at `/docs/`, generated from the same fixtures. NOT `govuk-eleventy-plugin`: it depends on govuk-frontend ^4 with no v5 or v6 line, so it would render the docs three majors behind the library they document.
+7. ~~Published to npm~~ done — `@defra-design/frontend` and
+   `@defra-design/create-prototype`, OGL-UK-3.0. See Releasing.
 
 ## Maps — demonstrated, not depended on
 
@@ -237,7 +239,7 @@ https://github.com/DEFRA/interactive-map — MIT, public, accessibility-first,
 Nunjucks + SCSS, provider-based so the map engine is a separate entry point.
 It is the right map component for Defra and this repo should never build one.
 
-**But it must not become a dependency of `@defra/frontend`, today.** It declares
+**But it must not become a dependency of `@defra-design/frontend`, today.** It declares
 `govuk-frontend: ^5.13.0` as a *direct* dependency, not a peer. We are on 6.4.0
 as a peer. Installing it puts two copies of govuk-frontend in the tree — the
 precise failure the first paragraph of this file says the architecture exists to
@@ -255,10 +257,10 @@ Also weigh, if it is ever adopted:
 
 **How it is included today.** It is a devDependency of `apps/storybook` only,
 with a hand-written story under `apps/storybook/stories/`. That placement is the
-boundary: nothing a service installs from `@defra/frontend` pulls it in, and
+boundary: nothing a service installs from `@defra-design/frontend` pulls it in, and
 `npm run boundary` fails the build if it ever appears in the package's
 dependencies (verified by temporarily adding it — the check exits 1). npm nests
-the v5 copy under the map package, so `@defra/frontend` still resolves 6.4.0;
+the v5 copy under the map package, so `@defra-design/frontend` still resolves 6.4.0;
 the boundary check prints both so the situation stays visible rather than
 becoming folklore.
 
@@ -280,7 +282,7 @@ Spin-up deliberately mirrors the GDS command, so every Defra instruction can be
 "the same as the GOV.UK one, with our package name":
 
 ```bash
-npx @defra/create-prototype my-service
+npx @defra-design/create-prototype my-service
 ```
 
 `packages/create-prototype` does not reimplement the kit. It runs the real
@@ -293,7 +295,7 @@ needs. Each one is load-bearing:
    `govuk-functional-colour` and `govuk-colour($variant:)` do not exist in v5,
    so on the kit's own v5 nothing here compiles at all. Verified working: the
    kit builds against v6 and emits only v6 deprecation warnings.
-2. **`@defra/frontend`, which is itself the kit plugin.** No separate plugin
+2. **`@defra-design/frontend`, which is itself the kit plugin.** No separate plugin
    package — `govuk-frontend` ships its own `govuk-prototype-kit.config.json`
    and this follows that precedent. One install, one version, no skew.
    The config file must stay in the package's `files` array or the plugin
@@ -346,14 +348,66 @@ the same split govuk-frontend uses. Pointing the kit at the library entry
 loaded every component and started none of them, which looks exactly like the
 components being broken.
 
+## Releasing to npm
+
+Two packages publish, under `@defra-design` — **not** `@defra`. That scope is a
+live npm organisation owned by Defra's delivery teams (`@defra/forms-model`,
+`@defra/hapi-tracing`, `@defra/interactive-map`, ~20 more) with Defra digital
+staff as maintainers. Publishing into it would both fail without membership and
+claim a departmental ownership that no design authority has granted. See the Org
+entry under open decisions.
+
+```bash
+npm ci                 # the lockfile must be in sync or CI fails where you passed
+npm run check          # build, boundary, drift, carbon
+npm publish -w @defra-design/frontend
+npm publish -w @defra-design/create-prototype
+```
+
+Both carry `publishConfig.access: "public"`, without which npm treats a scoped
+package as private and refuses on a free organisation.
+
+**Bump both versions together.** `create-prototype` installs
+`@defra-design/frontend@latest`, so it does not depend on a version range — but
+a prototype records what it installed, and two packages drifting apart makes
+"which version am I on" unanswerable from one number.
+
+**`files` carries a negation and it matters.** `"!src/stories"` keeps 53
+generated Storybook files out of the tarball — half the download and 69% of the
+unpacked size. Storybook reads them from the workspace path, not the package, so
+nothing breaks. Check `npm pack --dry-run` after touching `files`; a published
+tarball cannot be taken back.
+
+**No prebuilt stylesheet ships, deliberately.** Compiled CSS would bake in token
+values and defeat the settings layer, which only works by reaching
+govuk-frontend before it compiles. `dist/` is a local artefact for the carbon
+check and Storybook.
+
+**`create-prototype` detects npm by itself.** It runs `npm view` and falls back
+to packing from a local checkout, so it works from a clone before a release and
+from npm after, with no change to the instructions. Don't replace that with a
+hardcoded source.
+
+**Scope renames are a silent-failure risk, which is why `--update` migrates.**
+The sass imports name a `node_modules` path. A prototype left on the old
+`@defra/frontend` dependency still has that package on disk, still compiles and
+still looks right, while ignoring everything the update installed. The migration
+repoints the imports, removes the old dependency and deletes `vendor/`. Keep
+`LEGACY_NAME` in `create.mjs` for as long as prototypes from before the first
+release are plausibly still in use.
+
 ## Open decisions — ask, don't guess
 
 - **`@use` migration.** Sass emits ~172 `@import` deprecation warnings. v6 ships
   both modern and `.import.scss` files. Cheap now, breaking for every consumer
   later. Not yet decided.
-- **Org.** Currently `defra-design` (prototype org). If this becomes a production
-  dependency it arguably belongs in `DEFRA` alongside `design-standards`. GitHub
-  preserves redirects on transfer.
+- **Org and npm scope.** Currently `defra-design` on both GitHub and npm
+  (prototype org). If this becomes a production dependency it arguably belongs
+  in `DEFRA` alongside `design-standards`, published as `@defra/frontend`.
+  GitHub preserves redirects on transfer; **npm does not rename**. Moving scope
+  means publishing under the new name, deprecating the old one with a pointer,
+  and a `--update` migration like the one already written for the first move.
+  Cheap now, less so with every prototype created.
 - **Governance.** No Defra design authority has approved this yet. README says so.
   Don't remove that line until it's untrue. Note this is narrower than it was:
   published Defra branding guidance now exists (see Brand cues), so the question

@@ -56,7 +56,7 @@ export default {
     layout: 'padded',
     options: {
       // Companion packages sort last: they are demonstrated here, not shipped
-      // by @defra/frontend, and the ordering should say so.
+      // by @defra-design/frontend, and the ordering should say so.
       // Introduction first: Storybook opens on the first entry, and landing
       // someone in Accordion with no context is not an introduction to
       // anything. Companion packages last — demonstrated, not shipped.

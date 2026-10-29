@@ -1,11 +1,23 @@
 {
-  "name": "@defra/frontend",
+  "name": "@defra-design/frontend",
   "version": "0.1.0",
-  "description": "Defra Frontend \u2014 GOV.UK Frontend, themed for Defra services, built for minimum payload.",
-  "license": "MIT",
+  "description": "Defra Frontend — GOV.UK Frontend, themed for Defra services, built for minimum payload.",
+  "license": "OGL-UK-3.0",
+  "keywords": [
+    "defra",
+    "govuk",
+    "govuk-frontend",
+    "design-system",
+    "govuk-prototype-kit-plugin"
+  ],
+  "homepage": "https://defra-design.github.io/defra-frontend/docs/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/defra-design/defra-frontend.git"
+    "url": "https://github.com/defra-design/defra-frontend.git",
+    "directory": "packages/defra-frontend"
+  },
+  "bugs": {
+    "url": "https://github.com/defra-design/defra-frontend/issues"
   },
   "type": "module",
   "sass": "./src/defra-frontend.scss",
@@ -17,10 +29,13 @@
   },
   "files": [
     "src",
+    "!src/stories",
     "lib",
-    "README.md",
     "govuk-prototype-kit.config.json"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "sass --load-path=../../node_modules --style=compressed --no-source-map src/defra-frontend.scss dist/defra-frontend.min.css",
     "drift": "node scripts/drift.mjs",
