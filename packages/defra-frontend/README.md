@@ -15,7 +15,7 @@ peer dependency and stays that way.
 ## Install
 
 ```bash
-npm install @defra-design/frontend govuk-frontend
+npm install defra-frontend govuk-frontend
 ```
 
 Requires GOV.UK Frontend 6. The functional colour API this layer depends on
@@ -24,7 +24,7 @@ does not exist in 5.x, so it cannot work there.
 ## Styles
 
 ```scss
-@import "@defra-design/frontend/src/defra-frontend";
+@import "defra-frontend/src/defra-frontend";
 ```
 
 That brings GOV.UK Frontend with it. Override tokens *before* the import —
@@ -56,7 +56,7 @@ shadowing its template fails silently and renders upstream anyway.
 ## JavaScript
 
 ```js
-import { initAll } from '@defra-design/frontend/javascript'
+import { initAll } from 'defra-frontend/javascript'
 initAll()
 ```
 
@@ -82,7 +82,7 @@ both `@font-face` blocks automatically.
 This package is also a GOV.UK Prototype Kit plugin. To start a Defra prototype:
 
 ```bash
-npx @defra-design/create-prototype my-service
+npx defra-create-prototype my-service
 ```
 
 ## Licence

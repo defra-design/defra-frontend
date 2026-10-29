@@ -1,5 +1,5 @@
 {
-  "name": "@defra-design/frontend",
+  "name": "defra-frontend",
   "version": "0.1.0",
   "description": "Defra Frontend — GOV.UK Frontend, themed for Defra services, built for minimum payload.",
   "license": "OGL-UK-3.0",
@@ -33,9 +33,6 @@
     "lib",
     "govuk-prototype-kit.config.json"
   ],
-  "publishConfig": {
-    "access": "public"
-  },
   "scripts": {
     "build": "sass --load-path=../../node_modules --style=compressed --no-source-map src/defra-frontend.scss dist/defra-frontend.min.css",
     "drift": "node scripts/drift.mjs",

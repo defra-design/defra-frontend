@@ -228,10 +228,10 @@ Dependabot/Renovate.
 3. ~~carbon budgets~~ done
 4. ~~Storybook (`apps/storybook`) + carbon readout~~ done — badge lives in the
    preview iframe (vanilla JS), not a manager addon (manager UI is React)
-5. ~~Prototype kit plugin~~ done — `npx @defra-design/create-prototype`, verified in a real kit
+5. ~~Prototype kit plugin~~ done — `npx defra-create-prototype`, verified in a real kit
 6. ~~Docs site~~ done — Eleventy at `/docs/`, generated from the same fixtures. NOT `govuk-eleventy-plugin`: it depends on govuk-frontend ^4 with no v5 or v6 line, so it would render the docs three majors behind the library they document.
-7. ~~Published to npm~~ done — `@defra-design/frontend` and
-   `@defra-design/create-prototype`, OGL-UK-3.0. See Releasing.
+7. ~~Published to npm~~ done — `defra-frontend` and
+   `defra-create-prototype`, OGL-UK-3.0. See Releasing.
 
 ## Maps — demonstrated, not depended on
 
@@ -239,7 +239,7 @@ https://github.com/DEFRA/interactive-map — MIT, public, accessibility-first,
 Nunjucks + SCSS, provider-based so the map engine is a separate entry point.
 It is the right map component for Defra and this repo should never build one.
 
-**But it must not become a dependency of `@defra-design/frontend`, today.** It declares
+**But it must not become a dependency of `defra-frontend`, today.** It declares
 `govuk-frontend: ^5.13.0` as a *direct* dependency, not a peer. We are on 6.4.0
 as a peer. Installing it puts two copies of govuk-frontend in the tree — the
 precise failure the first paragraph of this file says the architecture exists to
@@ -257,10 +257,10 @@ Also weigh, if it is ever adopted:
 
 **How it is included today.** It is a devDependency of `apps/storybook` only,
 with a hand-written story under `apps/storybook/stories/`. That placement is the
-boundary: nothing a service installs from `@defra-design/frontend` pulls it in, and
+boundary: nothing a service installs from `defra-frontend` pulls it in, and
 `npm run boundary` fails the build if it ever appears in the package's
 dependencies (verified by temporarily adding it — the check exits 1). npm nests
-the v5 copy under the map package, so `@defra-design/frontend` still resolves 6.4.0;
+the v5 copy under the map package, so `defra-frontend` still resolves 6.4.0;
 the boundary check prints both so the situation stays visible rather than
 becoming folklore.
 
@@ -282,7 +282,7 @@ Spin-up deliberately mirrors the GDS command, so every Defra instruction can be
 "the same as the GOV.UK one, with our package name":
 
 ```bash
-npx @defra-design/create-prototype my-service
+npx defra-create-prototype my-service
 ```
 
 `packages/create-prototype` does not reimplement the kit. It runs the real
@@ -295,7 +295,7 @@ needs. Each one is load-bearing:
    `govuk-functional-colour` and `govuk-colour($variant:)` do not exist in v5,
    so on the kit's own v5 nothing here compiles at all. Verified working: the
    kit builds against v6 and emits only v6 deprecation warnings.
-2. **`@defra-design/frontend`, which is itself the kit plugin.** No separate plugin
+2. **`defra-frontend`, which is itself the kit plugin.** No separate plugin
    package — `govuk-frontend` ships its own `govuk-prototype-kit.config.json`
    and this follows that precedent. One install, one version, no skew.
    The config file must stay in the package's `files` array or the plugin
@@ -350,25 +350,35 @@ components being broken.
 
 ## Releasing to npm
 
-Two packages publish, under `@defra-design` — **not** `@defra`. That scope is a
+Two packages publish, both unscoped — **not** under `@defra`. That scope is a
 live npm organisation owned by Defra's delivery teams (`@defra/forms-model`,
 `@defra/hapi-tracing`, `@defra/interactive-map`, ~20 more) with Defra digital
 staff as maintainers. Publishing into it would both fail without membership and
 claim a departmental ownership that no design authority has granted. See the Org
 entry under open decisions.
 
+Unscoped matches `govuk-frontend`, `govuk-prototype-kit` and `hmrc-frontend`.
+MoJ and HMCTS scope theirs, so both conventions are in use; `hmrc-frontend` is
+the closest analogue to what this is and settles it.
+
+A scope was tried first and abandoned: `@defra-design` could not be created on
+npm — the name is unavailable, while `defra-design` is free as a *package* name,
+so it is either held as a username or blocked by npm's similarity guard against
+the existing `@defra`. Don't spend another afternoon on it.
+
 ```bash
 npm ci                 # the lockfile must be in sync or CI fails where you passed
 npm run check          # build, boundary, drift, carbon
-npm publish -w @defra-design/frontend
-npm publish -w @defra-design/create-prototype
+npm publish -w defra-frontend
+npm publish -w defra-create-prototype
 ```
 
-Both carry `publishConfig.access: "public"`, without which npm treats a scoped
-package as private and refuses on a free organisation.
+No `publishConfig` on either: unscoped packages are public by default, and
+config that does nothing invites a wrong reading of why it is there. A move to a
+scope would need `access: "public"` added back.
 
 **Bump both versions together.** `create-prototype` installs
-`@defra-design/frontend@latest`, so it does not depend on a version range — but
+`defra-frontend@latest`, so it does not depend on a version range — but
 a prototype records what it installed, and two packages drifting apart makes
 "which version am I on" unanswerable from one number.
 

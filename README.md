@@ -22,26 +22,39 @@ not a replacement for it.
 
 | Package | What it is |
 |---|---|
-| [`@defra-design/frontend`](https://www.npmjs.com/package/@defra-design/frontend) | The library: sass, Nunjucks macros, JavaScript, and the Prototype Kit plugin. |
-| [`@defra-design/create-prototype`](https://www.npmjs.com/package/@defra-design/create-prototype) | The command that creates and updates a Defra prototype. |
+| [`defra-frontend`](https://www.npmjs.com/package/defra-frontend) | The library: sass, Nunjucks macros, JavaScript, and the Prototype Kit plugin. |
+| [`defra-create-prototype`](https://www.npmjs.com/package/defra-create-prototype) | The command that creates and updates a Defra prototype. |
 
 Both are [Open Government Licence v3.0](LICENCE) and require GOV.UK Frontend 6
 as a peer dependency.
 
-### Why `@defra-design` and not `@defra`
+### Why unscoped, and not `@defra`
 
 `@defra` is a live npm organisation belonging to Defra's delivery teams —
 `@defra/forms-model`, `@defra/hapi-tracing`, `@defra/interactive-map` and around
-twenty more, maintained by Defra digital staff accounts. Publishing into it would
-need membership of that organisation, and would assert a departmental ownership
-that nothing here has been granted: no Defra design authority has approved this
+twenty more, maintained by Defra digital staff accounts. Publishing into it needs
+membership of that organisation, and would assert a departmental ownership that
+nothing here has been granted: no Defra design authority has approved this
 library. See [Status](#status).
 
-`@defra-design` matches this GitHub organisation, which is where the work
-actually lives. If it becomes a production dependency, moving scope is one of the
-[open decisions](CONTRIBUTING.md). npm has no rename, so that move means
+Unscoped names follow the closest prior art there is. A department frontend
+layered over GOV.UK Frontend is published unscoped by both GDS and HMRC:
+
+| Package | Shape |
+|---|---|
+| `govuk-frontend`, `govuk-prototype-kit` | unscoped |
+| `hmrc-frontend` | unscoped |
+| `@ministryofjustice/frontend`, `@hmcts/frontend` | scoped |
+
+Both conventions are in live use, so this is a judgement rather than a rule.
+Unscoped wins here because `hmrc-frontend` is the direct analogue, and because it
+claims nothing the governance has not settled.
+
+If this becomes a production dependency, moving to `@defra/frontend` is one of
+the [open decisions](CONTRIBUTING.md). npm has no rename, so that move means
 publishing under the new name and deprecating the old one with a pointer — which
-gets more expensive with every prototype created, not less.
+gets more expensive with every prototype created, not less. The migration that
+`--update` already performs is the pattern for doing it without breaking anyone.
 
 ## Which part do I need?
 
@@ -69,7 +82,7 @@ follows and whether it has been proposed back — see the
 ## Making a prototype
 
 ```bash
-npx @defra-design/create-prototype my-service
+npx defra-create-prototype my-service
 cd my-service
 npm start
 ```
@@ -85,7 +98,7 @@ A prototype pins the version it was created with, so changes here do not reach
 it on their own. From inside the prototype:
 
 ```bash
-npx @defra-design/create-prototype --update
+npx defra-create-prototype --update
 ```
 
 It reports the version before and after, and flags any workarounds in the
@@ -102,13 +115,13 @@ correct while ignoring every change.
 Defra services run Node.js with Hapi and GOV.UK Frontend Nunjucks templates.
 
 ```bash
-npm install @defra-design/frontend govuk-frontend
+npm install defra-frontend govuk-frontend
 ```
 
 **Styles.** Import the whole layer, which brings GOV.UK Frontend with it:
 
 ```scss
-@import "@defra-design/frontend/src/defra-frontend";
+@import "defra-frontend/src/defra-frontend";
 ```
 
 Override tokens before that import — `$defra-brand-mode`, `$defra-font-stack`
@@ -126,7 +139,7 @@ the same way as GOV.UK ones:
 **JavaScript.** Four components enhance markup that already works without it:
 
 ```js
-import { initAll } from '@defra-design/frontend/javascript'
+import { initAll } from 'defra-frontend/javascript'
 initAll()
 ```
 
@@ -186,12 +199,12 @@ carbon-baseline.json       committed measurements, so weight changes show as a d
 ```bash
 npm ci                 # the lockfile must be in sync, or CI fails where you passed
 npm run check
-npm publish -w @defra-design/frontend
-npm publish -w @defra-design/create-prototype
+npm publish -w defra-frontend
+npm publish -w defra-create-prototype
 ```
 
 Bump both versions together. `create-prototype` installs
-`@defra-design/frontend@latest` so it needs no version range, but a prototype
+`defra-frontend@latest` so it needs no version range, but a prototype
 records what it installed, and two packages drifting apart makes "which version
 am I on" unanswerable from one number.
 
@@ -205,8 +218,8 @@ Four things about the published tarball are deliberate:
 - **No prebuilt stylesheet ships.** Compiled CSS would bake in token values and
   defeat the settings layer, which works only by reaching GOV.UK Frontend before
   it compiles. `dist/` is a local artefact for the carbon check and Storybook.
-- **`publishConfig.access` is `public`** on both, without which npm treats a
-  scoped package as private and refuses to publish it on a free organisation.
+- **The bin is named after the package**, `defra-create-prototype`, so `npx`
+  resolves it without guessing between package name and bin name.
 - **`create-prototype` finds its own source.** It runs `npm view` and falls back
   to packing from a local checkout, so the same command works from a clone
   before a release and from npm after. Don't replace that with a hardcoded

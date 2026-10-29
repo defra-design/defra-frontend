@@ -38,14 +38,14 @@ jobs:
       # base_path comes from configure-pages, so this is correct for both a
       # project site (/defra-frontend/) and a user or custom-domain site (/).
       - name: Build Storybook
-        run: npm run build -w @defra-design/storybook
+        run: npm run build -w defra-storybook
         env:
           STORYBOOK_BASE_PATH: ${{ steps.pages.outputs.base_path }}/
 
       # Docs site is generated from fixtures, deviations.json and the carbon
       # files, so it must build after the stylesheet exists.
       - name: Build docs
-        run: npm run build -w @defra-design/docs
+        run: npm run build -w defra-docs
         env:
           DOCS_PATH_PREFIX: ${{ steps.pages.outputs.base_path }}/docs/
 

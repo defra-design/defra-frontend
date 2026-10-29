@@ -10,13 +10,13 @@
     "node": ">=22"
   },
   "scripts": {
-    "drift": "npm run drift -w @defra-design/frontend",
-    "carbon": "npm run carbon -w @defra-design/frontend --",
-    "stories": "npm run stories -w @defra-design/frontend",
-    "storybook": "npm run build -w @defra-design/frontend && npm run dev -w @defra-design/storybook",
-    "build": "npm run build -w @defra-design/frontend",
+    "drift": "npm run drift -w defra-frontend",
+    "carbon": "npm run carbon -w defra-frontend --",
+    "stories": "npm run stories -w defra-frontend",
+    "storybook": "npm run build -w defra-frontend && npm run dev -w defra-storybook",
+    "build": "npm run build -w defra-frontend",
     "check": "npm run build && npm run boundary && npm run drift && npm run carbon",
-    "boundary": "npm run boundary -w @defra-design/frontend"
+    "boundary": "npm run boundary -w defra-frontend"
   },
   "dependencies": {
     "@tgwf/co2": "^0.19.0",

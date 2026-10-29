@@ -1,10 +1,10 @@
 # Create a Defra prototype
 
 Creates a [GOV.UK Prototype Kit](https://prototype-kit.service.gov.uk/)
-prototype themed with [Defra Frontend](https://www.npmjs.com/package/@defra-design/frontend).
+prototype themed with [Defra Frontend](https://www.npmjs.com/package/defra-frontend).
 
 ```bash
-npx @defra-design/create-prototype my-service
+npx defra-create-prototype my-service
 ```
 
 Then:
@@ -41,7 +41,7 @@ README into the folder, and puts the prototype into git.
 From inside the prototype:
 
 ```bash
-npx @defra-design/create-prototype --update
+npx defra-create-prototype --update
 ```
 
 This reports the version before and after, and names any workarounds in the

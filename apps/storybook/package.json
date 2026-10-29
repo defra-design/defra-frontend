@@ -1,5 +1,5 @@
 {
-  "name": "@defra-design/storybook",
+  "name": "defra-storybook",
   "private": true,
   "version": "0.1.0",
   "type": "module",

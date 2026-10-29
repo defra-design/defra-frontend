@@ -4,7 +4,7 @@
 // That plugin depends on govuk-frontend ^4.3.0 and has no v5 or v6 line, so it
 // would render this site three majors behind the library it documents — a
 // documentation site that misrepresents the thing it documents is worse than
-// none. It is built on plain Eleventy and themed by @defra-design/frontend instead,
+// none. It is built on plain Eleventy and themed by defra-frontend instead,
 // which also means the site is a live demonstration of the package.
 //
 // Every page is generated from the same sources the checks read: fixtures,

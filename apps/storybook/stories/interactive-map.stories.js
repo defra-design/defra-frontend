@@ -1,8 +1,8 @@
-// @defra/interactive-map — a COMPANION package, not part of @defra-design/frontend.
+// @defra/interactive-map — a COMPANION package, not part of defra-frontend.
 //
 // This file lives in apps/storybook, not in the package, and that placement is
 // the point. The map is a devDependency of this app only; nothing a service
-// installs from @defra-design/frontend pulls it in. `npm run boundary` fails the build
+// installs from defra-frontend pulls it in. `npm run boundary` fails the build
 // if it ever appears in the package's dependencies.
 //
 // Why it cannot simply be adopted: it depends on govuk-frontend ^5 directly
@@ -31,7 +31,7 @@ export default {
       description: {
         component:
           'Accessibility-first map from https://github.com/DEFRA/interactive-map (MIT). ' +
-          'A companion package demonstrated here, NOT a dependency of @defra-design/frontend — ' +
+          'A companion package demonstrated here, NOT a dependency of defra-frontend — ' +
           'it depends on govuk-frontend 5 directly rather than as a peer, so adopting it ' +
           'into the package would put two majors of GOV.UK Frontend in one tree. ' +
           'Services that need a map install it themselves. `npm run boundary` enforces this. ' +

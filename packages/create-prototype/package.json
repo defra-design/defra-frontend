@@ -1,5 +1,5 @@
 {
-  "name": "@defra-design/create-prototype",
+  "name": "defra-create-prototype",
   "version": "0.1.0",
   "description": "Create a Defra-themed GOV.UK Prototype Kit prototype.",
   "license": "OGL-UK-3.0",
@@ -20,14 +20,11 @@
   },
   "type": "module",
   "bin": {
-    "create-prototype": "./bin/create.mjs"
+    "defra-create-prototype": "./bin/create.mjs"
   },
   "files": [
     "bin"
   ],
-  "publishConfig": {
-    "access": "public"
-  },
   "engines": {
     "node": ">=20"
   }
