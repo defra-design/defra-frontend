@@ -28,7 +28,7 @@
  *      must reach govuk-frontend before it compiles.
  */
 import { spawnSync } from 'node:child_process'
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
+import { existsSync, readFileSync, writeFileSync, mkdirSync, renameSync, cpSync } from 'node:fs'
 import { join, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createInterface } from 'node:readline/promises'
@@ -78,6 +78,8 @@ const isUpdate = args.includes('--update')
 const isLocal = args.includes('--local')
 // Put the prototype in the current directory rather than the shared folder.
 const isHere = args.includes('--here')
+// Split the prototype you are in into two variants that run side by side.
+const isVariants = args.includes('--variants')
 const flagValue = (flag) => {
   const prefix = `--${flag}=`
   const inline = args.find((a) => a.startsWith(prefix))
@@ -101,11 +103,12 @@ const flags = {
 // usage message stays the behaviour there.
 const interactive = Boolean(process.stdin.isTTY && process.stdout.isTTY)
 
-if (!isUpdate && !argName && !interactive) {
+if (!isUpdate && !isVariants && !argName && !interactive) {
   console.error(`
 Usage:
   npx defra-create-prototype <name>        create a new prototype
   npx defra-create-prototype --update      update the prototype you are in
+  npx defra-create-prototype --variants    split it into current and future
 
 Run it without a name in a terminal and it will ask.
 
@@ -433,6 +436,192 @@ line:
   }
 
   console.log('────────────────────────────────────────────────────────────────────────\n')
+  process.exit(0)
+}
+
+// --- Variants --------------------------------------------------------------
+// Two states of the same service, running side by side, for showing a
+// participant how something works now and how it might work.
+//
+// One prototype with two route trees, not two prototypes. Two folders would
+// mean two servers on two ports, two terminal windows, and every shared fix —
+// a typo in the header, a change to the styles — done twice, with the drift
+// that follows. One prototype gives both states the same layout and components,
+// so a fix lands in both, and both are reachable from one `npm run dev`:
+//
+//   localhost:3000/current/...    localhost:3000/future/...
+//
+// The cost is that existing page URLs change, which is why this asks for a
+// clean git tree first: it is a restructure of someone's work and they need to
+// be able to undo it.
+if (isVariants) {
+  const VARIANTS = ['current', 'future']
+
+  // Paths that must not be prefixed when links are rewritten. These are served
+  // by the kit or by plugins, not by the prototype's own pages, so prefixing
+  // them breaks images, stylesheets and the kit's own management pages.
+  const NOT_PAGES = ['public', 'assets', 'plugin-assets', 'extension-assets', 'manage-prototype']
+
+  const pkgPath = join(dir, 'package.json')
+  const pkg = existsSync(pkgPath) ? JSON.parse(readFileSync(pkgPath, 'utf8')) : null
+  if (!pkg || !{ ...pkg.dependencies, ...pkg.devDependencies }['govuk-prototype-kit']) {
+    console.error(`
+This does not look like a prototype.
+
+Run the command from inside your prototype folder:
+
+  cd "${PROTOTYPES_DIR}/my-service"
+  npx defra-create-prototype --variants
+`)
+    process.exit(1)
+  }
+
+  const viewsDir = join(dir, 'app', 'views')
+  if (!existsSync(viewsDir)) {
+    console.error('\nThis prototype has no app/views folder, so there are no pages to split.\n')
+    process.exit(1)
+  }
+
+  if (VARIANTS.some((v) => existsSync(join(viewsDir, v)))) {
+    console.error(`
+This prototype already has variants.
+
+  app/views/current   and   app/views/future
+
+Add pages to whichever you are changing. There is nothing more to set up.
+`)
+    process.exit(1)
+  }
+
+  // Moving someone's pages around is not something to do without an undo.
+  const inGit = tryRun('git', ['rev-parse', '--git-dir'])
+  const clean = inGit && spawnSync('git', ['status', '--porcelain'], {
+    cwd: dir, encoding: 'utf8', shell: process.platform === 'win32'
+  }).stdout.trim() === ''
+  if (!inGit || !clean) {
+    console.error(`
+${inGit
+  ? 'You have changes that are not saved to git yet.'
+  : 'This prototype is not in version control.'}
+
+This moves your pages into a new folder and rewrites links inside them. If it
+gets something wrong you will want to undo it, and that needs a clean starting
+point.
+
+${inGit
+  ? 'Save your work first:\n\n  git add -A\n  git commit -m "Before adding variants"'
+  : 'Put it in version control first:\n\n  git init -b main\n  git add -A\n  git commit -m "Before adding variants"'}
+`)
+    process.exit(1)
+  }
+
+  /**
+   * Prefix the prototype's own links so they stay inside their variant.
+   *
+   * Kit pages link with absolute paths — href="/task-list" — so a page moved
+   * into current/ would otherwise link straight out of its own variant and into
+   * the other one's territory. Only href and action are touched, only when the
+   * path is the prototype's own, and never for assets or the kit's own pages.
+   */
+  const prefixLinks = (html, variant) =>
+    html.replace(/\b(href|action)="\/([^"]*)"/g, (whole, attr, path) => {
+      const first = path.split(/[/?#]/)[0]
+      if (NOT_PAGES.includes(first)) return whole
+      return `${attr}="/${variant}/${path}"`
+    })
+
+  /** Every .html and .njk file under a directory. */
+  const pagesIn = (root) => {
+    const found = []
+    const walk = (d) => {
+      for (const entry of readdirSync(d, { withFileTypes: true })) {
+        const p = join(d, entry.name)
+        if (entry.isDirectory()) walk(p)
+        else if (/\.(html|njk)$/.test(entry.name)) found.push(p)
+      }
+    }
+    walk(root)
+    return found
+  }
+
+  const [current, future] = VARIANTS.map((v) => join(viewsDir, v))
+
+  // Everything except layouts, which both variants share — that sharing is the
+  // reason for doing this in one prototype rather than two.
+  const toMove = readdirSync(viewsDir, { withFileTypes: true })
+    .filter((e) => e.name !== 'layouts')
+    .map((e) => e.name)
+
+  mkdirSync(current, { recursive: true })
+  for (const entry of toMove) {
+    renameSync(join(viewsDir, entry), join(current, entry))
+  }
+  cpSync(current, future, { recursive: true })
+
+  let rewritten = 0
+  for (const variant of VARIANTS) {
+    for (const page of pagesIn(join(viewsDir, variant))) {
+      const before = readFileSync(page, 'utf8')
+      const after = prefixLinks(before, variant)
+      if (after !== before) {
+        writeFileSync(page, after)
+        rewritten++
+      }
+    }
+  }
+
+  // A landing page, so / still works and a research session has one link to
+  // open rather than two to remember.
+  writeFileSync(join(viewsDir, 'index.html'),
+`{% extends "layouts/main.html" %}
+
+{% set pageName = "Choose a version" %}
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">{{ serviceName }}</h1>
+    <p class="govuk-body">Two versions of this service, for comparing in research.</p>
+    <ul class="govuk-list">
+      <li><a class="govuk-link" href="/current/">Current state</a> — how it works today</li>
+      <li><a class="govuk-link" href="/future/">Future state</a> — how it might work</li>
+    </ul>
+    <p class="govuk-body-s">
+      This page is for you, not for participants. Send them straight to one of
+      the links above.
+    </p>
+  </div>
+</div>
+{% endblock %}
+`)
+
+  console.log(`
+────────────────────────────────────────────────────────────────────────
+
+Your prototype now has two versions.
+
+  app/views/current    how it works today
+  app/views/future     how it might work, starting as a copy of current
+
+Both run from the one prototype, so they share the layout, the styles and the
+components — fix something once and it changes in both.
+
+  npm run dev
+
+  localhost:3000/current/    localhost:3000/future/
+  localhost:3000            a page linking to both
+
+Your pages moved into current, and ${rewritten} of them had links updated to stay
+inside their own version. Check a couple of journeys before you rely on it, and
+if anything looks wrong:
+
+  git checkout .
+
+Then tell us what it got wrong, because it will be wrong the same way for
+everyone else.
+
+────────────────────────────────────────────────────────────────────────
+`)
   process.exit(0)
 }
 

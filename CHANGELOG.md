@@ -6,6 +6,34 @@ contain nothing for one of them. Where that happens it is said explicitly.
 Dates are the publish date. Nothing here is stable — see
 [Status](README.md#status).
 
+## 0.3.0 — 30 October 2026
+
+A `defra-create-prototype` release. **`defra-frontend` is unchanged**, bumped to
+keep the two packages answerable from one version number.
+
+### defra-create-prototype
+
+**Added `--variants`, for showing a current and a future state in research.**
+Run inside a prototype, it moves your pages into `app/views/current`, copies
+them to `app/views/future`, and prefixes internal links so each version keeps to
+its own journey. Both serve from one `npm run dev`:
+
+```
+localhost:3000/current/    how it works today
+localhost:3000/future/     how it might work
+localhost:3000             a page linking to both
+```
+
+One prototype rather than two, deliberately. Two folders would mean two servers,
+two terminal windows and every shared change made twice, with the drift that
+follows — where one prototype gives both versions the same layout, styles and
+components, so a common fix lands in both.
+
+It requires a clean git tree, because it moves pages and rewrites links inside
+them, and an undo is what makes that safe: `git checkout .`. It refuses if the
+prototype already has variants, and it leaves assets, plugin assets, the kit's
+own pages and external links alone when prefixing.
+
 ## 0.2.0 — 30 October 2026
 
 A `defra-create-prototype` release. **`defra-frontend` is unchanged**, bumped to

@@ -45,6 +45,32 @@ then adds the three things a Defra prototype needs:
 It also points the prototype's layout at the Defra header and footer, writes a
 README into the folder, and puts the prototype into git.
 
+## Comparing two versions in research
+
+To show a participant how something works today and how it might work, from
+inside your prototype:
+
+```bash
+npx defra-create-prototype --variants
+```
+
+Your pages move into `app/views/current`, a copy becomes `app/views/future`, and
+links inside them are prefixed so each version stays in its own journey.
+
+```
+localhost:3000/current/    how it works today
+localhost:3000/future/     how it might work
+localhost:3000             a page linking to both
+```
+
+One prototype rather than two, deliberately: both versions share the layout, the
+styles and the components, so fixing a typo in the header fixes it in both, and
+one `npm run dev` serves both. Two folders would mean two servers, two terminal
+windows and every shared change made twice.
+
+It needs a clean git tree, because it moves your pages and rewrites links inside
+them — if it gets something wrong, `git checkout .` puts it back.
+
 ## Updating a prototype
 
 From inside the prototype:

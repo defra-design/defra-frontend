@@ -116,6 +116,25 @@ To skip the questions — in a script, or in CI:
 npx defra-create-prototype my-service --service-name "Register a water abstraction" --defra
 ```
 
+### Comparing two versions in research
+
+To show a participant the current state and a possible future state, from inside
+a prototype:
+
+```bash
+npx defra-create-prototype --variants
+```
+
+Pages move into `app/views/current`, a copy becomes `app/views/future`, and
+internal links are prefixed so each version keeps to its own journey.
+`localhost:3000/current/` and `/future/` serve from one `npm run dev`, with a
+page at `/` linking to both.
+
+One prototype rather than two on purpose: both share the layout, styles and
+components, so a shared fix lands in both. Two folders would mean two servers,
+two terminal windows and every common change made twice. It requires a clean git
+tree, since it moves pages and rewrites links — `git checkout .` undoes it.
+
 ### Updating a prototype
 
 A prototype pins the version it was created with, so changes here do not reach

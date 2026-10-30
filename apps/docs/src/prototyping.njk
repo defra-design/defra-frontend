@@ -237,6 +237,56 @@ git push</code></pre>
   <a class="govuk-link" href="https://prototype-kit.service.gov.uk/docs/publishing-on-the-web">the options and how to password-protect them</a>.
 </p>
 
+<h2 class="govuk-heading-l">Comparing two versions in research</h2>
+
+<p class="govuk-body">
+  If you want to show someone how a service works today and how it might work,
+  you can split your prototype into two versions. Run this from inside your
+  prototype folder:
+</p>
+
+<pre class="govuk-body" style="padding:1rem;background:#f3f2f1;border:1px solid #b1b4b6;overflow-x:auto"><code>npx defra-create-prototype --variants</code></pre>
+
+<p class="govuk-body">
+  Your pages move into a <strong>current</strong> folder, and a copy of them
+  becomes a <strong>future</strong> folder. You then change the future one and
+  leave the current one alone.
+</p>
+
+<dl class="govuk-summary-list govuk-body-s">
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key"><code>localhost:3000/current/</code></dt>
+    <dd class="govuk-summary-list__value">How it works today</dd>
+  </div>
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key"><code>localhost:3000/future/</code></dt>
+    <dd class="govuk-summary-list__value">How it might work</dd>
+  </div>
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key"><code>localhost:3000</code></dt>
+    <dd class="govuk-summary-list__value">A page linking to both, for you rather than for participants</dd>
+  </div>
+</dl>
+
+<p class="govuk-body">
+  Both versions run from the same <code>npm run dev</code>, in two browser tabs
+  if you want them side by side. They also share the same header, footer and
+  styles, so if you fix something that both have in common, you only fix it
+  once.
+</p>
+
+<div class="govuk-inset-text">
+  Before you run it, save your work with git. This command moves your pages and
+  edits the links inside them, and a clean starting point is what lets you undo
+  it with <code>git checkout .</code> if it gets something wrong. It will refuse
+  to run until you have.
+</div>
+
+<p class="govuk-body-s">
+  Check a couple of journeys in each version before you rely on it in a session
+  — particularly any links you typed by hand.
+</p>
+
 <h2 class="govuk-heading-l">Updating an existing prototype</h2>
 
 <p class="govuk-body">
