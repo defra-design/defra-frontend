@@ -69,6 +69,25 @@ jobs:
             }
           '
 
+      # Fails fast and legibly if the OIDC token was never issued. Without this
+      # the symptom is `npm error ENEEDAUTH ... You need to authorize this
+      # machine using npm login`, which sends you looking for a missing token —
+      # the opposite of the problem, since the whole point is that there is no
+      # token. These two variables are injected by Actions only when
+      # `id-token: write` is in effect, so their absence localises the fault to
+      # the permission rather than to npm or the publisher configuration.
+      - name: OIDC must be available
+        run: |
+          set -euo pipefail
+          missing=""
+          [ -n "${ACTIONS_ID_TOKEN_REQUEST_URL:-}" ] || missing="$missing ACTIONS_ID_TOKEN_REQUEST_URL"
+          [ -n "${ACTIONS_ID_TOKEN_REQUEST_TOKEN:-}" ] || missing="$missing ACTIONS_ID_TOKEN_REQUEST_TOKEN"
+          if [ -n "$missing" ]; then
+            echo "::error::No OIDC token available (missing:$missing). The workflow sets id-token: write, so if that is present and these are not, the permission is being withheld — check the organisation or enterprise Actions policy."
+            exit 1
+          fi
+          echo "OIDC token endpoint is available"
+
       - run: npm ci
 
       # Both packages release together. A tag that disagrees with either
