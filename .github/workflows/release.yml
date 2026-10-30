@@ -124,9 +124,20 @@ jobs:
             else
               echo "Publishing $name@$version"
               # Published from inside the package directory rather than with
-              # `-w` from the root. The OIDC exchange is per package, and a
-              # workspace publish did not trigger it — npm fell straight through
-              # to ENEEDAUTH as though no authentication existed.
-              ( cd "$dir" && npm publish --loglevel=silly )
+              # `-w` from the root, which is how npm's own documented example
+              # does it. (A `-w` publish also failed, but for the reason below,
+              # so whether `-w` affects the OIDC exchange was never actually
+              # established — don't cite this comment as evidence that it does.)
+              #
+              # Verbose on purpose, and worth keeping. npm reports an OIDC
+              # failure only at verbose, as
+              #   npm verbose oidc Failed token exchange request with body
+              #   message: OIDC token exchange error - package not found
+              # At the default level the same failure surfaces as `ENEEDAUTH:
+              # You need to authorize this machine using npm login`, which
+              # points at a missing token — the opposite of the real cause, and
+              # an hour of looking in the wrong place. Releases are rare; the
+              # noise is worth it.
+              ( cd "$dir" && npm publish --loglevel=verbose )
             fi
           done
