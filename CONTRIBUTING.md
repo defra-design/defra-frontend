@@ -393,10 +393,21 @@ values and defeat the settings layer, which only works by reaching
 govuk-frontend before it compiles. `dist/` is a local artefact for the carbon
 check and Storybook.
 
-**`create-prototype` detects npm by itself.** It runs `npm view` and falls back
-to packing from a local checkout, so it works from a clone before a release and
-from npm after, with no change to the instructions. Don't replace that with a
-hardcoded source.
+**`create-prototype` prefers npm, so test unreleased changes with `--local`.**
+It runs `npm view` and uses the published package whenever that succeeds, which
+since the first release is always. Without `--local` a prototype you make to
+verify a fix installs the *published* version, builds fine, and shows you the
+old behaviour — so you conclude the fix does not work. The kit plugin bugs in
+this repo were all found by building a real prototype, which makes this the
+likeliest way to waste an afternoon:
+
+```bash
+node packages/create-prototype/bin/create.mjs --local my-test
+```
+
+The local route packs a tarball rather than writing a `file:` path, because a
+`file:` dependency records an absolute path from the machine that made it and
+breaks the moment a colleague clones the prototype.
 
 **Scope renames are a silent-failure risk, which is why `--update` migrates.**
 The sass imports name a `node_modules` path. A prototype left on the old

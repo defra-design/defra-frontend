@@ -12,7 +12,7 @@
   "homepage": "https://defra-design.github.io/defra-frontend/docs/prototyping/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/defra-design/defra-frontend.git",
+    "url": "git+https://github.com/defra-design/defra-frontend.git",
     "directory": "packages/create-prototype"
   },
   "bugs": {
@@ -20,7 +20,7 @@
   },
   "type": "module",
   "bin": {
-    "defra-create-prototype": "./bin/create.mjs"
+    "defra-create-prototype": "bin/create.mjs"
   },
   "files": [
     "bin"

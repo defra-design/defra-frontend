@@ -59,6 +59,12 @@ const sassImports = (pkgName) => ({
 
 const args = process.argv.slice(2)
 const isUpdate = args.includes('--update')
+// Forces the local checkout over the published package. Needed since the
+// release: npm is preferred whenever `npm view` succeeds, which it now always
+// does, so a contributor testing an unreleased change in a real kit would get
+// the published version and conclude their fix did not work. Exactly the kind
+// of silent wrong answer that makes a kit bug expensive to find.
+const isLocal = args.includes('--local')
 const name = args.find((a) => !a.startsWith('--'))
 
 if (!isUpdate && !name) {
@@ -66,6 +72,9 @@ if (!isUpdate && !name) {
 Usage:
   npx defra-create-prototype <directory>   create a new prototype
   npx defra-create-prototype --update      update the prototype you are in
+
+  --local   use this checkout instead of the published package, for
+            testing a change before it is released
 `)
   process.exit(1)
 }
@@ -104,13 +113,14 @@ terminal, then run this command again.
 
 // Where does defra-frontend come from?
 //
-// Two sources, checked in order, so this works before the package is published
-// and keeps working afterwards without anyone changing the instructions:
+// Two sources, checked in order, so the same command works for a designer and
+// for someone testing an unreleased change:
 //
-//   1. npm, once it is published.
-//   2. the checkout this script is running from. Whether that is a git clone
-//      or `npx github:defra-design/defra-frontend`, the package sits two
+//   1. npm, which is normally what you want.
+//   2. the checkout this script is running from — a git clone, or
+//      `npx github:defra-design/defra-frontend`. The package sits two
 //      directories up from here, so it can be packed and installed directly.
+//      Reached by --local, or when npm cannot be read at all (offline).
 //
 // The local route installs a packed tarball rather than a `file:` path on
 // purpose. A `file:` dependency records an absolute path from the machine that
@@ -119,7 +129,7 @@ terminal, then run this command again.
 const selfRoot = fileURLToPath(new URL('../../../', import.meta.url))
 const localPackage = join(selfRoot, 'packages', 'defra-frontend')
 
-const onNpm = spawnSync('npm', ['view', DEFRA_FRONTEND_NAME, 'version'], {
+const onNpm = !isLocal && spawnSync('npm', ['view', DEFRA_FRONTEND_NAME, 'version'], {
   stdio: 'ignore',
   shell: process.platform === 'win32'
 }).status === 0
@@ -127,20 +137,27 @@ const onNpm = spawnSync('npm', ['view', DEFRA_FRONTEND_NAME, 'version'], {
 const hasLocal = existsSync(join(localPackage, 'package.json'))
 
 if (!onNpm && !hasLocal) {
-  console.error(`
-Cannot find Defra Frontend.
+  console.error(isLocal
+    ? `
+Cannot find a local copy of Defra Frontend.
 
-It is not published to npm yet, and this script is not running from a copy of
-the defra-frontend repository, so there is nowhere to install it from.
-
-Run it one of these two ways instead:
-
-  npx github:defra-design/defra-frontend ${name ?? '<directory>'}
-
-or:
+--local installs from the checkout this script is running from, but it is not
+running from one. Clone the repository and run the script from inside it:
 
   git clone https://github.com/defra-design/defra-frontend.git
-  node defra-frontend/packages/create-prototype/bin/create.mjs ${name ?? '<directory>'}
+  node defra-frontend/packages/create-prototype/bin/create.mjs --local ${name ?? '<directory>'}
+
+Or drop --local to install the published package.
+`
+    : `
+Cannot reach npm, and this script is not running from a copy of the
+defra-frontend repository, so there is nowhere to install from.
+
+Check your connection and try again. If you are working offline, run it from a
+clone instead:
+
+  git clone https://github.com/defra-design/defra-frontend.git
+  node defra-frontend/packages/create-prototype/bin/create.mjs --local ${name ?? '<directory>'}
 `)
   process.exit(1)
 }
@@ -350,7 +367,9 @@ run('npx', ['govuk-prototype-kit', 'create', dir], process.cwd())
 
 console.log('\nAdding GOV.UK Frontend 6 and Defra Frontend\n')
 if (!onNpm) {
-  console.log('Using the local copy of Defra Frontend — it is not published yet.\n')
+  console.log(isLocal
+    ? 'Using this checkout of Defra Frontend, not the published package.\n'
+    : 'Cannot reach npm — using the local copy of Defra Frontend.\n')
 }
 // Installed at the project root on purpose: the kit resolves plugin paths
 // from there, so this is the copy the kit compiles.

@@ -220,10 +220,10 @@ Four things about the published tarball are deliberate:
   it compiles. `dist/` is a local artefact for the carbon check and Storybook.
 - **The bin is named after the package**, `defra-create-prototype`, so `npx`
   resolves it without guessing between package name and bin name.
-- **`create-prototype` finds its own source.** It runs `npm view` and falls back
-  to packing from a local checkout, so the same command works from a clone
-  before a release and from npm after. Don't replace that with a hardcoded
-  source.
+- **`create-prototype` prefers npm, so test unreleased changes with `--local`.**
+  Without it, a prototype you build to verify a fix installs the *published*
+  package and shows you the old behaviour, which reads as the fix not working:
+  `node packages/create-prototype/bin/create.mjs --local my-test`.
 
 A fuller account, including why a scope rename needs a migration rather than a
 note in the changelog, is in

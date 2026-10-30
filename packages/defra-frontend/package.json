@@ -13,7 +13,7 @@
   "homepage": "https://defra-design.github.io/defra-frontend/docs/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/defra-design/defra-frontend.git",
+    "url": "git+https://github.com/defra-design/defra-frontend.git",
     "directory": "packages/defra-frontend"
   },
   "bugs": {
