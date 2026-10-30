@@ -115,7 +115,11 @@ function checkStatic () {
       })
     }
   }
-  notes.push(`${SOURCES.length} instruction sources agree on \`${RUN}\``)
+  // Only claimed when it is true. Printing "all sources agree" above a list of
+  // disagreements is the kind of output that teaches people to distrust a check.
+  if (problems.length === 0) {
+    notes.push(`${SOURCES.length} instruction sources agree on \`${RUN}\``)
+  }
 }
 
 // --- live -------------------------------------------------------------------
@@ -123,7 +127,15 @@ function checkStatic () {
 function checkLive () {
   const dir = mkdtempSync(join(tmpdir(), 'defra-instructions-'))
   try {
-    const result = spawnSync('node', [cli, '--local', 'check-prototype'], {
+    // --here keeps it in this temp directory rather than the shared
+    // ~/Defra prototypes folder, which a check has no business writing to.
+    // --defra answers the brand question, so nothing waits on a prompt even if
+    // this is ever run from a terminal.
+    const result = spawnSync('node', [
+      cli, '--local', '--here', '--defra',
+      '--service-name', 'Instruction check',
+      'check-prototype'
+    ], {
       cwd: dir,
       encoding: 'utf8',
       shell: process.platform === 'win32'

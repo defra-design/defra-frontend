@@ -55,49 +55,46 @@ title: Prototyping
   close and reopen the terminal.
 </p>
 
-<h2 class="govuk-heading-l">Choose where to keep your prototypes</h2>
-
-<p class="govuk-body">
-  Make a folder to keep prototypes in, so they are not scattered around your
-  computer. These commands make a folder called <code>prototypes</code> in your
-  home folder and move into it. Run them one at a time.
-</p>
-
-<pre class="govuk-body" style="padding:1rem;background:#f3f2f1;border:1px solid #b1b4b6;overflow-x:auto"><code>cd ~
-mkdir prototypes
-cd prototypes</code></pre>
-
-<dl class="govuk-summary-list govuk-summary-list--no-border govuk-body-s">
-  <div class="govuk-summary-list__row">
-    <dt class="govuk-summary-list__key"><code>cd ~</code></dt>
-    <dd class="govuk-summary-list__value">Go to your home folder. <code>cd</code> means "change directory"</dd>
-  </div>
-  <div class="govuk-summary-list__row">
-    <dt class="govuk-summary-list__key"><code>mkdir prototypes</code></dt>
-    <dd class="govuk-summary-list__value">Make a new folder called <code>prototypes</code></dd>
-  </div>
-  <div class="govuk-summary-list__row">
-    <dt class="govuk-summary-list__key"><code>cd prototypes</code></dt>
-    <dd class="govuk-summary-list__value">Move into that folder</dd>
-  </div>
-</dl>
-
-<p class="govuk-body-s">
-  You only need to do this once. Next time, just run <code>cd ~/prototypes</code>.
-</p>
-
 <h2 class="govuk-heading-l">Create the prototype</h2>
 
 <p class="govuk-body">
-  Replace <code>my-service</code> with a short name for what you are prototyping,
-  using hyphens instead of spaces — for example <code>water-abstraction</code>.
+  Run this. You do not need to be in any particular folder, and you do not need
+  to make one first — every prototype is kept together in a
+  <strong>Defra prototypes</strong> folder in your home folder.
 </p>
 
-<pre class="govuk-body" style="padding:1rem;background:#f3f2f1;border:1px solid #b1b4b6;overflow-x:auto"><code>npx defra-create-prototype my-service</code></pre>
+<pre class="govuk-body" style="padding:1rem;background:#f3f2f1;border:1px solid #b1b4b6;overflow-x:auto"><code>npx defra-create-prototype</code></pre>
 
 <p class="govuk-body">
-  This takes a few minutes. It will print a lot of text — that is normal. If it
-  asks <code>Ok to proceed? (y)</code>, type <code>y</code> and press Enter.
+  If it asks <code>Ok to proceed? (y)</code>, type <code>y</code> and press
+  Enter. Then it asks you two questions.
+</p>
+
+<dl class="govuk-summary-list govuk-body-s">
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">What are you prototyping?</dt>
+    <dd class="govuk-summary-list__value">
+      Write it as you would say it — for example
+      <em>Register a water abstraction</em>. This becomes the name shown in the
+      header, and a tidied-up version of it becomes the folder name.
+    </dd>
+  </div>
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">Will this service be on a <code>service.gov.uk</code> address?</dt>
+    <dd class="govuk-summary-list__value">
+      Press Enter for no, which is the usual answer for Defra services. This
+      decides the header, footer and typeface — see
+      <a class="govuk-link" href="../#brand">which branding to use</a>. If you
+      are not sure, ask before changing it later: it is a licensing question,
+      not a design preference.
+    </dd>
+  </div>
+</dl>
+
+<p class="govuk-body">
+  Then it takes a few minutes and prints a lot of text, which is normal. At the
+  end it tells you exactly where your prototype is and the two lines to copy to
+  start it.
 </p>
 
 <details class="govuk-details">
@@ -126,17 +123,21 @@ node defra-frontend/packages/create-prototype/bin/create.mjs my-service</code></
   <li>a first saved version, so your work is protected from the start</li>
 </ul>
 
-<p class="govuk-body-s">
-  Defra Frontend is not on npm yet, so a copy is placed in a <code>vendor</code>
-  folder inside your prototype and installed from there. You do not need to do
-  anything with it — it is included when you share the prototype, so it works on
-  a colleague's machine too.
-</p>
-
 <h2 class="govuk-heading-l">Start it</h2>
 
-<pre class="govuk-body" style="padding:1rem;background:#f3f2f1;border:1px solid #b1b4b6;overflow-x:auto"><code>cd my-service
+<p class="govuk-body">
+  Copy the two lines the command printed. They look like this, with your own
+  prototype's name:
+</p>
+
+<pre class="govuk-body" style="padding:1rem;background:#f3f2f1;border:1px solid #b1b4b6;overflow-x:auto"><code>cd "~/Defra prototypes/register-a-water-abstraction"
 npm run dev</code></pre>
+
+<p class="govuk-body-s">
+  <code>cd</code> means "change directory" — it moves the terminal into your
+  prototype's folder. You need to be in that folder for
+  <code>npm run dev</code> to work, which is why the two lines go together.
+</p>
 
 <p class="govuk-body">
   Open <a class="govuk-link" href="http://localhost:3000">http://localhost:3000</a>

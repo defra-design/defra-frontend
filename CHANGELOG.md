@@ -6,6 +6,38 @@ contain nothing for one of them. Where that happens it is said explicitly.
 Dates are the publish date. Nothing here is stable — see
 [Status](README.md#status).
 
+## Unreleased
+
+### defra-create-prototype
+
+**It asks instead of requiring arguments.** Run with no name and it asks what
+you are prototyping and whether the service will be on a `service.gov.uk`
+address. Previously a missing argument printed usage and exited, which is a dead
+end for the person least able to recover from it. Flags
+(`--service-name`, `--govuk`, `--defra`) skip the questions for scripts and CI,
+and nothing is asked when there is no terminal to answer with — a prompt in CI
+would hang with no indication why.
+
+**The address question replaces a Sass variable nobody found.** It decides the
+header, footer and typeface, which is a licence boundary rather than a style
+choice: GDS Transport and the Royal Arms footer are licensed for
+`service.gov.uk` only. Leaving it as `$defra-brand-mode` meant the default
+silently decided it for every prototype. The answer now writes the variable, the
+layout and a comment in both explaining what changing it would mean.
+
+**Prototypes go in `~/Defra prototypes`.** They used to land in whatever
+directory the terminal happened to be in, which for someone who does not think
+in working directories means they scatter. One place also makes `--update`
+findable. `--here` uses the current directory; anything that looks like a path
+is still taken literally.
+
+**Also:** the service name is written into `app/config.json` rather than left as
+"Service name goes here"; the folder name is derived from the answer, so a
+designer can type a sentence; creating over a non-empty folder is refused rather
+than merged into; and Ctrl+D at a prompt exits with "Cancelled" instead of a
+Node stack trace, which is the worst thing to show someone who has just decided
+to back out.
+
 ## 0.1.2 — 30 October 2026
 
 A `defra-create-prototype` release. **`defra-frontend` is unchanged**, bumped to

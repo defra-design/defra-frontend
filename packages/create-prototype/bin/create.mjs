@@ -29,10 +29,21 @@
  */
 import { spawnSync } from 'node:child_process'
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
-import { join, resolve } from 'node:path'
+import { join, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { createInterface } from 'node:readline/promises'
+import { homedir } from 'node:os'
 
 import { readdirSync, rmSync } from 'node:fs'
+
+// Where prototypes go unless told otherwise.
+//
+// Previously they landed in whatever directory the terminal happened to be in,
+// which for someone who does not think in working directories means they end up
+// scattered and hard to find again. One place also makes --update findable:
+// "the folder in here" is an instruction that works, where "the folder you were
+// in when you ran it last month" is not.
+const PROTOTYPES_DIR = join(homedir(), 'Defra prototypes')
 
 const GOVUK_FRONTEND = 'govuk-frontend@^6.4.0'
 const DEFRA_FRONTEND_NAME = 'defra-frontend'
@@ -65,23 +76,53 @@ const isUpdate = args.includes('--update')
 // the published version and conclude their fix did not work. Exactly the kind
 // of silent wrong answer that makes a kit bug expensive to find.
 const isLocal = args.includes('--local')
-const name = args.find((a) => !a.startsWith('--'))
+// Put the prototype in the current directory rather than the shared folder.
+const isHere = args.includes('--here')
+const flagValue = (flag) => {
+  const prefix = `--${flag}=`
+  const inline = args.find((a) => a.startsWith(prefix))
+  if (inline) return inline.slice(prefix.length)
+  const i = args.indexOf(`--${flag}`)
+  return i !== -1 ? args[i + 1] : undefined
+}
+const argName = args.find((a) => !a.startsWith('--') && a !== flagValue('service-name'))
 
-if (!isUpdate && !name) {
+// Flags so the questions below can be skipped. The prompts are for designers;
+// these are for anyone scripting it, and for the live instruction check, which
+// has no terminal to answer with.
+const flags = {
+  serviceName: flagValue('service-name'),
+  govuk: args.includes('--govuk'),
+  defra: args.includes('--defra')
+}
+
+// Prompting is only safe when someone is there to answer. Without a terminal —
+// in CI, or piped — a prompt would hang forever with no indication why, so the
+// usage message stays the behaviour there.
+const interactive = Boolean(process.stdin.isTTY && process.stdout.isTTY)
+
+if (!isUpdate && !argName && !interactive) {
   console.error(`
 Usage:
-  npx defra-create-prototype <directory>   create a new prototype
+  npx defra-create-prototype <name>        create a new prototype
   npx defra-create-prototype --update      update the prototype you are in
 
-  --local   use this checkout instead of the published package, for
-            testing a change before it is released
+Run it without a name in a terminal and it will ask.
+
+  --here                  create it here instead of in ${PROTOTYPES_DIR}
+  --service-name "<text>" the name shown in the header
+  --govuk | --defra       which header and footer, if not asking
+  --local                 use this checkout instead of the published package,
+                          for testing a change before it is released
 `)
   process.exit(1)
 }
 
 // Update runs against an existing prototype, which is normally the directory
-// the person is standing in.
-const dir = resolve(process.cwd(), name ?? '.')
+// the person is standing in. Create reassigns this once the name is known,
+// which may be after asking — `run` reads it at call time, so both work.
+let name = argName
+let dir = resolve(process.cwd(), argName ?? '.')
 const run = (cmd, args, cwd = dir) => {
   const r = spawnSync(cmd, args, { cwd, stdio: 'inherit', shell: process.platform === 'win32' })
   if (r.status !== 0) {
@@ -395,7 +436,119 @@ line:
   process.exit(0)
 }
 
-console.log('\nCreating the GOV.UK Prototype Kit\n')
+// --- Questions -------------------------------------------------------------
+// Asked rather than configured. The brand mode especially: it is a licence
+// boundary, and leaving it as a Sass variable meant the default silently
+// decided it for everyone. A question gets it right at the point someone knows
+// the answer.
+
+/** A folder name that will survive git, Windows and a URL. */
+const toFolderName = (input) => input
+  .trim()
+  .toLowerCase()
+  .replace(/['’]/g, '')
+  .replace(/[^a-z0-9]+/g, '-')
+  .replace(/^-+|-+$/g, '')
+  .slice(0, 60)
+
+let serviceName = flags.serviceName
+// --govuk and --defra are the non-interactive answers; neither means "ask".
+let brandMode = flags.govuk ? 'govuk' : flags.defra ? 'defra' : undefined
+
+if (interactive && (!name || !serviceName || !brandMode)) {
+  const rl = createInterface({ input: process.stdin, output: process.stdout })
+  // Ctrl+D at a prompt makes readline throw AbortError. Unhandled that is a
+  // Node stack trace, which is the worst possible thing to show someone who
+  // has just decided to back out — and backing out of a prompt is a normal
+  // thing to do, not an error.
+  const cancelled = () => {
+    rl.close()
+    console.log('\n\nCancelled. Nothing has been created.\n')
+    process.exit(1)
+  }
+  try {
+    if (!name) {
+      while (true) {
+        const answer = await rl.question('\nWhat are you prototyping? For example, Register a water abstraction\n> ')
+        if (!answer.trim()) {
+          console.log('A name is needed to make the folder.')
+          continue
+        }
+        serviceName = serviceName ?? answer.trim()
+        name = toFolderName(answer)
+        if (!name) {
+          console.log('That name has no letters or numbers in it, so it cannot be a folder name.')
+          continue
+        }
+        break
+      }
+    }
+
+    if (!serviceName) {
+      const answer = await rl.question(`\nName to show in the header? Press Enter for "${name}"\n> `)
+      serviceName = answer.trim() || name
+    }
+
+    if (!brandMode) {
+      // Worded around the address, not the brand, because the address is the
+      // thing a designer knows and the licence follows from it rather than
+      // from a preference. GDS Transport is licensed for service.gov.uk only.
+      const answer = await rl.question('\nWill this service be on a service.gov.uk address? (y/N)\n> ')
+      brandMode = /^y(es)?$/i.test(answer.trim()) ? 'govuk' : 'defra'
+    }
+  } catch (error) {
+    if (error?.code === 'ABORT_ERR') cancelled()
+    throw error
+  } finally {
+    rl.close()
+  }
+}
+
+serviceName = serviceName ?? name
+brandMode = brandMode ?? 'defra'
+
+// Where it goes. A bare name goes in the shared folder; anything that looks
+// like a path is taken literally, because someone who typed a path meant it.
+const looksLikePath = name.includes('/') || name.includes(sep) ||
+  name.startsWith('.') || name.startsWith('~')
+if (looksLikePath) {
+  // An explicit path is used exactly as written. Someone who typed one meant
+  // it, and silently rewriting part of it would be worse than a space in a
+  // folder name.
+  dir = resolve(process.cwd(), name)
+  name = dir.split(sep).pop()
+} else {
+  // A bare name is tidied whether it lands here or in the shared folder.
+  // --here used to skip this, which produced folder names with spaces in them
+  // — the thing that makes every later path need quoting.
+  const folder = toFolderName(name)
+  if (folder !== name) {
+    console.log(`\nUsing the folder name "${folder}".`)
+  }
+  name = folder
+  if (isHere) {
+    dir = resolve(process.cwd(), name)
+  } else {
+    mkdirSync(PROTOTYPES_DIR, { recursive: true })
+    dir = join(PROTOTYPES_DIR, name)
+  }
+}
+
+// Refusing beats merging into whatever is already there. Someone re-running
+// this because the first attempt looked wrong should not have the kit
+// half-overwrite a prototype they have since put work into.
+if (existsSync(dir) && readdirSync(dir).length > 0) {
+  console.error(`
+There is already something here:
+
+  ${dir}
+
+Pick a different name, or delete that folder if you do not need it.
+`)
+  process.exit(1)
+}
+
+console.log(`\nCreating your prototype in\n  ${dir}\n`)
 run('npx', ['govuk-prototype-kit', 'create', dir], process.cwd())
 
 console.log('\nAdding GOV.UK Frontend 6 and Defra Frontend\n')
@@ -417,10 +570,22 @@ mkdirSync(sassDir, { recursive: true })
 const settingsPath = join(sassDir, 'settings.scss')
 const settingsImport = sassImports(DEFRA_FRONTEND_NAME).settings
 const settings = existsSync(settingsPath) ? readFileSync(settingsPath, 'utf8') : ''
+// The brand mode has to be set BEFORE the settings import, because the import
+// is where it is read. Written out even for the default, so the file states
+// which answer was given rather than leaving it implicit.
+const brandModeLine = brandMode === 'govuk'
+  ? `// On service.gov.uk: GOV.UK header and footer, and GDS Transport, which is
+// licensed for this address only.
+$defra-brand-mode: "govuk";`
+  : `// Not on service.gov.uk: Defra header and footer, and a system font stack.
+// GDS Transport must not be used outside *.service.gov.uk.
+$defra-brand-mode: "defra";`
 if (!settings.includes(settingsImport)) {
   writeFileSync(settingsPath,
 `// Defra tokens. This file is imported by the kit BEFORE govuk-frontend, which
 // is the only point at which these settings can take effect.
+${brandModeLine}
+
 ${settingsImport}
 
 ${settings}`.trimEnd() + '\n')
@@ -439,19 +604,48 @@ ${appImport}
 `)
 }
 
+// --- Service name ----------------------------------------------------------
+// The kit ships a "Service name goes here" placeholder. Filling it means the
+// prototype reads as the thing being tested from the first page load, rather
+// than after someone finds the file.
+const configPath = join(dir, 'app', 'config.json')
+if (existsSync(configPath)) {
+  try {
+    const config = JSON.parse(readFileSync(configPath, 'utf8'))
+    config.serviceName = serviceName
+    writeFileSync(configPath, JSON.stringify(config, null, 2) + '\n')
+  } catch {
+    // A kit that has changed this file's shape is not worth failing a whole
+    // setup over — the prototype works, it just says "Service name goes here".
+    console.log('Could not set the service name automatically; change it in app/config.json.')
+  }
+}
+
 // --- Layout ----------------------------------------------------------------
-// Point the prototype's own layout at the Defra one. This is the licence
-// boundary, not decoration: the kit's default layout renders the GOV.UK
-// header and a footer asserting the Royal Arms and the Open Government
-// Licence, which a service outside the GOV.UK proposition may not use.
+// Which header and footer, decided by the answer about the address. This is a
+// licence boundary, not decoration: the GOV.UK layout renders the Royal Arms
+// and asserts the Open Government Licence, which a service outside the GOV.UK
+// proposition may not use — and the Defra layout drops GDS Transport, which is
+// licensed for *.service.gov.uk only.
 const layoutDir = join(dir, 'app', 'views', 'layouts')
 mkdirSync(layoutDir, { recursive: true })
-writeFileSync(join(layoutDir, 'main.html'),
-`{#
-  Extends the Defra layout, which replaces the GOV.UK header and footer with
-  Defra chrome. Services on *.service.gov.uk should extend
-  "govuk-prototype-kit/layouts/govuk-branded.njk" instead — the choice is a
-  licence boundary, not a preference.
+writeFileSync(join(layoutDir, 'main.html'), brandMode === 'govuk'
+  ? `{#
+  This service is on a service.gov.uk address, so it uses the GOV.UK header and
+  footer and GDS Transport. Both are licensed for that address and must not be
+  used off it — if the address changes, extend
+  "defra/prototype-kit/layouts/defra.html" instead and set
+  $defra-brand-mode to "defra" in app/assets/sass/settings.scss.
+#}
+{% extends "govuk-prototype-kit/layouts/govuk-branded.njk" %}
+`
+  : `{#
+  This service is not on a service.gov.uk address, so it uses the Defra header
+  and footer and a system font stack. The GOV.UK header, Royal Arms footer and
+  GDS Transport are licensed for service.gov.uk and must not be used here — if
+  the address changes, extend
+  "govuk-prototype-kit/layouts/govuk-branded.njk" instead and set
+  $defra-brand-mode to "govuk" in app/assets/sass/settings.scss.
 #}
 {% extends "defra/prototype-kit/layouts/defra.html" %}
 `)
@@ -460,10 +654,16 @@ writeFileSync(join(layoutDir, 'main.html'),
 // Written into the prototype because the person who opens this folder in three
 // months, or the colleague who inherits it, will not have this terminal output.
 writeFileSync(join(dir, 'README.md'),
-`# ${name}
+`# ${serviceName}
 
 A Defra prototype, built with the [GOV.UK Prototype Kit](https://prototype-kit.service.gov.uk/)
 and [Defra Frontend](https://defra-design.github.io/defra-frontend/docs/).
+
+${brandMode === 'govuk'
+  ? 'Branded as GOV.UK, for a service on a `service.gov.uk` address.'
+  : 'Branded as Defra, for a service that is not on a `service.gov.uk` address.'}
+Changing that is a licence decision — see the comment in
+\`app/views/layouts/main.html\`.
 
 ## Running it
 
@@ -520,9 +720,11 @@ console.log(`
 
 Your prototype is ready.
 
+It is in ${dir}
+
 To start it, copy and run these two lines:
 
-  cd ${name}
+  cd "${dir}"
   npm run dev
 
 Then open http://localhost:3000 in your browser.

@@ -84,15 +84,37 @@ follows and whether it has been proposed back — see the
 ## Making a prototype
 
 ```bash
-npx defra-create-prototype my-service
-cd my-service
+npx defra-create-prototype
+```
+
+Run it with no arguments and it asks what you are prototyping and whether the
+service will be on a `service.gov.uk` address. It then prints the two lines to
+start it:
+
+```bash
+cd "~/Defra prototypes/register-a-water-abstraction"
 npm run dev
 ```
 
+Prototypes go in `~/Defra prototypes` so they are all in one place and
+`--update` can find them later; `--here` uses the current directory instead.
+
+That second question is not cosmetic. It decides the header, the footer and the
+typeface, all of which are
+[licensed for `service.gov.uk` only](#which-brand-mode-do-i-need) — it used to
+be a Sass variable most people never found, which meant the default decided it
+silently.
+
 This runs the real GOV.UK Prototype Kit, then adds Defra styling, Defra page
-templates and the Defra layout. The
+templates and the right layout. The
 [step-by-step guide](https://defra-design.github.io/defra-frontend/docs/prototyping/)
 covers installing Node, using a terminal, and putting your prototype on GitHub.
+
+To skip the questions — in a script, or in CI:
+
+```bash
+npx defra-create-prototype my-service --service-name "Register a water abstraction" --defra
+```
 
 ### Updating a prototype
 
