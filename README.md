@@ -178,6 +178,8 @@ npm run storybook    # build the stylesheet and open Storybook on :6006
 | `npm run drift` | Renders all 692 upstream fixtures and compares them to GOV.UK Frontend | A GOV.UK component's markup changed and the divergence is not declared |
 | `npm run carbon` | Renders each page type and measures it against its budget | A page type went over budget, or a page type has no budget declared |
 | `npm run boundary` | Checks companion packages have not become dependencies of the published package | Something that should be demonstration-only is about to ship |
+| `npm run instructions` | Checks every instruction source agrees on how to run a prototype, and recommends nothing the kit warns against | The docs, the CLI output and the generated README have drifted apart |
+| `npm run instructions -- --live` | Creates a real prototype and compares our commands against what the kit itself recommends | The kit changed under us — our instructions are now wrong even though nothing here changed |
 | `npm run stories` | Regenerates Storybook stories from fixtures | A component is not registered in `deviations.json` |
 | `npm run build` | Compiles the stylesheet | — |
 

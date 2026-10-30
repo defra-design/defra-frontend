@@ -26,3 +26,28 @@ jobs:
 
       - name: Stories build
         run: npm run stories
+
+      # Fails if the instruction sources disagree about how to run a prototype,
+      # or recommend a command the kit warns against. Static and fast.
+      - name: Instructions agree
+        run: npm run instructions
+
+  # Separate job because it creates a real prototype — a few minutes and a lot
+  # of network, against the 30 seconds the gate above takes. Run in parallel so
+  # it does not slow every push down to its pace.
+  #
+  # It answers the question the static check cannot: are the commands we
+  # recommend still what the Prototype Kit actually does? The kit is resolved
+  # fresh at create time, not pinned here, so it can change under us without a
+  # single file in this repo changing.
+  instructions-live:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Instructions match the kit
+        run: npm run instructions -- --live

@@ -27,5 +27,8 @@
   ],
   "engines": {
     "node": ">=20"
+  },
+  "scripts": {
+    "instructions": "node scripts/instructions.mjs"
   }
 }
