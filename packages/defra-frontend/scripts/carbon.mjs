@@ -26,9 +26,16 @@ const emissions = new co2({ model: 'swd', version: 4 })
 // GB grid intensity from Ember, shipped with CO2.js.
 const gridIntensity = averageIntensity.data.GBR
 
-// Green hosting: Defra runs on Core Delivery Platform (Azure). Not verifiable
-// via the Green Web Foundation directory from here, so we assume false.
-// Assuming true would flatter every number in this report.
+// Green hosting: Defra services run on Core Delivery Platform. CDP's own
+// components point at AWS in eu-west-2 — S3, ElastiCache, ECS-shaped logs —
+// rather than the Azure this comment used to assert, which was never checked.
+// Treat even that as indicative: it is read off CDP's public repositories, not
+// confirmed by anyone who runs the platform.
+//
+// Either way the figure below does not change. Verification would have to come
+// from the Green Web Foundation directory for the actual region and provider,
+// and until someone does that, false is the honest assumption — assuming true
+// would flatter every number in this report.
 const GREEN_HOST = false
 
 export function estimate (bytes) {

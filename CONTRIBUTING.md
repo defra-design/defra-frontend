@@ -503,6 +503,47 @@ repoints the imports, removes the old dependency and deletes `vendor/`. Keep
 `LEGACY_NAME` in `create.mjs` for as long as prototypes from before the first
 release are plausibly still in use.
 
+## Hosting prototypes — prior art before inventing anything
+
+Prototypes currently go to Heroku, individually. Two things are worth knowing
+before anyone designs something better.
+
+**GitHub Pages cannot host a prototype.** Not a trade-off — the kit is an
+Express app. `server.js` installs session middleware and `autoStoreData`, so
+every answer a participant types lives in a server-side session, and form posts
+and branching journeys are server-rendered. Pages runs no Node. The password is
+a second, independent blocker: `config.js` enforces it as middleware
+(`if (process.env.PASSWORD) config.passwords.push(...)`), so with no server
+there is nothing to enforce it, and a public repo's Pages site has no
+authentication at all. That is not a weaker password, it is a Defra-branded,
+service-looking site open to the internet.
+
+**MoJ has already built central prototype hosting**, on their Cloud Platform
+(Kubernetes), and documented it at
+`user-guide.cloud-platform.service.justice.gov.uk` under "Publish prototypes on
+the web". The shape: a designer runs `cloud-platform environment prototype
+create`, raises a PR against the `cloud-platform-environments` repo, a member
+of the platform team approves it, and from then on a push to `main` deploys via
+GitHub Actions to a predictable URL. Teardown is another PR. It is explicitly
+scoped to Prototype Kit prototypes and nothing else. Anyone proposing a Defra
+equivalent should start from that rather than from a blank page.
+
+**On CDP specifically:** its public repositories describe it as "Helping Defra
+teams to create, deploy, run and monitor applications", and there is a "CDP
+Self Service Ops" API, so the self-service shape exists. What is *not* public,
+and therefore not known here: the onboarding or approval process, whether the
+platform accepts short-lived non-production workloads at all, and who would own
+prototype hosting operationally. Those are the questions to ask, and they are
+organisational rather than technical — the technical part is demonstrably
+solvable, because MoJ solved it.
+
+Note also that CDP's own components point at **AWS in eu-west-2**, not Azure.
+An earlier comment in `carbon.mjs` asserted Azure and was never checked; it has
+been corrected. This is read off public repositories, not confirmed by anyone
+who runs the platform, so treat it as indicative and verify before relying on
+it — particularly for any green-hosting claim, where the provider and region
+are the whole question.
+
 ## Open decisions — ask, don't guess
 
 - **`@use` migration.** Sass emits ~172 `@import` deprecation warnings. v6 ships
