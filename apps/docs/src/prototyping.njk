@@ -232,9 +232,9 @@ git push</code></pre>
 </p>
 <p class="govuk-body">
   Hosting is a team decision and depends on what your programme already uses, so
-  ask your technical lead rather than setting one up alone. The Prototype Kit
-  documentation covers
-  <a class="govuk-link" href="https://prototype-kit.service.gov.uk/docs/publishing-on-the-web">the options and how to password-protect them</a>.
+  ask your technical lead rather than setting one up alone. See
+  <a class="govuk-link" href="#publishing-your-prototype">Publishing your prototype</a>
+  below for the options and the two settings a password needs.
 </p>
 
 <h2 class="govuk-heading-l">Finding your prototypes</h2>
@@ -361,7 +361,7 @@ git push</code></pre>
   </div>
 </details>
 
-<h2 class="govuk-heading-l">Publishing your prototype</h2>
+<h2 class="govuk-heading-l" id="publishing-your-prototype">Publishing your prototype</h2>
 
 <p class="govuk-body">
   A prototype is a small web application, not a set of files, so it needs
@@ -369,35 +369,88 @@ git push</code></pre>
   knowing before you promise a link to anyone.
 </p>
 
+<p class="govuk-body">
+  <strong>Ask your technical lead first.</strong> Your programme may already pay
+  for somewhere to put these, and that is both cheaper and easier than signing
+  up for an account yourself.
+</p>
+
+<p class="govuk-body">
+  If not, the Prototype Kit
+  <a class="govuk-link" href="https://prototype-kit.service.gov.uk/publishing/">names three services</a>
+  that publish automatically every time you push to GitHub:
+</p>
+
 <dl class="govuk-summary-list govuk-body-s">
   <div class="govuk-summary-list__row">
-    <dt class="govuk-summary-list__key">A hosting service</dt>
-    <dd class="govuk-summary-list__value">
-      The usual route, and the only one that supports every prototype. Your
-      programme almost certainly already uses something — ask your technical
-      lead rather than signing up for an account yourself. The kit documents
-      <a class="govuk-link" href="https://prototype-kit.service.gov.uk/docs/publishing-on-the-web">the options and how to password-protect them</a>.
-    </dd>
+    <dt class="govuk-summary-list__key">
+      <a class="govuk-link" href="https://railway.app/new/github">Railway</a>
+    </dt>
+    <dd class="govuk-summary-list__value">Connects to a GitHub repository and redeploys on push.</dd>
   </div>
   <div class="govuk-summary-list__row">
-    <dt class="govuk-summary-list__key">GitHub Pages</dt>
+    <dt class="govuk-summary-list__key">
+      <a class="govuk-link" href="https://render.com/docs/github">Render</a>
+    </dt>
+    <dd class="govuk-summary-list__value">The same arrangement.</dd>
+  </div>
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key">
+      <a class="govuk-link" href="https://devcenter.heroku.com/articles/github-integration">Heroku</a>
+    </dt>
     <dd class="govuk-summary-list__value">
-      Possible, but only for a prototype that is pages and links. Pages serves
-      files and cannot run anything, so you first have to export your prototype
-      to flat HTML. Anything that remembers an answer between pages — a form
-      post, branching based on what someone entered, the <code>data</code>
-      object — stops working. If your prototype only links from page to page,
-      this is the cheapest option; if it collects answers, it is not an option
-      at all.
+      Also works, and is what Defra teams have mostly used — but the kit marks
+      it <strong>“requires payment”</strong>, and it has had no free tier since
+      2022. Worth comparing before defaulting to it.
     </dd>
   </div>
 </dl>
 
+<p class="govuk-body">
+  <strong>GitHub Pages and Netlify will not work.</strong> The kit says so
+  itself: it “does not run on ‘static’ hosting services”. A prototype is a small
+  Node application, not a folder of files — it remembers what someone typed, and
+  that needs a server. There is no export that gets around it, and a static copy
+  could not be password-protected either.
+</p>
+
+<h3 class="govuk-heading-m">Setting the password</h3>
+
+<p class="govuk-body">
+  Wherever you publish, set <strong>two</strong> environment variables. Your
+  hosting service may call them “config vars” or just “variables”.
+</p>
+
+<dl class="govuk-summary-list govuk-body-s">
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key"><code>NODE_ENV</code></dt>
+    <dd class="govuk-summary-list__value"><code>production</code></dd>
+  </div>
+  <div class="govuk-summary-list__row">
+    <dt class="govuk-summary-list__key"><code>PASSWORD</code></dt>
+    <dd class="govuk-summary-list__value">Whatever password you want to share with participants</dd>
+  </div>
+</dl>
+
 <div class="govuk-inset-text">
-  Whatever you choose, put a password on it. A prototype looks like a real
-  service, and people who find one without context have no way of knowing it
-  is not. Never put real personal data in a published prototype.
+  <p class="govuk-body">
+    <strong>Both, or neither works.</strong> The kit only asks for a password
+    when <code>NODE_ENV</code> is <code>production</code>. Set
+    <code>PASSWORD</code> on its own and it is ignored completely — your
+    prototype is published, looks right, and anyone who finds the address can
+    walk straight in.
+  </p>
+  <p class="govuk-body">
+    Check it yourself after publishing: open the address in a private browser
+    window. If it does not ask for the password, it is not protected.
+  </p>
 </div>
+
+<p class="govuk-body-s">
+  A prototype looks like a real service, and someone who finds one without
+  context has no way of knowing it is not. Never put real personal data in a
+  published prototype.
+</p>
 
 <h2 class="govuk-heading-l">If something goes wrong</h2>
 

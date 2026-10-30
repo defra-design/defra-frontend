@@ -508,15 +508,31 @@ release are plausibly still in use.
 Prototypes currently go to Heroku, individually. Two things are worth knowing
 before anyone designs something better.
 
-**GitHub Pages cannot host a prototype.** Not a trade-off — the kit is an
-Express app. `server.js` installs session middleware and `autoStoreData`, so
-every answer a participant types lives in a server-side session, and form posts
-and branching journeys are server-rendered. Pages runs no Node. The password is
-a second, independent blocker: `config.js` enforces it as middleware
-(`if (process.env.PASSWORD) config.passwords.push(...)`), so with no server
-there is nothing to enforce it, and a public repo's Pages site has no
-authentication at all. That is not a weaker password, it is a Defra-branded,
+**GitHub Pages cannot host a prototype**, and the kit says so itself at
+<https://prototype-kit.service.gov.uk/publishing/>: it "does not run on
+'static' hosting services like GitHub Pages or Netlify". The mechanism, if
+anyone asks why: `server.js` installs session middleware and `autoStoreData`,
+so every answer a participant types lives in a server-side session, and form
+posts and branching journeys are server-rendered. Pages runs no Node. A static
+copy could not be password-protected either, so it would be a Defra-branded,
 service-looking site open to the internet.
+
+**The password needs two environment variables, and the failure is silent.**
+`PASSWORD` alone does nothing. `lib/authentication.js` gates on
+`shouldUseAuth()`, which returns true only when `config.isProduction` — that is,
+when `NODE_ENV=production`. Set the password without it and the middleware is
+never installed, so the prototype publishes, looks correct, and has no
+protection at all. The other way round fails safe: `NODE_ENV=production` with no
+password serves an error page instead of the prototype. So the dangerous
+direction is the one someone setting "the password" would naturally take, which
+is why the designer guide tells them to confirm it in a private window rather
+than trusting that it worked.
+
+**Heroku is the expensive option, and the kit marks it so.** The publishing page
+names Railway, Render and Heroku as services that redeploy on push, with
+"(requires payment)" against Heroku alone — it has had no free tier since 2022.
+Defra teams have mostly defaulted to it. Worth saying out loud when anyone asks
+where to publish.
 
 **MoJ has already built central prototype hosting**, on their Cloud Platform
 (Kubernetes), and documented it at
