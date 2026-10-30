@@ -74,9 +74,14 @@ function inspect (dir) {
 
   const config = read(join(dir, 'app', 'config.json'))
   let serviceName
+  // Each prototype records its own port, so two can be open at once. Anything
+  // made before that was added still uses the kit's default.
+  let port = 3000
   try {
-    serviceName = config ? JSON.parse(config).serviceName : undefined
-  } catch { /* leave undefined */ }
+    const parsedConfig = config ? JSON.parse(config) : {}
+    serviceName = parsedConfig.serviceName
+    if (typeof parsedConfig.port === 'number') port = parsedConfig.port
+  } catch { /* leave the defaults */ }
 
   const views = join(dir, 'app', 'views')
   const hasVariants = VARIANTS.every((v) => existsSync(join(views, v)))
@@ -90,6 +95,7 @@ function inspect (dir) {
     kit: deps['govuk-prototype-kit'],
     govuk: deps['govuk-frontend'],
     defra: deps['defra-frontend'] ?? deps['@defra/frontend'] ?? deps['@defra-design/frontend'],
+    port,
     changed: statSync(dir).mtime,
     hasVariants,
     pages: hasVariants ? [] : pagesIn(views).filter((p) => !p.startsWith('layouts')),
@@ -134,8 +140,8 @@ function render (prototypes, prototypesDir) {
           <tbody>${changed.map((c) => `
             <tr class="changed">
               <td><code>${escape(c.page)}</code></td>
-              <td>${c.state === 'only in future' ? '—' : `<a href="http://localhost:3000/current/${escape(c.page.replace(PAGE, ''))}">open</a>`}</td>
-              <td>${c.state === 'only in current' ? '—' : `<a href="http://localhost:3000/future/${escape(c.page.replace(PAGE, ''))}">open</a>`}</td>
+              <td>${c.state === 'only in future' ? '—' : `<a href="http://localhost:${p.port}/current/${escape(c.page.replace(PAGE, ''))}">open</a>`}</td>
+              <td>${c.state === 'only in current' ? '—' : `<a href="http://localhost:${p.port}/future/${escape(c.page.replace(PAGE, ''))}">open</a>`}</td>
               <td class="state">${escape(c.state)}</td>
             </tr>`).join('')}
           </tbody>
@@ -149,6 +155,7 @@ function render (prototypes, prototypesDir) {
         · kit ${escape(p.kit)}
         · govuk-frontend ${escape(p.govuk ?? '—')}
         ${p.defra ? `· defra-frontend ${escape(p.defra)}` : '· <span class="warn">no defra-frontend</span>'}
+        · port ${p.port}${p.port === 3000 ? ' <span class="warn">(the shared default)</span>' : ''}
         · changed ${p.changed.toISOString().slice(0, 10)}
       </p>
       <p class="summary">${escape(summary)}</p>
@@ -205,8 +212,10 @@ npm run dev</pre>
 <main>
   <h1>Defra prototypes</h1>
   <p class="intro">
-    Everything in <code>${escape(prototypesDir)}</code>. The open links work for
-    whichever prototype is running — they all use port 3000, so one at a time.
+    Everything in <code>${escape(prototypesDir)}</code>. Each prototype has its
+    own port, so you can run two at once and compare them side by side. Anything
+    marked <span class="warn">the shared default</span> was made before that and
+    still uses port 3000 — run <code>--update</code> on it to give it one.
   </p>
   ${prototypes.length ? rows : '<p class="empty">No prototypes found yet.</p>'}
   <footer>

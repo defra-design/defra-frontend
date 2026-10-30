@@ -6,6 +6,30 @@ contain nothing for one of them. Where that happens it is said explicitly.
 Dates are the publish date. Nothing here is stable — see
 [Status](README.md#status).
 
+## 0.5.0 — 30 October 2026
+
+A `defra-create-prototype` release. **`defra-frontend` is unchanged**, bumped to
+keep the two packages answerable from one version number.
+
+### defra-create-prototype
+
+**Each prototype gets its own port**, so two can run at once — which is what
+makes a side-by-side comparison of two prototypes possible at all. Before this
+they all used 3000 and only one could run.
+
+The port is recorded as `port` in `app/config.json`, which the kit reads, so
+`npm run dev` picks it up with nothing to remember and nothing to type. That
+also works on Windows, where a `PORT=` prefix on the command would not.
+
+Ports are spaced 100 apart, and that spacing is load-bearing: the kit binds a
+second port at `port - 50` for live reload, so anything closer would put one
+prototype's reload proxy on another prototype's main port — a collision that
+presents as a mysterious failure to start rather than as a port clash.
+
+`--update` assigns a port to a prototype that has none, so existing ones can
+have one without being recreated. `--dashboard` shows each prototype's port,
+links to it, and marks the ones still on the shared default.
+
 ## 0.4.0 — 30 October 2026
 
 A `defra-create-prototype` release. **`defra-frontend` is unchanged**, bumped to

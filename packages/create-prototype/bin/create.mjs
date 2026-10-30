@@ -45,6 +45,48 @@ import { readdirSync, rmSync } from 'node:fs'
 // in when you ran it last month" is not.
 const PROTOTYPES_DIR = join(homedir(), 'Defra prototypes')
 
+// Each prototype gets its own port, so two can run at once — which is the
+// point of having a current and a future version to compare.
+//
+// Spacing is not arbitrary. The kit binds a second port at `port - 50` for its
+// live reload proxy (see listen-on-port.js), so anything closer than that would
+// put one prototype's proxy on another's main port, and the collision would
+// look like a mysterious failure to start rather than a port clash.
+//
+// 3000 is left alone: it is the kit's default, and every prototype made before
+// this still uses it.
+const PORT_BASE = 4000
+const PORT_STEP = 100
+
+/** The port recorded in a prototype's config, or null. */
+const portOf = (prototypeDir) => {
+  try {
+    const config = JSON.parse(readFileSync(join(prototypeDir, 'app', 'config.json'), 'utf8'))
+    return typeof config.port === 'number' ? config.port : null
+  } catch {
+    return null
+  }
+}
+
+/** The lowest port in the series that no prototype in the shared folder uses. */
+const freePort = () => {
+  const taken = new Set()
+  try {
+    for (const entry of readdirSync(PROTOTYPES_DIR, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue
+      const port = portOf(join(PROTOTYPES_DIR, entry.name))
+      if (port) taken.add(port)
+    }
+  } catch { /* no shared folder yet, so nothing is taken */ }
+
+  for (let port = PORT_BASE; port < PORT_BASE + PORT_STEP * 60; port += PORT_STEP) {
+    if (!taken.has(port)) return port
+  }
+  // Sixty prototypes in one folder is a different problem. Fall back to the
+  // kit's default rather than inventing a port that might collide.
+  return 3000
+}
+
 const GOVUK_FRONTEND = 'govuk-frontend@^6.4.0'
 const DEFRA_FRONTEND_NAME = 'defra-frontend'
 // `@latest` rather than a caret range. On 0.x a caret is narrow — ^0.1.0 stops
@@ -427,6 +469,29 @@ its app/views folder:
     process.exit(1)
   }
 
+  // Prototypes made before ports were assigned all sit on 3000, so only one
+  // can run at a time — which defeats comparing two side by side. Update is
+  // the natural place to give one its own port, and it only ever adds a value
+  // that was not there.
+  let assignedPort = null
+  if (dir.startsWith(PROTOTYPES_DIR) && portOf(dir) === null) {
+    const configPath = join(dir, 'app', 'config.json')
+    if (existsSync(configPath)) {
+      try {
+        const config = JSON.parse(readFileSync(configPath, 'utf8'))
+        assignedPort = freePort()
+        if (assignedPort !== 3000) {
+          config.port = assignedPort
+          writeFileSync(configPath, JSON.stringify(config, null, 2) + '\n')
+        } else {
+          assignedPort = null
+        }
+      } catch {
+        assignedPort = null
+      }
+    }
+  }
+
   const before = installedVersion(dir) ??
     LEGACY_NAMES.map((n) => installedVersion(dir, n)).find(Boolean) ?? null
   console.log(`\nUpdating Defra Frontend in ${pkg.name || dir}\n`)
@@ -463,6 +528,14 @@ Moved this prototype across:`}
 ${migrated.map((m) => `  - ${m}`).join('\n')}
 
 Commit those changes with the rest of your work.
+`)
+  }
+
+  if (assignedPort) {
+    console.log(`This prototype now runs on its own port, ${assignedPort}, so it can be open at
+the same time as another one.
+
+  http://localhost:${assignedPort}
 `)
   }
 
@@ -642,6 +715,9 @@ ${inGit
 {% endblock %}
 `)
 
+  // Prototypes made before ports were assigned still use the kit's default.
+  const variantPort = portOf(dir) ?? 3000
+
   console.log(`
 ────────────────────────────────────────────────────────────────────────
 
@@ -655,8 +731,8 @@ components — fix something once and it changes in both.
 
   npm run dev
 
-  localhost:3000/current/    localhost:3000/future/
-  localhost:3000            a page linking to both
+  localhost:${variantPort}/current/    localhost:${variantPort}/future/
+  localhost:${variantPort}            a page linking to both
 
 Your pages moved into current, and ${rewritten} of them had links updated to stay
 inside their own version. Check a couple of journeys before you rely on it, and
@@ -845,16 +921,25 @@ ${appImport}
 // prototype reads as the thing being tested from the first page load, rather
 // than after someone finds the file.
 const configPath = join(dir, 'app', 'config.json')
+// Its own port goes here too. The kit reads `port` from this file
+// (lib/config.js), so `npm run dev` picks it up with no env var and nothing
+// for anyone to remember — which matters on Windows, where a PORT= prefix on
+// the command would not work anyway.
+let port = isHere ? 3000 : freePort()
 if (existsSync(configPath)) {
   try {
     const config = JSON.parse(readFileSync(configPath, 'utf8'))
     config.serviceName = serviceName
+    if (port !== 3000) config.port = port
     writeFileSync(configPath, JSON.stringify(config, null, 2) + '\n')
   } catch {
     // A kit that has changed this file's shape is not worth failing a whole
     // setup over — the prototype works, it just says "Service name goes here".
     console.log('Could not set the service name automatically; change it in app/config.json.')
+    port = 3000
   }
+} else {
+  port = 3000
 }
 
 // --- Layout ----------------------------------------------------------------
@@ -907,7 +992,7 @@ Changing that is a licence decision — see the comment in
 npm run dev
 \`\`\`
 
-Then open http://localhost:3000
+Then open http://localhost:${port}
 
 Use \`npm run dev\` and not \`npm start\`. Both exist in \`package.json\`, but
 \`start\` is the command hosting services use — run locally it does not watch
@@ -919,7 +1004,7 @@ Create HTML files in \`app/views\`. A file at \`app/views/apply/name.html\`
 is served at \`/apply/name\`.
 
 Defra page templates are available under **Create a new page** at
-http://localhost:3000/manage-prototype
+http://localhost:${port}/manage-prototype
 
 ## Important
 
@@ -963,7 +1048,7 @@ To start it, copy and run these two lines:
   cd "${dir}"
   npm run dev
 
-Then open http://localhost:3000 in your browser.
+Then open http://localhost:${port} in your browser.
 
 To stop it, come back to this terminal and press Ctrl and C together.
 
@@ -972,7 +1057,7 @@ WHAT TO DO NEXT
   Make a page      Create an HTML file in app/views. A file at
                    app/views/apply/name.html appears at /apply/name
 
-  Use a template   Go to http://localhost:3000/manage-prototype and choose
+  Use a template   Go to http://localhost:${port}/manage-prototype and choose
                    "Create a new page" — Defra start, question and check
                    answers pages are in the list
 

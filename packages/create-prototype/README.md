@@ -93,6 +93,11 @@ styles and the components, so fixing a typo in the header fixes it in both, and
 one `npm run dev` serves both. Two folders would mean two servers, two terminal
 windows and every shared change made twice.
 
+Each prototype also gets its own port, recorded in `app/config.json`, so two
+different prototypes can run at the same time without clashing. Nothing to
+remember — `npm run dev` reads it. Prototypes made before this still use the
+kit's default of 3000; `--update` gives them one.
+
 It needs a clean git tree, because it moves your pages and rewrites links inside
 them — if it gets something wrong, `git checkout .` puts it back.
 

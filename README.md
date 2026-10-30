@@ -150,6 +150,11 @@ components, so a shared fix lands in both. Two folders would mean two servers,
 two terminal windows and every common change made twice. It requires a clean git
 tree, since it moves pages and rewrites links — `git checkout .` undoes it.
 
+Each prototype also gets its own port, recorded in `app/config.json` and read by
+`npm run dev`, so two different prototypes can run at once. Ports are spaced 100
+apart because the kit binds a second one at `port - 50` for live reload, and
+anything closer would put one prototype's reload proxy on another's main port.
+
 ### Updating a prototype
 
 A prototype pins the version it was created with, so changes here do not reach
