@@ -26,7 +26,9 @@ not a replacement for it.
 | [`defra-create-prototype`](https://www.npmjs.com/package/defra-create-prototype) | The command that creates and updates a Defra prototype. |
 
 Both are [Open Government Licence v3.0](LICENCE) and require GOV.UK Frontend 6
-as a peer dependency.
+as a peer dependency. They share a version number and release together, so a
+release may contain nothing for one of them — [CHANGELOG.md](CHANGELOG.md) says
+when that is the case.
 
 ### Why unscoped, and not `@defra`
 
