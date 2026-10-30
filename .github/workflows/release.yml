@@ -123,6 +123,10 @@ jobs:
               echo "$name@$version is already published, skipping"
             else
               echo "Publishing $name@$version"
-              npm publish -w "$name"
+              # Published from inside the package directory rather than with
+              # `-w` from the root. The OIDC exchange is per package, and a
+              # workspace publish did not trigger it — npm fell straight through
+              # to ENEEDAUTH as though no authentication existed.
+              ( cd "$dir" && npm publish --loglevel=verbose )
             fi
           done
