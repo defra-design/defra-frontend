@@ -1,6 +1,6 @@
 {
   "name": "defra-frontend",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Defra Frontend — GOV.UK Frontend, themed for Defra services, built for minimum payload.",
   "license": "OGL-UK-3.0",
   "keywords": [

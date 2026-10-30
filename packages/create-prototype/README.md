@@ -45,6 +45,22 @@ then adds the three things a Defra prototype needs:
 It also points the prototype's layout at the Defra header and footer, writes a
 README into the folder, and puts the prototype into git.
 
+## Checking a published prototype is protected
+
+```bash
+npx defra-create-prototype --check https://my-service.up.railway.app
+```
+
+Asks your published prototype whether it wants a password, and says plainly
+whether it does.
+
+Worth doing every time, because the failure is silent. The Prototype Kit only
+asks for a password when `NODE_ENV` is `production` — set `PASSWORD` on its own
+and it is ignored completely, so the prototype publishes, looks right, and is
+open to anyone with the address. Nothing about the deploy tells you. A new
+prototype gets a `.env.example` naming both variables, which hosting services
+like Railway offer to import during setup.
+
 ## Finding your prototypes
 
 ```bash

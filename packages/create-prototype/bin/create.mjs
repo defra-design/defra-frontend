@@ -124,6 +124,8 @@ const isHere = args.includes('--here')
 const isVariants = args.includes('--variants')
 // List every prototype in the shared folder, with what differs between versions.
 const isDashboard = args.includes('--dashboard')
+// Ask a published prototype whether it is actually password protected.
+const isCheck = args.includes('--check')
 const flagValue = (flag) => {
   const prefix = `--${flag}=`
   const inline = args.find((a) => a.startsWith(prefix))
@@ -133,7 +135,7 @@ const flagValue = (flag) => {
 }
 // The positional name, ignoring anything that is really a flag's value —
 // otherwise `--dir ~/somewhere` would be read as the prototype's name.
-const flagValues = ['service-name', 'dir'].map(flagValue).filter(Boolean)
+const flagValues = ['service-name', 'dir', 'check'].map(flagValue).filter(Boolean)
 const argName = args.find((a) => !a.startsWith('--') && !flagValues.includes(a))
 
 // Flags so the questions below can be skipped. The prompts are for designers;
@@ -149,6 +151,111 @@ const flags = {
 // in CI, or piped — a prompt would hang forever with no indication why, so the
 // usage message stays the behaviour there.
 const interactive = Boolean(process.stdin.isTTY && process.stdout.isTTY)
+
+// --- Check a published prototype -------------------------------------------
+// The one thing documentation cannot do: confirm the password is actually on.
+//
+// PASSWORD without NODE_ENV=production is ignored, so a prototype can publish,
+// look entirely correct, and be open to anyone with the address. Nothing about
+// the deploy says so. A protected prototype redirects to
+// /manage-prototype/password, so asking from outside gives a real answer rather
+// than a reassuring one.
+if (isCheck) {
+  const target = flagValue('check') ?? argName
+  if (!target) {
+    console.error(`
+Give the address of your published prototype:
+
+  npx defra-create-prototype --check https://my-service.up.railway.app
+`)
+    process.exit(1)
+  }
+
+  const url = /^https?:\/\//.test(target) ? target : `https://${target}`
+  console.log(`\nChecking ${url}\n`)
+
+  // Redirects are followed by hand rather than by fetch, because the two that
+  // matter have to be told apart.
+  //
+  // A protected prototype redirects to /manage-prototype/password. But in
+  // production mode the kit also redirects http to https (server.js,
+  // forceHttps), and letting fetch follow that blindly against a local
+  // prototype produces "fetch failed" — which reads as "your prototype is
+  // down" when it is in fact protected and working. Walking the chain lets the
+  // password redirect be recognised before anything is followed, and lets an
+  // unreachable https upgrade be reported as what it is.
+  let current = url
+  let response
+  let upgradedToHttps = false
+
+  for (let hop = 0; hop < 5; hop++) {
+    try {
+      response = await fetch(current, { redirect: 'manual' })
+    } catch (error) {
+      console.error(upgradedToHttps
+        ? `It redirected to ${current} and that address could not be reached.
+
+Redirecting to https is what the kit does when NODE_ENV is production, so this
+is a good sign — but check the https address rather than the http one:
+
+  npx defra-create-prototype --check ${current}
+`
+        : `Could not reach it: ${error.message}
+
+Check the address, and that the prototype is actually running.
+`)
+      process.exit(1)
+    }
+
+    const location = response.status >= 300 && response.status < 400 &&
+      response.headers.get('location')
+    if (!location) break
+
+    const next = new URL(location, current)
+    if (next.pathname.startsWith('/manage-prototype/password')) {
+      response = { ok: true, askedForPassword: true }
+      break
+    }
+    if (next.protocol === 'https:' && new URL(current).protocol === 'http:') {
+      upgradedToHttps = true
+    }
+    current = next.href
+  }
+
+  const askedForPassword = response.askedForPassword === true
+
+  if (askedForPassword) {
+    console.log(`PROTECTED — it asks for a password.
+
+Share the address and the password with participants. Nothing else to do.
+`)
+    process.exit(0)
+  }
+
+  if (!response.ok) {
+    console.log(`The server answered ${response.status}, so this could not be checked.
+
+That usually means the prototype is not running, rather than that it is
+unprotected. Fix the deploy, then check again.
+`)
+    process.exit(1)
+  }
+
+  console.error(`NOT PROTECTED — it served the prototype without asking for anything.
+
+Anyone with this address can see it, and it looks like a real Defra service to
+whoever finds it.
+
+Almost always this is NODE_ENV. A password on its own does nothing. In your
+hosting service's variables, set BOTH:
+
+  NODE_ENV = production
+  PASSWORD = whatever you are giving participants
+
+Then deploy again and run this check once more.
+`)
+  process.exit(1)
+}
 
 // --- Dashboard -------------------------------------------------------------
 // Separate from everything else: it reads, writes one file, and touches no
@@ -941,6 +1048,31 @@ if (existsSync(configPath)) {
 } else {
   port = 3000
 }
+
+// --- Publishing settings ---------------------------------------------------
+// Not read by anything locally — the kit does not use dotenv, so this file has
+// no effect on `npm run dev`. It is here because Railway scans a repository
+// root for .env.example and offers those variables during setup, which is the
+// one documented hook for getting NODE_ENV in front of someone at the moment
+// they are setting a password.
+//
+// That pairing is the whole point. PASSWORD on its own is silently ignored,
+// and the prototype publishes unprotected (lib/authentication.js only installs
+// the middleware when NODE_ENV is production). An empty PASSWORD alongside it
+// fails safe: the kit serves an error page rather than the prototype.
+writeFileSync(join(dir, '.env.example'),
+`# Settings for publishing this prototype online. Your hosting service may call
+# these "variables" or "config vars". They do nothing on your own machine.
+#
+# SET BOTH. A password on its own is ignored completely — the Prototype Kit
+# only asks for one when NODE_ENV is production, so without this line your
+# published prototype has no protection at all.
+NODE_ENV=production
+
+# The password you give to research participants. Not a secret worth
+# protecting, but do not commit a real one here.
+PASSWORD=
+`)
 
 // --- Layout ----------------------------------------------------------------
 // Which header and footer, decided by the answer about the address. This is a

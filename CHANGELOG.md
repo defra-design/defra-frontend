@@ -6,6 +6,39 @@ contain nothing for one of them. Where that happens it is said explicitly.
 Dates are the publish date. Nothing here is stable — see
 [Status](README.md#status).
 
+## 0.6.0 — 30 October 2026
+
+A `defra-create-prototype` release. **`defra-frontend` is unchanged**, bumped to
+keep the two packages answerable from one version number.
+
+### defra-create-prototype
+
+**Added `--check`, which asks a published prototype whether it is protected.**
+
+```bash
+npx defra-create-prototype --check https://my-service.up.railway.app
+```
+
+This exists because the password fails open, silently. The kit installs its
+auth middleware only when `NODE_ENV` is `production` —
+`lib/authentication.js` gates on `shouldUseAuth()`, which returns true only for
+`config.isProduction`. Set `PASSWORD` on its own and the middleware is never
+installed: the prototype publishes, looks entirely correct, and anyone with the
+address can walk in. Nothing about the deploy says so, which is why this had to
+be something you can run rather than something written in a guide.
+
+A protected prototype redirects to `/manage-prototype/password`, so the answer
+comes from the prototype itself rather than from configuration anyone believes
+they set. When it is open, the message names `NODE_ENV` as the near-certain
+cause.
+
+**New prototypes get a `.env.example`** naming both variables with an
+explanation. Railway scans a repository root for that file and offers its
+variables during setup, which is the one documented hook for putting
+`NODE_ENV` in front of someone at the moment they are setting a password. It is
+not read locally — the kit does not use dotenv — so it changes nothing about
+`npm run dev`.
+
 ## 0.5.0 — 30 October 2026
 
 A `defra-create-prototype` release. **`defra-frontend` is unchanged**, bumped to

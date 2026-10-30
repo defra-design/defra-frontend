@@ -441,10 +441,29 @@ git push</code></pre>
     walk straight in.
   </p>
   <p class="govuk-body">
-    Check it yourself after publishing: open the address in a private browser
-    window. If it does not ask for the password, it is not protected.
+    Do not take it on trust. Check, with the command below.
   </p>
 </div>
+
+<h3 class="govuk-heading-m">Check it is actually protected</h3>
+
+<p class="govuk-body">
+  After publishing, run this with your prototype's address:
+</p>
+
+<pre class="govuk-body" style="padding:1rem;background:#f3f2f1;border:1px solid #b1b4b6;overflow-x:auto"><code>npx defra-create-prototype --check https://my-service.up.railway.app</code></pre>
+
+<p class="govuk-body">
+  It asks your published prototype whether it wants a password, and tells you
+  plainly. If it says <strong>NOT PROTECTED</strong>, the fix is almost always
+  the missing <code>NODE_ENV</code> — it will say so.
+</p>
+
+<p class="govuk-body-s">
+  Worth doing every time you change the hosting settings, and before you send
+  the address to anyone. A prototype that is published and open looks exactly
+  like one that is published and protected.
+</p>
 
 <p class="govuk-body-s">
   A prototype looks like a real service, and someone who finds one without

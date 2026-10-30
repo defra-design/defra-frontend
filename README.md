@@ -116,6 +116,19 @@ To skip the questions — in a script, or in CI:
 npx defra-create-prototype my-service --service-name "Register a water abstraction" --defra
 ```
 
+### Checking a published prototype is protected
+
+```bash
+npx defra-create-prototype --check https://my-service.up.railway.app
+```
+
+The kit installs its password middleware only when `NODE_ENV=production`, so
+`PASSWORD` on its own is ignored and the prototype publishes wide open while
+looking correct. This asks the published prototype whether it wants a password
+and reports what it finds, rather than leaving that to trust. New prototypes
+also get a `.env.example` naming both variables, which Railway and others offer
+to import during setup.
+
 ### Finding your prototypes
 
 ```bash
