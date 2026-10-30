@@ -32,6 +32,12 @@ jobs:
       - name: Instructions agree
         run: npm run instructions
 
+      # What create-prototype actually does: the guards that stop it damaging
+      # someone's work, the link rewriting, and the published-prototype check.
+      # Fabricated fixtures, so it runs in seconds rather than minutes.
+      - name: Behaviour of create-prototype
+        run: npm run behaviour
+
   # Separate job because it creates a real prototype — a few minutes and a lot
   # of network, against the 30 seconds the gate above takes. Run in parallel so
   # it does not slow every push down to its pace.

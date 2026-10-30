@@ -369,14 +369,32 @@ terminal, then run this command again.
 const selfRoot = fileURLToPath(new URL('../../../', import.meta.url))
 const localPackage = join(selfRoot, 'packages', 'defra-frontend')
 
-const onNpm = !isLocal && spawnSync('npm', ['view', DEFRA_FRONTEND_NAME, 'version'], {
-  stdio: 'ignore',
-  shell: process.platform === 'win32'
-}).status === 0
+// Asked once, and only when something is actually going to be installed.
+//
+// This used to run at module load, so every invocation paid for a network
+// round trip to the registry — including --check, --dashboard and --variants,
+// none of which install anything. Besides being slow for no reason, it made
+// those commands fail or hang on a machine with no network, which is a strange
+// way for "is my published prototype protected?" to behave.
+let npmAnswer
+const onNpm = () => {
+  if (npmAnswer === undefined) {
+    npmAnswer = !isLocal && spawnSync('npm', ['view', DEFRA_FRONTEND_NAME, 'version'], {
+      stdio: 'ignore',
+      shell: process.platform === 'win32'
+    }).status === 0
+  }
+  return npmAnswer
+}
 
 const hasLocal = existsSync(join(localPackage, 'package.json'))
 
-if (!onNpm && !hasLocal) {
+/**
+ * Called only by the paths that install something. It asks npm, so it belongs
+ * where an install is about to happen rather than at module load.
+ */
+const requireASource = () => {
+  if (onNpm() || hasLocal) return
   console.error(isLocal
     ? `
 Cannot find a local copy of Defra Frontend.
@@ -421,7 +439,8 @@ function installedVersion (prototypeDir, pkgName = DEFRA_FRONTEND_NAME) {
  * would break the moment a colleague cloned it. A tarball travels with it.
  */
 function installDefraFrontend (prototypeDir) {
-  if (onNpm) {
+  requireASource()
+  if (onNpm()) {
     run('npm', ['install', GOVUK_FRONTEND, DEFRA_FRONTEND, '--save'], prototypeDir)
     return
   }
@@ -504,7 +523,7 @@ function migrateFromLegacyScope (prototypeDir, pkg) {
   // history. Only when installing from npm, though: running from a clone,
   // installDefraFrontend repacks into this same folder immediately after, so
   // deleting it here would report a removal that did not survive the next step.
-  if (onNpm) {
+  if (onNpm()) {
     const vendor = join(prototypeDir, 'vendor')
     if (existsSync(vendor)) {
       for (const file of readdirSync(vendor)) {
@@ -626,7 +645,7 @@ Updated${before && after ? ` from ${before} to ${after}` : ''}.
 `)
 
   if (migrated.length) {
-    console.log(`${onNpm
+    console.log(`${onNpm()
       ? `Defra Frontend is now published to npm, so this prototype no longer
 carries its own copy. Moved it across:`
       : `Defra Frontend has moved to the ${DEFRA_FRONTEND_NAME} package name.
@@ -971,7 +990,7 @@ console.log(`\nCreating your prototype in\n  ${dir}\n`)
 run('npx', ['govuk-prototype-kit', 'create', dir], process.cwd())
 
 console.log('\nAdding GOV.UK Frontend 6 and Defra Frontend\n')
-if (!onNpm) {
+if (!onNpm()) {
   console.log(isLocal
     ? 'Using this checkout of Defra Frontend, not the published package.\n'
     : 'Cannot reach npm — using the local copy of Defra Frontend.\n')

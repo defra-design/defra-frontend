@@ -29,6 +29,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "instructions": "node scripts/instructions.mjs"
+    "instructions": "node scripts/instructions.mjs",
+    "behaviour": "node scripts/behaviour.mjs"
   }
 }

@@ -15,9 +15,10 @@
     "stories": "npm run stories -w defra-frontend",
     "storybook": "npm run build -w defra-frontend && npm run dev -w defra-storybook",
     "build": "npm run build -w defra-frontend",
-    "check": "npm run build && npm run boundary && npm run instructions && npm run drift && npm run carbon",
+    "check": "npm run build && npm run boundary && npm run instructions && npm run behaviour && npm run drift && npm run carbon",
     "boundary": "npm run boundary -w defra-frontend",
-    "instructions": "npm run instructions -w defra-create-prototype --"
+    "instructions": "npm run instructions -w defra-create-prototype --",
+    "behaviour": "npm run behaviour -w defra-create-prototype"
   },
   "dependencies": {
     "@tgwf/co2": "^0.19.0",
