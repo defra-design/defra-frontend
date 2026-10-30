@@ -438,12 +438,16 @@ No `publishConfig` on either package: unscoped packages are public by default,
 and config that does nothing invites a wrong reading of why it is there. A move
 to a scope would need `access: "public"` added back.
 
-**No provenance, for now.** npm attaches provenance attestations automatically
-under trusted publishing, but only from a **public** repository. This repository
-is `INTERNAL`, so publishing succeeds and no attestation is produced. Making it
-public would turn provenance on with no change to this workflow — and would also
-settle the "code in the open" line under Defra tech constraints, which an
-internal repository does not currently meet.
+**Provenance comes for free and should stay that way.** npm attaches a
+provenance attestation automatically under trusted publishing, with no
+`--provenance` flag, because this repository is public and both packages are.
+Each release is then publicly linked to the commit and workflow run that built
+it — which is most of the reason trusted publishing is worth the setup for a
+library other departments might depend on.
+
+It is conditional on public visibility, not on anything in the workflow. Making
+the repository private or internal again would silently stop attestations
+without failing a release, so that is not a change to make casually.
 
 **`files` carries a negation and it matters.** `"!src/stories"` keeps 53
 generated Storybook files out of the tarball — half the download and 69% of the
