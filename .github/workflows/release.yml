@@ -1,0 +1,97 @@
+name: release
+
+# Publishes both packages to npm using trusted publishing (OIDC). There is no
+# npm token anywhere in this workflow or in the repository secrets — npm
+# verifies the OIDC claims GitHub issues (org, repo, workflow filename) against
+# the trusted publisher configured on each package.
+#
+# Setup is per package, on npmjs.com under Settings -> Trusted publishing, and
+# must name THIS file by basename: release.yml. See the Releasing section of
+# CONTRIBUTING.md.
+#
+# Versions are committed, not computed. Bump both package.json files, commit,
+# then tag. The tag only triggers this and is checked against what is committed.
+
+on:
+  push:
+    tags: ['v*']
+  # Lets you re-run a release that failed after the tag was already pushed,
+  # without deleting and recreating the tag.
+  workflow_dispatch:
+
+permissions:
+  id-token: write # required for OIDC; without it npm cannot authenticate
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest # trusted publishing supports cloud-hosted runners only
+    steps:
+      - uses: actions/checkout@v4
+
+      # No dependency cache on purpose: a release should resolve from the
+      # lockfile and the registry, not from whatever a previous run left behind.
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          registry-url: https://registry.npmjs.org
+
+      # Trusted publishing needs npm 11.5.1+, and the npm bundled with a Node
+      # release is not guaranteed to be that new — Node 22 ships npm 10.x. This
+      # is upgraded explicitly rather than inferred from the Node version,
+      # because the failure without it is an authentication error that looks
+      # like a misconfigured publisher.
+      - name: Install an npm that supports trusted publishing
+        run: |
+          set -euo pipefail
+          npm install -g npm@latest
+          npm_version=$(npm -v)
+          echo "npm $npm_version on $(node -v)"
+          NPM_VERSION="$npm_version" node -e '
+            const [major, minor, patch] = process.env.NPM_VERSION.split(".").map(Number)
+            const tooOld = major < 11 ||
+              (major === 11 && (minor < 5 || (minor === 5 && patch < 1)))
+            if (tooOld) {
+              console.error(`npm ${process.env.NPM_VERSION} cannot do trusted publishing — needs 11.5.1 or later`)
+              process.exit(1)
+            }
+          '
+
+      - run: npm ci
+
+      # Both packages release together. A tag that disagrees with either
+      # package.json means someone bumped one and forgot the other, which would
+      # otherwise publish a half-release that cannot be taken back.
+      - name: Tag must match the committed versions
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME#v}"
+          for dir in packages/defra-frontend packages/create-prototype; do
+            version=$(node -p "require('./$dir/package.json').version")
+            if [ "$version" != "$tag" ]; then
+              echo "::error::$dir is at $version but the tag is v$tag. Bump both packages to the same version."
+              exit 1
+            fi
+          done
+          echo "Both packages are at $tag"
+
+      # The same gate as every push: byte-identical GOV.UK markup, companion
+      # packages outside the published package, and page types within budget.
+      - run: npm run check
+
+      # Skips anything already on the registry, so re-running a partly failed
+      # release finishes it instead of failing on the package that succeeded.
+      - name: Publish
+        run: |
+          set -euo pipefail
+          for dir in packages/defra-frontend packages/create-prototype; do
+            name=$(node -p "require('./$dir/package.json').name")
+            version=$(node -p "require('./$dir/package.json').version")
+            if npm view "$name@$version" version > /dev/null 2>&1; then
+              echo "$name@$version is already published, skipping"
+            else
+              echo "Publishing $name@$version"
+              npm publish -w "$name"
+            fi
+          done

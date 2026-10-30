@@ -196,15 +196,27 @@ carbon-baseline.json       committed measurements, so weight changes show as a d
 
 ### Releasing
 
+Tag it. CI publishes both packages.
+
 ```bash
-npm ci                 # the lockfile must be in sync, or CI fails where you passed
-npm run check
-npm publish -w defra-frontend
-npm publish -w defra-create-prototype
+npm version 0.1.1 --no-git-tag-version -w defra-frontend -w defra-create-prototype
+git commit -am "release 0.1.1"
+git tag v0.1.1
+git push && git push --tags
 ```
 
-Bump both versions together. `create-prototype` installs
-`defra-frontend@latest` so it needs no version range, but a prototype
+There is no npm token in this repository. `.github/workflows/release.yml` uses
+**trusted publishing**, so npm verifies the OIDC claims GitHub issues — the
+organisation, repository and workflow filename — against a publisher configured
+on each package. Nothing to rotate and no credential that can leak. Setting one
+up is in [CONTRIBUTING.md](CONTRIBUTING.md#configuring-the-trusted-publisher).
+
+The workflow checks the tag against both `package.json` files before it
+publishes anything, and skips whatever is already on the registry, so a re-run
+finishes a half-done release rather than failing on the package that succeeded.
+
+Bump both versions together — the tag guard enforces it. `create-prototype`
+installs `defra-frontend@latest` so it needs no version range, but a prototype
 records what it installed, and two packages drifting apart makes "which version
 am I on" unanswerable from one number.
 

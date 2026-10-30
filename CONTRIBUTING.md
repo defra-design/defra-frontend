@@ -366,21 +366,84 @@ npm — the name is unavailable, while `defra-design` is free as a *package* nam
 so it is either held as a username or blocked by npm's similarity guard against
 the existing `@defra`. Don't spend another afternoon on it.
 
+### Cutting a release
+
+`.github/workflows/release.yml` publishes both packages. There is no npm token
+in the repository: it uses **trusted publishing**, where npm verifies the OIDC
+claims GitHub issues — organisation, repository, workflow filename — against a
+publisher configured on each package. Nothing to rotate, and no credential that
+can leak.
+
+Versions are committed, not computed:
+
 ```bash
-npm ci                 # the lockfile must be in sync or CI fails where you passed
-npm run check          # build, boundary, drift, carbon
-npm publish -w defra-frontend
-npm publish -w defra-create-prototype
+npm version 0.1.1 --no-git-tag-version -w defra-frontend -w defra-create-prototype
+git commit -am "release 0.1.1"
+git tag v0.1.1
+git push && git push --tags
 ```
 
-No `publishConfig` on either: unscoped packages are public by default, and
-config that does nothing invites a wrong reading of why it is there. A move to a
-scope would need `access: "public"` added back.
+The workflow then checks the tag against both `package.json` files, runs
+`npm run check`, and publishes anything not already on the registry. That last
+part makes a re-run safe: a release that failed after one package went out
+finishes the other instead of failing on the one that succeeded.
 
 **Bump both versions together.** `create-prototype` installs
-`defra-frontend@latest`, so it does not depend on a version range — but
-a prototype records what it installed, and two packages drifting apart makes
-"which version am I on" unanswerable from one number.
+`defra-frontend@latest`, so it does not depend on a version range — but a
+prototype records what it installed, and two packages drifting apart makes
+"which version am I on" unanswerable from one number. The tag guard enforces
+this rather than trusting anyone to remember.
+
+Three things about the workflow are load-bearing:
+
+- **`permissions: id-token: write`.** Without it there is no OIDC token and npm
+  cannot authenticate. The error looks like a misconfigured publisher.
+- **npm is upgraded explicitly.** Trusted publishing needs npm 11.5.1+, and the
+  npm bundled with a Node release is not guaranteed to be that new — Node 22
+  ships npm 10.x. npm's own documented example quietly relies on Node 24 for
+  this; the workflow installs `npm@latest` and asserts the version instead, so it
+  does not break the day `.nvmrc` changes.
+- **No dependency cache.** A release should resolve from the lockfile and the
+  registry, not from what a previous run left behind.
+
+### Configuring the trusted publisher
+
+Per package, on npmjs.com under **Settings → Trusted publishing**. Both packages
+need their own, pointing at the same workflow:
+
+| Field | Value |
+|---|---|
+| Organization or user | `defra-design` |
+| Repository | `defra-frontend` |
+| Workflow filename | `release.yml` — basename only, not a path |
+| Environment | leave empty |
+| Allowed actions | must include **`npm publish`** |
+
+All fields are case-sensitive and npm does not validate them on save, so a typo
+surfaces only at publish time.
+
+**The allowed-actions row is the trap.** Configurations created after 3 September
+2026 default to permitting only `npm stage publish`. The workflow runs
+`npm publish`, so that has to be ticked explicitly or the release fails
+authentication having looked correctly configured.
+
+**A new publisher must complete its first successful publish within two days**
+or it expires and cannot be used or edited. Configure it when you are ready to
+cut a release, not in advance.
+
+`repository.url` in each `package.json` must match the GitHub repository exactly,
+including the `git+` prefix. npm checks it.
+
+No `publishConfig` on either package: unscoped packages are public by default,
+and config that does nothing invites a wrong reading of why it is there. A move
+to a scope would need `access: "public"` added back.
+
+**No provenance, for now.** npm attaches provenance attestations automatically
+under trusted publishing, but only from a **public** repository. This repository
+is `INTERNAL`, so publishing succeeds and no attestation is produced. Making it
+public would turn provenance on with no change to this workflow — and would also
+settle the "code in the open" line under Defra tech constraints, which an
+internal repository does not currently meet.
 
 **`files` carries a negation and it matters.** `"!src/stories"` keeps 53
 generated Storybook files out of the tarball — half the download and 69% of the
