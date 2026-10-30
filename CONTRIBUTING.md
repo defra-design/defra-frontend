@@ -147,6 +147,25 @@ Always publish alongside any number:
 Do not assume green hosting `true` to flatter the numbers. Do not turn a score
 into a badge.
 
+**Where the headline number comes from.** The first measurement, taken against
+`govuk-frontend@6.4.0` on a first uncached question page, gzipped:
+
+| Brand mode | CSS | Fonts | Total | gCO2e |
+|---|---:|---:|---:|---:|
+| GOV.UK (GDS Transport) | 15,669 | 64,862 | 89,531 | 0.0098 |
+| Defra (system stack) | 15,548 | 0 | 24,548 | 0.0027 |
+
+A 72.6% reduction from one variable, and the footer fork saves a further 3,039
+bytes of HTML per page (3,411 → 372).
+
+Two things to keep straight when quoting it. The **CSS figures are stale** —
+current weights live in `carbon-baseline.json` and the check reports them — but
+the shape of the finding is not, because the whole saving is the fonts column
+and that column is still zero. And the saving **follows from the licence, not
+from a design choice**: outside the GOV.UK proposition a service must not use
+GDS Transport, so this is a constraint that happens to pay, not an optimisation
+anyone chose.
+
 **No grading, ever.** The check deliberately refuses to say whether a gCO2e
 figure is good or bad, and must not be made to. The uncertainty in the method
 cannot support a grade, and a grade travels out of context in a way a raw
@@ -500,6 +519,14 @@ release are plausibly still in use.
   Don't remove that line until it's untrue. Note this is narrower than it was:
   published Defra branding guidance now exists (see Brand cues), so the question
   is approval of *this library*, not the absence of any standard.
+
+  The question underneath it, still unanswered: **is this Defra-sanctioned or a
+  designer-led pilot?** It is not a presentational detail. A sanctioned library
+  owes consumers a support commitment, a deprecation policy and a route for
+  other teams to propose components; a pilot owes them honesty that it might be
+  abandoned. Everything in the README's Status section is currently written for
+  the second reading. If the answer becomes the first, that section is the thing
+  to rewrite, not the code.
 - **Typeface — decided, registered as DEF-002.** The branding guidance requires
   "Helvetica or Arial CSS font stacks"; this repo ships a `system-ui` stack.
   Both drop New Transport and both cost zero font bytes, so licence and carbon
@@ -529,6 +556,15 @@ release are plausibly still in use.
   Still unowned: no audit across the wider estates (Environment Agency, Natural
   England, RPA, APHA), and the guidance says "agency equivalent" without
   defining them.
+
+  And the harder version of that question, which an audit would answer but this
+  repo cannot: **are the brand cues across the estates consistent enough to
+  tokenise at all, or is the real first step a brand consolidation job?** If the
+  estates have genuinely diverged, a token layer cannot reconcile them — it can
+  only pick one and make the others wrong. That would make this library a
+  downstream consequence of a decision nobody has taken, rather than the thing
+  that settles it. Worth saying out loud before anyone treats the token values
+  here as the answer.
 
 ## House style
 

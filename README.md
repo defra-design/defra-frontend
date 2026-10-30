@@ -287,8 +287,11 @@ Alpha. Nothing here is stable.
   declared as DEF-002 in [`deviations.json`](deviations.json) and is waiting on a
   decision.
 
-Open governance questions are in [`docs/spec.md`](docs/spec.md) and the open
-decisions section of [CONTRIBUTING.md](CONTRIBUTING.md).
+Open governance questions are in the
+[open decisions](CONTRIBUTING.md#open-decisions--ask-dont-guess) section of
+CONTRIBUTING.md — including the two that sit above this library rather than
+inside it: whether it is Defra-sanctioned or a designer-led pilot, and whether
+the estates' brand cues are consistent enough to tokenise at all.
 
 ## Licence
 
