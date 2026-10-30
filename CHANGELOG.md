@@ -6,6 +6,29 @@ contain nothing for one of them. Where that happens it is said explicitly.
 Dates are the publish date. Nothing here is stable — see
 [Status](README.md#status).
 
+## 0.1.2 — 30 October 2026
+
+A `defra-create-prototype` release. **`defra-frontend` is unchanged**, bumped to
+keep the two packages answerable from one version number.
+
+### defra-create-prototype
+
+**Fixed: `--update` could break a prototype it had nothing to do with.** It
+checked only that the folder was a Prototype Kit prototype, not that Defra
+Frontend was already installed. Run in any other prototype it would install
+Defra Frontend and raise `govuk-frontend` to 6 — from 4.x or 5.x in most
+existing ones. That is up to three majors of breaking changes applied to
+someone's working research prototype by a command whose name promises the
+opposite, with `npm install` reporting success while the pages broke.
+
+It now refuses, prints the versions it found, and says to make a new prototype
+and move pages into it instead.
+
+Found by looking at real prototypes on a designer's machine: eighteen of them,
+every one on kit 13 with `govuk-frontend` 4.x or 5.x, and not one with Defra
+Frontend installed. Anyone running the published `--update` in the obvious place
+would have hit this.
+
 ## 0.1.1 — 30 October 2026
 
 A `defra-create-prototype` release. **`defra-frontend` is unchanged**: its only

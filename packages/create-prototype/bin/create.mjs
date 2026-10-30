@@ -303,6 +303,39 @@ package.json and an app folder:
     process.exit(1)
   }
 
+  // Update means update, not convert.
+  //
+  // Without this, --update in a prototype that never used Defra Frontend would
+  // install it and raise govuk-frontend to 6 — from 4.x or 5.x in most existing
+  // prototypes. That is up to three majors of breaking changes applied to
+  // someone's working research prototype by a command whose name promises the
+  // opposite, and `npm install` would report success while the pages broke.
+  //
+  // Found by looking at real prototypes on a designer's machine: eighteen of
+  // them, every one on kit 13 with govuk-frontend 4.x or 5.x, and not one with
+  // Defra Frontend installed. The guard is not hypothetical.
+  const installed = [DEFRA_FRONTEND_NAME, ...LEGACY_NAMES].filter((n) => deps[n])
+  if (installed.length === 0) {
+    console.error(`
+This prototype does not use Defra Frontend, so there is nothing to update.
+
+  ${pkg.name || dir}
+  govuk-prototype-kit ${deps['govuk-prototype-kit']}
+  govuk-frontend ${deps['govuk-frontend'] ?? '(not declared)'}
+
+Adding Defra Frontend here is not a small change. It needs GOV.UK Frontend 6,
+which is ahead of the version above. That upgrade would change markup and
+styling across every page you have built, and --update will not do that to
+your work behind your back.
+
+If you want a Defra-themed prototype, make a new one and move your pages into
+its app/views folder:
+
+  npx defra-create-prototype my-service
+`)
+    process.exit(1)
+  }
+
   const before = installedVersion(dir) ??
     LEGACY_NAMES.map((n) => installedVersion(dir, n)).find(Boolean) ?? null
   console.log(`\nUpdating Defra Frontend in ${pkg.name || dir}\n`)
