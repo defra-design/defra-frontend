@@ -6,7 +6,13 @@ contain nothing for one of them. Where that happens it is said explicitly.
 Dates are the publish date. Nothing here is stable — see
 [Status](README.md#status).
 
-## Unreleased
+## 0.2.0 — 30 October 2026
+
+A `defra-create-prototype` release. **`defra-frontend` is unchanged**, bumped to
+keep the two packages answerable from one version number.
+
+Minor rather than patch: where prototypes are created has moved, and running the
+command with no arguments now asks questions instead of printing usage.
 
 ### defra-create-prototype
 
