@@ -344,7 +344,7 @@ Commit those changes with the rest of your work.
 
   console.log(`Restart your prototype to pick it up:
 
-  npm start
+  npm run dev
 `)
 
   if (leftovers.length) {
@@ -435,10 +435,14 @@ and [Defra Frontend](https://defra-design.github.io/defra-frontend/docs/).
 ## Running it
 
 \`\`\`
-npm start
+npm run dev
 \`\`\`
 
 Then open http://localhost:3000
+
+Use \`npm run dev\` and not \`npm start\`. Both exist in \`package.json\`, but
+\`start\` is the command hosting services use — run locally it does not watch
+your files, so your changes will not appear.
 
 ## Making pages
 
@@ -486,7 +490,7 @@ Your prototype is ready.
 To start it, copy and run these two lines:
 
   cd ${name}
-  npm start
+  npm run dev
 
 Then open http://localhost:3000 in your browser.
 

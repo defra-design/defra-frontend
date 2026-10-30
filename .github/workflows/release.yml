@@ -31,10 +31,22 @@ jobs:
 
       # No dependency cache on purpose: a release should resolve from the
       # lockfile and the registry, not from whatever a previous run left behind.
+      #
+      # Deliberately NO registry-url. It looks like the right thing to add, and
+      # npm's own documented example includes it, but it breaks trusted
+      # publishing: setup-node then writes an .npmrc containing
+      # `_authToken=${NODE_AUTH_TOKEN}` and, with no token supplied, sets
+      # NODE_AUTH_TOKEN to the literal placeholder XXXXX-XXXXX-XXXXX-XXXXX. npm
+      # sends that as credentials, the registry rejects it as an unknown user,
+      # and the publish fails with `404 Not Found - PUT` — because npm only
+      # falls back to OIDC when no credential is present at all. The 404 names
+      # the package, so it reads as a missing package or a bad publisher
+      # config rather than as the auth problem it is.
+      #
+      # registry.npmjs.org is the default registry, so nothing is lost.
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          registry-url: https://registry.npmjs.org
 
       # Trusted publishing needs npm 11.5.1+, and the npm bundled with a Node
       # release is not guaranteed to be that new — Node 22 ships npm 10.x. This

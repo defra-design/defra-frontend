@@ -136,12 +136,19 @@ node defra-frontend/packages/create-prototype/bin/create.mjs my-service</code></
 <h2 class="govuk-heading-l">Start it</h2>
 
 <pre class="govuk-body" style="padding:1rem;background:#f3f2f1;border:1px solid #b1b4b6;overflow-x:auto"><code>cd my-service
-npm start</code></pre>
+npm run dev</code></pre>
 
 <p class="govuk-body">
   Open <a class="govuk-link" href="http://localhost:3000">http://localhost:3000</a>
   in your browser. You should see your prototype.
 </p>
+
+<div class="govuk-inset-text">
+  It is <code>npm run dev</code>, not <code>npm start</code>. Both appear in your
+  prototype's <code>package.json</code>, which makes <code>npm start</code> an
+  easy guess, but that one is meant for hosting services — run on your own
+  machine it does not watch your files, so your changes will not appear.
+</div>
 
 <p class="govuk-body">
   Leave the terminal open while you work — it is running the prototype. To stop
@@ -242,7 +249,7 @@ git push</code></pre>
 <p class="govuk-body">
   It reports the version before and after, and tells you if your prototype
   contains workarounds that are no longer needed. Restart with
-  <code>npm start</code> afterwards.
+  <code>npm run dev</code> afterwards.
 </p>
 
 <p class="govuk-body-s">
@@ -319,7 +326,7 @@ git push</code></pre>
   </div>
   <div class="govuk-summary-list__row">
     <dt class="govuk-summary-list__key">The page looks unstyled</dt>
-    <dd class="govuk-summary-list__value">Stop the prototype with Ctrl and C, then run <code>npm start</code> again. The styles are rebuilt on start.</dd>
+    <dd class="govuk-summary-list__value">Stop the prototype with Ctrl and C, then run <code>npm run dev</code> again. The styles are rebuilt on start.</dd>
   </div>
   <div class="govuk-summary-list__row">
     <dt class="govuk-summary-list__key">A change does not appear</dt>

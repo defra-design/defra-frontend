@@ -11,7 +11,7 @@ Then:
 
 ```bash
 cd my-service
-npm start
+npm run dev
 ```
 
 - [Step-by-step guide for designers](https://defra-design.github.io/defra-frontend/docs/prototyping/)

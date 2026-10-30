@@ -86,7 +86,7 @@ follows and whether it has been proposed back — see the
 ```bash
 npx defra-create-prototype my-service
 cd my-service
-npm start
+npm run dev
 ```
 
 This runs the real GOV.UK Prototype Kit, then adds Defra styling, Defra page
