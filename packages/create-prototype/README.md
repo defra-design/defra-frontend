@@ -45,6 +45,31 @@ then adds the three things a Defra prototype needs:
 It also points the prototype's layout at the Defra header and footer, writes a
 README into the folder, and puts the prototype into git.
 
+## Finding your prototypes
+
+```bash
+npx defra-create-prototype --dashboard
+```
+
+Writes and opens a page listing every prototype in `~/Defra prototypes` — its
+service name, its versions, the command to start it, and, where a prototype has
+versions, **which pages differ between them**. Useful before a comparison
+session: knowing that three of fifteen pages changed tells you where to spend
+the time.
+
+Prototypes made before the shared folder existed are usually somewhere else:
+
+```bash
+npx defra-create-prototype --dashboard --dir ~/Documents/GitHub
+```
+
+That reads the folder you name and writes the page into `~/Defra prototypes`,
+so scanning somewhere does not leave a file in it.
+
+The difference check ignores the link prefixes `--variants` adds, so "differs"
+means a real content change. Without that every copied page would be reported as
+changed, which looks like an answer and is not one.
+
 ## Comparing two versions in research
 
 To show a participant how something works today and how it might work, from

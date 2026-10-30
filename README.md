@@ -116,6 +116,21 @@ To skip the questions — in a script, or in CI:
 npx defra-create-prototype my-service --service-name "Register a water abstraction" --defra
 ```
 
+### Finding your prototypes
+
+```bash
+npx defra-create-prototype --dashboard
+```
+
+Writes and opens a page listing every prototype in `~/Defra prototypes` — its
+service name, versions, the command to start it, and which pages differ between
+versions. `--dir <path>` reads prototypes kept somewhere else, writing the page
+into `~/Defra prototypes` rather than into the folder it scanned.
+
+The difference check normalises away the link prefixes `--variants` adds, so
+"differs" means a real content change. Without that, every copied page reports
+as changed — an answer that looks like information and is not.
+
 ### Comparing two versions in research
 
 To show a participant the current state and a possible future state, from inside

@@ -6,6 +6,36 @@ contain nothing for one of them. Where that happens it is said explicitly.
 Dates are the publish date. Nothing here is stable — see
 [Status](README.md#status).
 
+## 0.4.0 — 30 October 2026
+
+A `defra-create-prototype` release. **`defra-frontend` is unchanged**, bumped to
+keep the two packages answerable from one version number.
+
+### defra-create-prototype
+
+**Added `--dashboard`.** Writes and opens a page listing every prototype in
+`~/Defra prototypes`: service name, versions, the command to start it, and for
+any with versions, **which pages differ between them**.
+
+```bash
+npx defra-create-prototype --dashboard
+npx defra-create-prototype --dashboard --dir ~/Documents/GitHub
+```
+
+`--dir` reads prototypes kept somewhere else and still writes the page into
+`~/Defra prototypes`, so scanning a folder does not leave a file in it.
+
+Two things it does that are easy to get wrong. The difference check normalises
+away the link prefixes `--variants` adds, because otherwise every copied page
+differs textually and the column reports everything as changed — worse than no
+answer, since it looks like one. And it lists only the pages that differ: one
+real prototype used while building this has 3,190 pages, where a table of all
+of them would be unreadable.
+
+It reads the service name from `app/config.json`, which is usually the only
+record of what a prototype was for — folder names like
+`defra form tool working backup 4:2:25` are not.
+
 ## 0.3.0 — 30 October 2026
 
 A `defra-create-prototype` release. **`defra-frontend` is unchanged**, bumped to

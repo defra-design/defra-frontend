@@ -80,6 +80,8 @@ const isLocal = args.includes('--local')
 const isHere = args.includes('--here')
 // Split the prototype you are in into two variants that run side by side.
 const isVariants = args.includes('--variants')
+// List every prototype in the shared folder, with what differs between versions.
+const isDashboard = args.includes('--dashboard')
 const flagValue = (flag) => {
   const prefix = `--${flag}=`
   const inline = args.find((a) => a.startsWith(prefix))
@@ -87,7 +89,10 @@ const flagValue = (flag) => {
   const i = args.indexOf(`--${flag}`)
   return i !== -1 ? args[i + 1] : undefined
 }
-const argName = args.find((a) => !a.startsWith('--') && a !== flagValue('service-name'))
+// The positional name, ignoring anything that is really a flag's value —
+// otherwise `--dir ~/somewhere` would be read as the prototype's name.
+const flagValues = ['service-name', 'dir'].map(flagValue).filter(Boolean)
+const argName = args.find((a) => !a.startsWith('--') && !flagValues.includes(a))
 
 // Flags so the questions below can be skipped. The prompts are for designers;
 // these are for anyone scripting it, and for the live instruction check, which
@@ -102,6 +107,48 @@ const flags = {
 // in CI, or piped — a prompt would hang forever with no indication why, so the
 // usage message stays the behaviour there.
 const interactive = Boolean(process.stdin.isTTY && process.stdout.isTTY)
+
+// --- Dashboard -------------------------------------------------------------
+// Separate from everything else: it reads, writes one file, and touches no
+// prototype. Kept in its own module because it is a different job from making
+// and updating prototypes, and this file is long enough.
+if (isDashboard) {
+  const { buildDashboard } = await import('./dashboard.mjs')
+  // --dir reads somewhere else. Prototypes made before the shared folder
+  // existed are scattered, often in a folder of git repositories, and the
+  // dashboard is most useful when it can see those too.
+  const scanDir = flagValue('dir')
+    ? resolve(process.cwd(), flagValue('dir'))
+    : PROTOTYPES_DIR
+  const { path, found } = buildDashboard(scanDir, PROTOTYPES_DIR)
+
+  const withVariants = found.filter((p) => p.hasVariants)
+  console.log(`
+${found.length} prototype${found.length === 1 ? '' : 's'} in ${scanDir}${
+  withVariants.length ? `, ${withVariants.length} with versions` : ''}
+
+  ${path}
+`)
+  if (found.length === 0) {
+    console.log(`Nothing there yet. Make one with:
+
+  npx defra-create-prototype
+
+Or point it at prototypes you already have:
+
+  npx defra-create-prototype --dashboard --dir ~/Documents/GitHub
+`)
+  }
+  // Opening it is a convenience, not the point — the path above is the output,
+  // so a machine with no handler for html files still gets a usable answer.
+  // Called directly rather than through tryRun, which is defined further down:
+  // this block runs before it exists, and a const is not hoisted.
+  const opener = process.platform === 'darwin'
+    ? 'open'
+    : process.platform === 'win32' ? 'start' : 'xdg-open'
+  spawnSync(opener, [path], { stdio: 'ignore', shell: process.platform === 'win32' })
+  process.exit(0)
+}
 
 if (!isUpdate && !isVariants && !argName && !interactive) {
   console.error(`
