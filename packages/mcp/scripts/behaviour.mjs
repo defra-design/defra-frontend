@@ -24,6 +24,7 @@ import { open, textOf } from './drive.mjs'
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync, readFileSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
+import { spawnSync } from 'node:child_process'
 
 /**
  * A prototype-shaped folder, fabricated rather than created for real.
@@ -82,6 +83,15 @@ check('it offers the knowledge tools',
 check('and the tools that act on a prototype',
   ['create_page', 'run_prototype', 'audit', 'snapshot'].every((n) => names.includes(n)),
   names.join(', '))
+
+check('and the publishing tools',
+  ['publish', 'check_protection'].every((n) => names.includes(n)),
+  names.join(', '))
+
+// The password warning is the single most consequential sentence this server
+// produces, and an assistant only relays it if the description says to.
+check('the publish description tells the assistant to relay the warning',
+  /relay/i.test(tools.find((t) => t.name === 'publish')?.description ?? ''))
 
 check('every tool has a description and an object input schema',
   tools.every((t) => t.description?.length > 20 && t.inputSchema?.type === 'object'),
@@ -250,6 +260,73 @@ client.close()
 
   c.close()
   rmSync(dir, { recursive: true, force: true })
+}
+
+// --- publishing ------------------------------------------------------------
+// The password fails OPEN: PASSWORD without NODE_ENV=production is ignored and
+// the prototype serves the real thing to anyone. Every path out of publish has
+// to carry that, because the failure is invisible from everywhere else.
+
+{
+  const dir = fixture()
+  const c = open({ cwd: dir })
+  await c.start()
+
+  const noGit = textOf(await c.call('publish', {}))
+  check('publish refuses a folder that is not a git repository',
+    /not a git repository/.test(noGit), noGit.slice(0, 80))
+
+  spawnSync('git', ['init', '-q'], { cwd: dir })
+  spawnSync('git', ['config', 'user.email', 'b@example.com'], { cwd: dir })
+  spawnSync('git', ['config', 'user.name', 'Behaviour'], { cwd: dir })
+
+  const noRemote = textOf(await c.call('publish', {}))
+  check('publish refuses when there is no GitHub repository, rather than committing',
+    /no GitHub repository/.test(noRemote), noRemote.slice(0, 80))
+
+  check('and says nothing was committed or pushed',
+    /[Nn]othing has been committed or pushed/.test(noRemote))
+
+  check('and the refusal left no commit behind',
+    spawnSync('git', ['rev-list', '-n', '1', '--all'], { cwd: dir, encoding: 'utf8' })
+      .stdout.trim() === '')
+
+  // A real push needs a real remote. A bare repository on disk is a remote,
+  // which exercises the whole path without touching the network or GitHub.
+  const bare = mkdtempSync(join(tmpdir(), 'defra-mcp-remote-'))
+  spawnSync('git', ['init', '--bare', '-q'], { cwd: bare })
+  spawnSync('git', ['remote', 'add', 'origin', bare], { cwd: dir })
+  writeFileSync(join(dir, 'app', 'views', 'index.html'), '<h1>hello</h1>')
+
+  const done = textOf(await c.call('publish', { message: 'First version' }))
+
+  check('publish commits and pushes once there is a remote',
+    /Pushed/.test(done) && spawnSync('git', ['rev-list', '-n', '1', '--all'],
+      { cwd: bare, encoding: 'utf8' }).stdout.trim() !== '', done.slice(0, 100))
+
+  check('and uses the message it was given',
+    /First version/.test(spawnSync('git', ['log', '-1', '--format=%s'],
+      { cwd: dir, encoding: 'utf8' }).stdout))
+
+  check('and names BOTH environment variables, since PASSWORD alone fails open',
+    /PASSWORD=/.test(done) && /NODE_ENV=production/.test(done), done.slice(-200))
+
+  check('and says plainly that PASSWORD on its own does nothing',
+    /on its own does nothing/.test(done))
+
+  check('and tells the designer to confirm it in a private window',
+    /private window/.test(done))
+
+  check('and does not claim the prototype is now on the web',
+    /NOT on the web/.test(done))
+
+  const again = textOf(await c.call('publish', {}))
+  check('publishing with nothing changed still repeats the password warning',
+    /Nothing to commit/.test(again) && /NODE_ENV=production/.test(again))
+
+  c.close()
+  rmSync(dir, { recursive: true, force: true })
+  rmSync(bare, { recursive: true, force: true })
 }
 
 // --- report ----------------------------------------------------------------

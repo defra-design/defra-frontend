@@ -54,11 +54,20 @@ viewing a page, because a browser does that better.
 | `run_prototype` | Starts the prototype and returns its address |
 | `audit` | Checks every page against WCAG 2.1 AA with axe-core |
 | `snapshot` | Freezes the pages as they are now, so a round of research stays viewable |
+| `publish` | Commits and pushes to GitHub — it does not host the prototype |
+| `check_protection` | Asks a published prototype whether it wants a password |
 
 The tools that act on a prototype refuse to run in a folder that is not one,
 and `create_page` refuses to overwrite a page that already exists. Both guards
 are there because an assistant retrying a call must not be able to destroy
 work.
+
+`publish` stops at GitHub. A prototype is a running Node server, so hosting it
+means a platform that runs Node and an account to go with it — GitHub Pages
+cannot. What `publish` does do is say, every time, that **`PASSWORD` without
+`NODE_ENV=production` does nothing**: the prototype deploys, looks correct, and
+is open to anyone who finds the address. Creating a repository is private
+unless public is asked for, because a prototype may hold unreleased policy.
 
 `audit` returns a list of things to fix and never a pass. An automated check
 finds a minority of accessibility problems, and the commonest mistake in a

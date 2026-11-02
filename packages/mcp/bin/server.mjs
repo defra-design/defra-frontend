@@ -41,6 +41,8 @@ import { createPage } from '../lib/tools/create-page.mjs'
 import { runPrototype } from '../lib/tools/run-prototype.mjs'
 import { audit } from '../lib/tools/audit.mjs'
 import { snapshot } from '../lib/tools/snapshot.mjs'
+import { publish } from '../lib/tools/publish.mjs'
+import { checkProtection } from '../lib/tools/check-protection.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const { version } = JSON.parse(
@@ -56,7 +58,9 @@ export const TOOLS = [
   createPage,
   runPrototype,
   audit,
-  snapshot
+  snapshot,
+  publish,
+  checkProtection
 ]
 
 const server = new Server(
