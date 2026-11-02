@@ -517,8 +517,17 @@ function wireEditor (prototypeDir) {
   if (!result.written) return { wired: false, reason: result.reason }
 
   if (onNpm()) {
-    run('npm', ['install', `${DEFRA_MCP_NAME}@latest`, '--save-dev'], prototypeDir)
-    return { wired: true }
+    // tryRun, NOT run. This is a convenience, and run() exits the process on
+    // failure — which would abandon a half-made prototype because an optional
+    // assistant server could not be fetched. The registry can be unreachable
+    // behind a government proxy, the package may not be published yet, and
+    // neither is a reason to destroy someone's prototype at the last step.
+    // The configuration is already written either way, and npx will fetch the
+    // server on first use if it is not in node_modules.
+    const installed = tryRun('npm', ['install', `${DEFRA_MCP_NAME}@latest`, '--save-dev'], prototypeDir)
+    return installed
+      ? { wired: true }
+      : { wired: true, reason: 'it could not be downloaded now, so it will be fetched the first time it is used' }
   }
   // --local tests an unreleased checkout. The configuration still points at
   // the published server, which is worth saying rather than implying this

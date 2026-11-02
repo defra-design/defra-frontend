@@ -690,6 +690,22 @@ console.log('─'.repeat(66))
   }
 }
 
+{
+  // Asserted against the source because create.mjs cannot be imported — it
+  // reads process.argv at module scope and exits in dozens of places. The
+  // instructions check reads this same file as text for the same reason.
+  //
+  // The distinction matters more than it looks: run() exits the process on a
+  // non-zero status. Installing the assistant server with it would abandon a
+  // half-made prototype whenever the registry is unreachable — behind a
+  // government proxy, or simply before the package is published — at the very
+  // last step, after the kit and Defra Frontend are already in place.
+  const source = text(cli)
+  const install = source.split('\n').find((l) => l.includes('DEFRA_MCP_NAME}@latest'))
+  check('installing the assistant server cannot abort creating a prototype',
+    Boolean(install) && install.includes('tryRun('), (install ?? '(line not found)').trim())
+}
+
 // --- report ----------------------------------------------------------------
 
 const failed = results.filter((r) => !r.ok)
