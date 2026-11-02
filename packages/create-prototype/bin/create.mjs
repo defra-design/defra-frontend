@@ -1389,6 +1389,12 @@ So this is a list of things to fix, not a score. A prototype with no errors
 here has not been accessibility tested, and nothing in the report should be
 quoted as a pass.
 
+One gap worth knowing by name, because it is a common prototyping habit: a
+field with a placeholder and no <label> raises nothing here. axe takes the
+placeholder as the field's name, so the field looks named — but a placeholder
+is not a label. It disappears as soon as someone types. Check by eye that
+every field has a visible label that stays put.
+
 ────────────────────────────────────────────────────────────────────────
 `)
 

@@ -292,6 +292,15 @@ export function renderReport ({ name, base, audited, broken, summary }) {
       errors here has not been accessibility tested. Nothing in this file should
       be quoted as a pass.
     </p>
+    <p>
+      One gap worth knowing by name, because it is a common prototyping habit:
+      a field with a <code>placeholder</code> and no <code>&lt;label&gt;</code>
+      raises nothing here. axe takes the placeholder as the field's name, so
+      the field looks named — but a placeholder is not a label. It disappears
+      as soon as someone types, it is grey on white, and it leaves the field
+      unnamed for anyone who comes back to it. Check by eye that every field
+      has a visible label that stays put.
+    </p>
   </div>
   ${summary.issues.length
     ? summary.issues.map(row).join('')

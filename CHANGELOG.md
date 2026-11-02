@@ -6,6 +6,31 @@ contain nothing for one of them. Where that happens it is said explicitly.
 Dates are the publish date. Nothing here is stable — see
 [Status](README.md#status).
 
+## 0.7.1 — unreleased
+
+A `defra-create-prototype` release. **`defra-frontend` is unchanged**, bumped to
+keep the two packages answerable from one version number.
+
+### defra-create-prototype
+
+**`--audit` now names the placeholder-as-label gap, in the terminal and in the
+report.**
+
+Found by running `--audit` against a form journey built for the purpose. Two
+fields were given a `placeholder` and no `<label>` — the single most common
+accessibility mistake in a prototype — and the audit reported nothing. That is
+axe working as designed: it accepts a placeholder as a field's accessible name,
+so the field looks named and no rule fires.
+
+The result is that the one mistake a prototype is most likely to contain is one
+this check cannot report, and a clean run is exactly when a designer is least
+likely to go looking. So the caveat now says it, rather than leaving it as an
+instance of the general "automated checks find a minority of problems" wording
+that was already there.
+
+It sits in the caveat block, which is printed whether or not anything was
+found, because a zero-finding run is when it matters most.
+
 ## 0.7.0 — 2 November 2026
 
 A `defra-create-prototype` release. **`defra-frontend` is unchanged**, bumped to

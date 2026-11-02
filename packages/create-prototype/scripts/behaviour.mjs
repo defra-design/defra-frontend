@@ -569,6 +569,11 @@ console.log('─'.repeat(66))
   check('and pages that were not checked are named in it',
     /\/check/.test(html) && /answered 500/.test(html))
   check('and it is not described as passing', !/\bpass(ed|es)\b/i.test(html.replace(/quoted as a pass/, '')))
+  // axe accepts a placeholder as a field's accessible name, so the one mistake
+  // a prototype is most likely to contain is the one it cannot report. The
+  // report has to say so itself, since nothing in the findings will.
+  check('and it names the placeholder-as-label gap, which it cannot detect',
+    /placeholder/.test(html) && /&lt;label&gt;/.test(html))
 }
 
 {
