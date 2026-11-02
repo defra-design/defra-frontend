@@ -6,7 +6,7 @@ contain nothing for one of them. Where that happens it is said explicitly.
 Dates are the publish date. Nothing here is stable — see
 [Status](README.md#status).
 
-## 0.7.1 — unreleased
+## 0.7.1 — 2 November 2026
 
 A `defra-create-prototype` release. **`defra-frontend` is unchanged**, bumped to
 keep the two packages answerable from one version number.
