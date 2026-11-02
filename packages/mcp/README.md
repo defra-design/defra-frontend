@@ -1,0 +1,66 @@
+# defra-mcp
+
+Design system knowledge for an assistant working inside a Defra prototype.
+
+Nothing is approved for live services. See
+[Status](../../README.md#status).
+
+## What it is for
+
+An assistant editing a prototype's pages writes confident, plausible Nunjucks.
+Without knowing this design system it will refer to macros that do not exist,
+reach for `govukFooter` on a service that may not legally use it, or try to
+change a GOV.UK component by shadowing its template — which fails with no error
+at all, so the fix looks applied and the page is unchanged.
+
+This server answers those questions from the design system itself, so the
+answers move when the design system moves.
+
+## What it is not
+
+It does not edit files. An assistant in VS Code already does that, and doing it
+twice in two places is how the two disagree.
+
+## Using it
+
+A prototype made with `defra-create-prototype` is already wired up — open the
+folder in VS Code and the tools are there.
+
+To add it to a prototype by hand, create `.vscode/mcp.json`:
+
+```json
+{
+  "servers": {
+    "defra": { "type": "stdio", "command": "npx", "args": ["defra-mcp"] }
+  }
+}
+```
+
+That is the VS Code workspace format. GitHub Copilot CLI uses a different file
+with a `mcpServers` key and `"type": "local"`, and does not read this one.
+
+Run the prototype the usual way to see your changes — `npm run dev` from the
+prototype folder, which watches files and reloads. There is no tool here for
+viewing a page, because a browser does that better.
+
+## Tools
+
+| Tool | Answers |
+|---|---|
+| `list_components` | What exists, which Defra components replace GOV.UK ones, and which must not be used |
+| `component_help` | One component's macro name, import path, parameters and a working example |
+| `list_page_types` | The page types, how a file becomes a URL, and the layout every page extends |
+
+## The catalogue is generated
+
+`lib/catalogue.json` is built from `packages/defra-frontend` by
+`npm run catalogue`, and `npm run catalogue:check` fails when the two have
+drifted apart. It is precomputed rather than read at runtime because this
+server runs inside a designer's prototype, where the design system's source
+files are not present.
+
+Do not edit it by hand.
+
+## Licence
+
+[Open Government Licence v3.0](../../LICENCE).

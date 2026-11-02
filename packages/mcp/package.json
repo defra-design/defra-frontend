@@ -1,0 +1,25 @@
+{
+  "name": "defra-mcp",
+  "version": "0.7.1",
+  "description": "Design system knowledge and prototype commands for an assistant working in a Defra prototype",
+  "license": "OGL-UK-3.0",
+  "type": "module",
+  "bin": {
+    "defra-mcp": "bin/server.mjs"
+  },
+  "files": [
+    "bin",
+    "lib"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "catalogue": "node scripts/catalogue.mjs",
+    "catalogue:check": "node scripts/catalogue.mjs --check",
+    "behaviour": "node scripts/behaviour.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2"
+  }
+}

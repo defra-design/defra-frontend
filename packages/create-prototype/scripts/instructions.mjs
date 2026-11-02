@@ -68,7 +68,14 @@ const SOURCES = [
   'packages/create-prototype/bin/create.mjs',
   'packages/create-prototype/README.md',
   'README.md',
-  'apps/docs/src/prototyping.njk'
+  'apps/docs/src/prototyping.njk',
+  // The MCP server's README and its tool descriptions are instructions too,
+  // and the descriptions are the highest-traffic ones in the repo: an
+  // assistant reads them every session and writes code from them, without a
+  // designer ever seeing the words. A wrong command there would reach further
+  // and quieter than the `npm start` mistake this check was built for.
+  'packages/mcp/README.md',
+  'packages/mcp/bin/server.mjs'
 ]
 
 const problems = []
