@@ -4,6 +4,10 @@
  *
  *   npx defra-create-prototype my-service   create a prototype
  *   npx defra-create-prototype --update     update the one you are in
+ *   npx defra-create-prototype --variants   split it into current and future
+ *   npx defra-create-prototype --snapshot   freeze the pages as they are now
+ *   npx defra-create-prototype --dashboard  list every prototype you have
+ *   npx defra-create-prototype --check      is a published one protected?
  *
  * --update brings an existing prototype up to the current release and reports
  * what changed. It also migrates prototypes made before this package was
@@ -122,6 +126,8 @@ const isLocal = args.includes('--local')
 const isHere = args.includes('--here')
 // Split the prototype you are in into two variants that run side by side.
 const isVariants = args.includes('--variants')
+// Freeze the pages as they are now, keeping them reachable.
+const isSnapshot = args.includes('--snapshot')
 // List every prototype in the shared folder, with what differs between versions.
 const isDashboard = args.includes('--dashboard')
 // Ask a published prototype whether it is actually password protected.
@@ -135,7 +141,8 @@ const flagValue = (flag) => {
 }
 // The positional name, ignoring anything that is really a flag's value —
 // otherwise `--dir ~/somewhere` would be read as the prototype's name.
-const flagValues = ['service-name', 'dir', 'check'].map(flagValue).filter(Boolean)
+const flagValues = ['service-name', 'dir', 'check', 'snapshot', 'note']
+  .map(flagValue).filter(Boolean)
 const argName = args.find((a) => !a.startsWith('--') && !flagValues.includes(a))
 
 // Flags so the questions below can be skipped. The prompts are for designers;
@@ -299,18 +306,23 @@ Or point it at prototypes you already have:
   process.exit(0)
 }
 
-if (!isUpdate && !isVariants && !argName && !interactive) {
+if (!isUpdate && !isVariants && !isSnapshot && !argName && !interactive) {
   console.error(`
 Usage:
   npx defra-create-prototype <name>        create a new prototype
   npx defra-create-prototype --update      update the prototype you are in
   npx defra-create-prototype --variants    split it into current and future
+  npx defra-create-prototype --snapshot "round 1"
+                                           freeze the pages as they are now
+  npx defra-create-prototype --dashboard   list every prototype you have
+  npx defra-create-prototype --check <url> is a published one protected?
 
 Run it without a name in a terminal and it will ask.
 
   --here                  create it here instead of in ${PROTOTYPES_DIR}
   --service-name "<text>" the name shown in the header
   --govuk | --defra       which header and footer, if not asking
+  --note "<text>"         with --snapshot, why you took it
   --local                 use this checkout instead of the published package,
                           for testing a change before it is released
 `)
@@ -428,6 +440,55 @@ function installedVersion (prototypeDir, pkgName = DEFRA_FRONTEND_NAME) {
   } catch {
     return null
   }
+}
+
+// --- Pages -----------------------------------------------------------------
+// Shared by --variants and --snapshot, which both copy a prototype's pages
+// somewhere and have to keep the links inside them working.
+
+/** A folder name that will survive git, Windows and a URL. */
+const toFolderName = (input) => input
+  .trim()
+  .toLowerCase()
+  .replace(/['’]/g, '')
+  .replace(/[^a-z0-9]+/g, '-')
+  .replace(/^-+|-+$/g, '')
+  .slice(0, 60)
+
+// Paths that must not be prefixed when links are rewritten. These are served
+// by the kit or by plugins, not by the prototype's own pages, so prefixing
+// them breaks images, stylesheets and the kit's own management pages.
+const NOT_PAGES = ['public', 'assets', 'plugin-assets', 'extension-assets', 'manage-prototype']
+
+/**
+ * Prefix the prototype's own links so they stay inside a copy of it.
+ *
+ * Kit pages link with absolute paths — href="/task-list" — so a page moved
+ * into current/ would otherwise link straight out of its own variant and into
+ * the other one's territory. Only href and action are touched, only when the
+ * path is the prototype's own, and never for assets or the kit's own pages.
+ *
+ * `prefix` may contain a slash: a snapshot's is `snapshots/round-1`.
+ */
+const prefixLinks = (html, prefix) =>
+  html.replace(/\b(href|action)="\/([^"]*)"/g, (whole, attr, path) => {
+    const first = path.split(/[/?#]/)[0]
+    if (NOT_PAGES.includes(first)) return whole
+    return `${attr}="/${prefix}/${path}"`
+  })
+
+/** Every .html and .njk file under a directory. */
+const pagesIn = (root) => {
+  const found = []
+  const walk = (d) => {
+    for (const entry of readdirSync(d, { withFileTypes: true })) {
+      const p = join(d, entry.name)
+      if (entry.isDirectory()) walk(p)
+      else if (/\.(html|njk)$/.test(entry.name)) found.push(p)
+    }
+  }
+  walk(root)
+  return found
 }
 
 /**
@@ -703,11 +764,6 @@ line:
 if (isVariants) {
   const VARIANTS = ['current', 'future']
 
-  // Paths that must not be prefixed when links are rewritten. These are served
-  // by the kit or by plugins, not by the prototype's own pages, so prefixing
-  // them breaks images, stylesheets and the kit's own management pages.
-  const NOT_PAGES = ['public', 'assets', 'plugin-assets', 'extension-assets', 'manage-prototype']
-
   const pkgPath = join(dir, 'package.json')
   const pkg = existsSync(pkgPath) ? JSON.parse(readFileSync(pkgPath, 'utf8')) : null
   if (!pkg || !{ ...pkg.dependencies, ...pkg.devDependencies }['govuk-prototype-kit']) {
@@ -761,41 +817,14 @@ ${inGit
     process.exit(1)
   }
 
-  /**
-   * Prefix the prototype's own links so they stay inside their variant.
-   *
-   * Kit pages link with absolute paths — href="/task-list" — so a page moved
-   * into current/ would otherwise link straight out of its own variant and into
-   * the other one's territory. Only href and action are touched, only when the
-   * path is the prototype's own, and never for assets or the kit's own pages.
-   */
-  const prefixLinks = (html, variant) =>
-    html.replace(/\b(href|action)="\/([^"]*)"/g, (whole, attr, path) => {
-      const first = path.split(/[/?#]/)[0]
-      if (NOT_PAGES.includes(first)) return whole
-      return `${attr}="/${variant}/${path}"`
-    })
-
-  /** Every .html and .njk file under a directory. */
-  const pagesIn = (root) => {
-    const found = []
-    const walk = (d) => {
-      for (const entry of readdirSync(d, { withFileTypes: true })) {
-        const p = join(d, entry.name)
-        if (entry.isDirectory()) walk(p)
-        else if (/\.(html|njk)$/.test(entry.name)) found.push(p)
-      }
-    }
-    walk(root)
-    return found
-  }
-
   const [current, future] = VARIANTS.map((v) => join(viewsDir, v))
 
   // Everything except layouts, which both variants share — that sharing is the
-  // reason for doing this in one prototype rather than two.
+  // reason for doing this in one prototype rather than two. Snapshots stay put
+  // too: they are frozen copies of earlier rounds and have their own prefix
+  // already, so splitting them would rewrite links in pages nobody is editing.
   const toMove = readdirSync(viewsDir, { withFileTypes: true })
-    .filter((e) => e.name !== 'layouts')
+    .filter((e) => e.name !== 'layouts' && e.name !== 'snapshots')
     .map((e) => e.name)
 
   mkdirSync(current, { recursive: true })
@@ -874,20 +903,282 @@ everyone else.
   process.exit(0)
 }
 
+// --- Snapshots -------------------------------------------------------------
+// Freeze the pages as they are now, and keep them reachable.
+//
+// A different job from --variants, which is for two states you are both
+// editing. A snapshot is a copy nobody edits: round one of research is over,
+// the pages are about to be rebuilt, and the question that always comes up in
+// round two is what the thing people actually saw looked like.
+//
+// The answer today, on every machine we have looked at, is a folder called
+// "backup copy" — or "defra form tool working backup 4:2:25" — with nothing
+// recording when it was taken or what it was for, and no way to look at it
+// without stopping the prototype that is running.
+//
+// So a snapshot lives inside the prototype and is served by it:
+//
+//   localhost:<port>/snapshots/round-1/...
+//
+// No second install, no second port, no second terminal, and it travels with
+// the prototype when a colleague clones it.
+//
+// What is deliberately NOT frozen: the layout, the stylesheets and routes.js.
+// A snapshot freezes the pages and the journey through them, not the design
+// system. Copying the layout would pin every old snapshot to an old header
+// forever and gain almost nothing, since the layout extends a plugin that
+// resolves at whatever version is installed either way.
+if (isSnapshot) {
+  const SNAPSHOTS = 'snapshots'
+
+  const pkgPath = join(dir, 'package.json')
+  const pkg = existsSync(pkgPath) ? JSON.parse(readFileSync(pkgPath, 'utf8')) : null
+  const deps = { ...pkg?.dependencies, ...pkg?.devDependencies }
+  if (!pkg || !deps['govuk-prototype-kit']) {
+    console.error(`
+This does not look like a prototype.
+
+Run the command from inside your prototype folder:
+
+  cd "${PROTOTYPES_DIR}/my-service"
+  npx defra-create-prototype --snapshot "round 1"
+`)
+    process.exit(1)
+  }
+
+  const viewsDir = join(dir, 'app', 'views')
+  const snapshotsDir = join(viewsDir, SNAPSHOTS)
+  const manifestPath = join(dir, 'snapshots.json')
+
+  if (!existsSync(viewsDir)) {
+    console.error('\nThis prototype has no app/views folder, so there are no pages to snapshot.\n')
+    process.exit(1)
+  }
+
+  // A prototype that already has its own app/views/snapshots folder is not one
+  // of ours, and the manifest is what tells the difference. Taking it over
+  // would mean excluding the designer's own pages from every snapshot from
+  // then on, silently.
+  if (existsSync(snapshotsDir) && !existsSync(manifestPath)) {
+    console.error(`
+This prototype already has a folder at app/views/${SNAPSHOTS}, and it was not
+made by this command — there is no snapshots.json alongside it.
+
+Snapshots need that folder name, so rename yours first:
+
+  app/views/${SNAPSHOTS}  ->  something else
+
+Links to those pages will need the new name too.
+`)
+    process.exit(1)
+  }
+
+  // Everything except the shared layout and the snapshots themselves. The
+  // second exclusion is not tidiness: without it each snapshot would copy
+  // every earlier one, so the folder would roughly double every time.
+  const toCopy = readdirSync(viewsDir, { withFileTypes: true })
+    .filter((e) => e.name !== 'layouts' && e.name !== SNAPSHOTS)
+    .map((e) => e.name)
+
+  if (toCopy.length === 0) {
+    console.error(`
+There are no pages to snapshot yet.
+
+Make some pages in app/views first — a snapshot is a copy of what you have
+built, so there has to be something to copy.
+`)
+    process.exit(1)
+  }
+
+  let label = flagValue('snapshot') ?? argName
+  if (!label && interactive) {
+    const rl = createInterface({ input: process.stdin, output: process.stdout })
+    try {
+      label = (await rl.question(
+        '\nWhat are you freezing? For example, round 1 or before the new task list\n> ')).trim()
+    } catch (error) {
+      if (error?.code !== 'ABORT_ERR') throw error
+      rl.close()
+      console.log('\n\nCancelled. Nothing has been snapshotted.\n')
+      process.exit(1)
+    } finally {
+      rl.close()
+    }
+  }
+  if (!label) {
+    console.error(`
+Give the snapshot a name, so you know later what it was:
+
+  npx defra-create-prototype --snapshot "round 1"
+`)
+    process.exit(1)
+  }
+
+  const slug = toFolderName(label)
+  if (!slug) {
+    console.error('\nThat name has no letters or numbers in it, so it cannot be a folder name.\n')
+    process.exit(1)
+  }
+
+  const target = join(snapshotsDir, slug)
+  if (existsSync(target)) {
+    console.error(`
+There is already a snapshot called "${slug}".
+
+A snapshot is never overwritten — the whole point is that it stays as it was.
+Use a different name:
+
+  npx defra-create-prototype --snapshot "round 2"
+`)
+    process.exit(1)
+  }
+
+  mkdirSync(target, { recursive: true })
+  for (const entry of toCopy) {
+    cpSync(join(viewsDir, entry), join(target, entry), { recursive: true })
+  }
+
+  // The copy's links are repointed; the live pages are not touched at all.
+  // A prototype that already has variants keeps them inside the snapshot —
+  // /current/task-list becomes /snapshots/round-1/current/task-list — so both
+  // states as they were on the day stay reachable.
+  const frozen = pagesIn(target)
+  let rewritten = 0
+  for (const page of frozen) {
+    const before = readFileSync(page, 'utf8')
+    const after = prefixLinks(before, `${SNAPSHOTS}/${slug}`)
+    if (after !== before) {
+      writeFileSync(page, after)
+      rewritten++
+    }
+  }
+
+  // The manifest is the part a "backup copy" folder does not have: what this
+  // was, when it was taken, and what it was built against. Three months later
+  // that is the difference between a usable reference and a folder nobody
+  // dares delete.
+  let manifest = { snapshots: [] }
+  try {
+    const parsed = JSON.parse(readFileSync(manifestPath, 'utf8'))
+    if (Array.isArray(parsed?.snapshots)) manifest = parsed
+  } catch { /* no manifest yet, or an unreadable one; start a fresh list */ }
+
+  const taken = new Date().toISOString().slice(0, 10)
+  manifest.snapshots = [{
+    label,
+    slug,
+    taken,
+    note: flagValue('note') ?? null,
+    pages: frozen.length,
+    // The installed version where there is one, because that is what was
+    // actually compiled; the declared range otherwise.
+    defraFrontend: installedVersion(dir) ?? deps[DEFRA_FRONTEND_NAME] ??
+      LEGACY_NAMES.map((n) => deps[n]).find(Boolean) ?? null,
+    govukFrontend: deps['govuk-frontend'] ?? null,
+    kit: deps['govuk-prototype-kit'] ?? null
+  }, ...manifest.snapshots.filter((s) => s?.slug !== slug)]
+  writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n')
+
+  // Rewritten from the manifest every time, so it is never out of date with
+  // it. Ours to generate, which is why it is here and not a line added to the
+  // designer's own index page.
+  writeFileSync(join(snapshotsDir, 'index.html'),
+`{% extends "layouts/main.html" %}
+
+{% set pageName = "Snapshots" %}
+
+{# Generated by defra-create-prototype --snapshot. Rewritten each time one is
+   taken, so edits here will not survive. #}
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">Snapshots</h1>
+    <p class="govuk-body">
+      Earlier states of this prototype, frozen so they can still be looked at.
+      They are copies — editing a page here changes nothing in the live
+      prototype, and nothing here is kept up to date.
+    </p>
+    <dl class="govuk-summary-list">
+${manifest.snapshots.map((s) => `      <div class="govuk-summary-list__row">
+        <dt class="govuk-summary-list__key">
+          <a class="govuk-link" href="/${SNAPSHOTS}/${s.slug}/">${s.label}</a>
+        </dt>
+        <dd class="govuk-summary-list__value">
+          Taken ${s.taken} · ${s.pages} page${s.pages === 1 ? '' : 's'}${s.note ? `<br>${s.note}` : ''}
+        </dd>
+      </div>`).join('\n')}
+    </dl>
+    <p class="govuk-body-s">
+      This page is for you, not for participants.
+    </p>
+  </div>
+</div>
+{% endblock %}
+`)
+
+  const port = portOf(dir) ?? 3000
+  const inGit = tryRun('git', ['rev-parse', '--git-dir'])
+
+  // Two columns whose left side contains a slug of unknown length, so the gap
+  // is measured rather than typed. Hard-coded spaces here looked right for
+  // "round-1" and ragged for every other name.
+  const columns = (rows) => {
+    const width = Math.max(...rows.map(([left]) => left.length)) + 4
+    return rows.map(([left, right]) => `  ${left.padEnd(width)}${right}`).join('\n')
+  }
+
+  console.log(`
+────────────────────────────────────────────────────────────────────────
+
+Snapshotted "${label}" — ${frozen.length} page${frozen.length === 1 ? '' : 's'}.
+
+${columns([
+  [`app/views/${SNAPSHOTS}/${slug}`, 'the frozen copy'],
+  ['snapshots.json', 'what it was, and when']
+])}
+
+Your live pages have not been touched. The copy is reachable from the same
+prototype, so there is nothing else to start:
+
+${columns([
+  [`localhost:${port}/${SNAPSHOTS}/${slug}/`, 'as it is today'],
+  [`localhost:${port}/${SNAPSHOTS}`, 'every snapshot, with dates']
+])}
+
+${rewritten} page${rewritten === 1 ? '' : 's'} had links repointed to stay inside the snapshot.
+
+WHAT IS FROZEN, AND WHAT IS NOT
+
+Your pages and the journey through them are frozen. The layout, your
+stylesheets and app/routes.js are shared with the live prototype on purpose —
+a fix to the header reaches every snapshot, rather than leaving them all on an
+old one. The trade is that a snapshot shows old content in today's design, and
+a journey that depends on a route you later change may stop working.
+${inGit
+  ? `
+Commit it, or it is exactly the backup copy this replaces:
+
+  git add -A
+  git commit -m "Snapshot: ${label}"
+`
+  : `
+This prototype is not in version control, so the snapshot exists only on this
+machine. Worth fixing before you rely on it:
+
+  git init -b main
+  git add -A
+  git commit -m "Snapshot: ${label}"
+`}
+────────────────────────────────────────────────────────────────────────
+`)
+  process.exit(0)
+}
+
 // --- Questions -------------------------------------------------------------
 // Asked rather than configured. The brand mode especially: it is a licence
 // boundary, and leaving it as a Sass variable meant the default silently
 // decided it for everyone. A question gets it right at the point someone knows
 // the answer.
-
-/** A folder name that will survive git, Windows and a URL. */
-const toFolderName = (input) => input
-  .trim()
-  .toLowerCase()
-  .replace(/['’]/g, '')
-  .replace(/[^a-z0-9]+/g, '-')
-  .replace(/^-+|-+$/g, '')
-  .slice(0, 60)
 
 let serviceName = flags.serviceName
 // --govuk and --defra are the non-interactive answers; neither means "ask".
@@ -1156,6 +1447,19 @@ is served at \`/apply/name\`.
 
 Defra page templates are available under **Create a new page** at
 http://localhost:${port}/manage-prototype
+
+## Keeping an earlier round
+
+Before you rebuild pages you have already tested, freeze them:
+
+\`\`\`
+npx defra-create-prototype --snapshot "round 1"
+\`\`\`
+
+The copy stays reachable at http://localhost:${port}/snapshots/round-1/ from this
+same prototype, and your live pages are not touched. Use this instead of making
+a "backup copy" folder — a snapshot records when it was taken and what it was
+built against, and you do not need to stop this prototype to look at it.
 
 ## Important
 

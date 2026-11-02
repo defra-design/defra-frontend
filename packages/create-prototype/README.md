@@ -82,9 +82,12 @@ npx defra-create-prototype --dashboard --dir ~/Documents/GitHub
 That reads the folder you name and writes the page into `~/Defra prototypes`,
 so scanning somewhere does not leave a file in it.
 
-The difference check ignores the link prefixes `--variants` adds, so "differs"
-means a real content change. Without that every copied page would be reported as
-changed, which looks like an answer and is not one.
+It also lists each prototype's [snapshots](#keeping-an-earlier-round) with how
+many of their pages have changed since one was taken.
+
+The difference check ignores the link prefixes `--variants` and `--snapshot`
+add, so "differs" means a real content change. Without that every copied page
+would be reported as changed, which looks like an answer and is not one.
 
 ## Comparing two versions in research
 
@@ -116,6 +119,47 @@ kit's default of 3000; `--update` gives them one.
 
 It needs a clean git tree, because it moves your pages and rewrites links inside
 them — if it gets something wrong, `git checkout .` puts it back.
+
+## Keeping an earlier round
+
+```bash
+npx defra-create-prototype --snapshot "round 1"
+```
+
+Freezes your pages as they are now, so the next round can change them:
+
+```
+localhost:3000/snapshots/round-1/   as it is today
+localhost:3000/snapshots            every snapshot, with dates
+```
+
+Your live pages are not touched — a snapshot is only ever added. Pass
+`--note "before the new task list"` to record why you took it.
+
+This is the other versioning case, and not the same as `--variants`. Variants
+are two states you are both editing and both showing. A snapshot is a copy
+nobody edits: a round of research is over, the pages are about to be rebuilt,
+and round two always asks what the thing participants actually saw looked like.
+
+The alternative today is a folder called `backup copy` — or
+`defra form tool working backup 4:2:25` — with nothing recording when it was
+taken or what it was for, and no way to look at it without stopping the
+prototype that is running. A snapshot is served by the same prototype, so there
+is no second install, no second port and no second terminal, and
+`snapshots.json` records the date, your note and the versions it was built
+against. `--dashboard` lists them with how many of their pages have changed
+since.
+
+### What is frozen, and what is not
+
+Your pages and the journey through them are frozen. The layout, your stylesheets
+and `app/routes.js` are shared with the live prototype on purpose: a fix to the
+header reaches every snapshot rather than leaving them all on an old one, and a
+copied layout would resolve the plugin at its installed version anyway, so
+freezing it would gain almost nothing.
+
+The trade is worth knowing. A snapshot shows old content in today's design, and
+a journey that depends on a route you later change may stop working.
 
 ## Updating a prototype
 

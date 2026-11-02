@@ -6,6 +6,70 @@ contain nothing for one of them. Where that happens it is said explicitly.
 Dates are the publish date. Nothing here is stable — see
 [Status](README.md#status).
 
+## 0.7.0 — 2 November 2026
+
+A `defra-create-prototype` release. **`defra-frontend` is unchanged**, bumped to
+keep the two packages answerable from one version number.
+
+### defra-create-prototype
+
+**Added `--snapshot`, which freezes the pages as they are now.**
+
+```bash
+npx defra-create-prototype --snapshot "round 1" --note "before the new task list"
+```
+
+The second half of versioning, and a different job from `--variants`. Variants
+are two states you are both editing and both showing. A snapshot is a copy
+nobody edits: a round of research is over, the pages are about to be rebuilt,
+and round two always asks what the thing participants actually saw looked like.
+
+What it replaces, on every machine we have looked at, is a folder called
+`backup copy` — or `defra form tool working backup 4:2:25` — with nothing
+recording when it was taken or what it was for, and no way to look at it without
+stopping the prototype that is running.
+
+So a snapshot lives inside the prototype and is served by it, at
+`localhost:<port>/snapshots/round-1/`, with an index of all of them at
+`/snapshots`. No second install, no second port, no second terminal, and it
+travels with the prototype when a colleague clones it. The live pages are not
+touched: unlike `--variants`, this only ever adds.
+
+`snapshots.json` records the label, the date, your note, the page count and the
+versions it was built against. `--dashboard` reads it and lists each snapshot
+with **how many of its pages have changed since** — the number that says whether
+what participants saw still resembles the current prototype.
+
+Links inside a snapshot are repointed to stay inside it, reusing the rewriting
+`--variants` already does, so the two compose: snapshotting a prototype that has
+variants keeps both states, at `/snapshots/round-1/current/` and
+`/snapshots/round-1/future/`.
+
+**What is deliberately not frozen:** the layout, the stylesheets and
+`app/routes.js`. A snapshot freezes the pages and the journey, not the design
+system. Copying the layout would pin every old snapshot to an old header forever
+and gain almost nothing, since the layout extends a plugin that resolves at its
+installed version either way. The trade — old content in today's design, and a
+journey that may break if you change a route it depends on — is stated in the
+command's own output rather than left to be discovered.
+
+Guards, each with a test: a folder that is not a prototype, a prototype with no
+pages yet, a label that slugifies to nothing, the same name twice (a snapshot is
+never overwritten), and an existing `app/views/snapshots` folder with no
+manifest beside it — which is the designer's own, and taking it over would
+silently exclude their pages from every snapshot from then on. Earlier snapshots
+are excluded from the copy, without which each one would contain all of its
+predecessors and the folder would roughly double every time.
+
+### Tests
+
+The behaviour suite is up from 32 assertions to 59, and the harness now reads
+files defensively. Mutation testing found that making `--snapshot` move the live
+pages rather than copy them failed the suite with a stack trace and **no failing
+assertion** — ending the run, so every later block was skipped. A test that is
+right in the least useful way is worth fixing: the same mutation now names the
+behaviour it broke.
+
 ## 0.6.0 — 30 October 2026
 
 A `defra-create-prototype` release. **`defra-frontend` is unchanged**, bumped to

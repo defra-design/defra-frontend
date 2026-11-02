@@ -8,6 +8,10 @@
  * showing someone a current and a future state, the useful thing to know is
  * which pages actually changed, so the session can concentrate on those.
  *
+ * Snapshots are listed the same way, with how many of their pages the live
+ * prototype has since changed. That number answers the question a frozen round
+ * is kept for: whether what participants were shown still resembles this.
+ *
  * The difference check has one non-obvious part. `--variants` prefixes links so
  * each version keeps to its own journey, which means every copied page differs
  * textually from its twin — `/current/task-list` against `/future/task-list`.
@@ -22,6 +26,7 @@ import { readdirSync, readFileSync, writeFileSync, existsSync, statSync, mkdirSy
 import { join, relative } from 'node:path'
 
 const VARIANTS = ['current', 'future']
+const SNAPSHOTS = 'snapshots'
 const PAGE = /\.(html|njk)$/
 
 const read = (path) => {
@@ -50,10 +55,17 @@ const pagesIn = (root) => {
 }
 
 /**
- * Remove what `--variants` changed, so a comparison sees only real edits.
- * Without this every page differs and the column is noise.
+ * Remove the link prefixes `--variants` and `--snapshot` add, so a comparison
+ * sees only real edits. Without this every page differs and the column is
+ * noise.
+ *
+ * The snapshot prefix goes first and leaves nothing behind, so a frozen
+ * /snapshots/round-1/current/x lines up with a live /current/x, which then
+ * normalises like any other variant link.
  */
-const normalise = (text) => text.replace(/\/(?:current|future)(?=[/"'])/g, '/<variant>')
+const normalise = (text) => text
+  .replace(/\/snapshots\/[a-z0-9-]+(?=\/)/g, '')
+  .replace(/\/(?:current|future)(?=[/"'])/g, '/<variant>')
 
 const escape = (text) => String(text)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -86,6 +98,35 @@ function inspect (dir) {
   const views = join(dir, 'app', 'views')
   const hasVariants = VARIANTS.every((v) => existsSync(join(views, v)))
 
+  // Frozen earlier rounds, and how far the prototype has moved since each one.
+  // That second number is the one worth having: "round 1 was eleven pages ago"
+  // is what tells you whether the thing people saw still resembles this.
+  const snapshots = []
+  const manifest = read(join(dir, 'snapshots.json'))
+  if (manifest) {
+    try {
+      for (const entry of JSON.parse(manifest)?.snapshots ?? []) {
+        if (!entry?.slug) continue
+        const root = join(views, SNAPSHOTS, entry.slug)
+        const pages = pagesIn(root)
+        let changed = 0
+        for (const page of pages) {
+          const frozen = read(join(root, page))
+          const live = read(join(views, page))
+          if (live === null || normalise(frozen) !== normalise(live)) changed++
+        }
+        snapshots.push({
+          label: entry.label ?? entry.slug,
+          slug: entry.slug,
+          taken: entry.taken ?? null,
+          note: entry.note ?? null,
+          pages: pages.length,
+          changed
+        })
+      }
+    } catch { /* an unreadable manifest is not worth failing the page over */ }
+  }
+
   const prototype = {
     dir,
     folder: dir.split(/[\\/]/).pop(),
@@ -98,7 +139,12 @@ function inspect (dir) {
     port,
     changed: statSync(dir).mtime,
     hasVariants,
-    pages: hasVariants ? [] : pagesIn(views).filter((p) => !p.startsWith('layouts')),
+    // Frozen copies are not pages of the prototype, and counting them would
+    // make a prototype look several times larger with every snapshot taken.
+    pages: hasVariants
+      ? []
+      : pagesIn(views).filter((p) => !p.startsWith('layouts') && !p.startsWith(SNAPSHOTS)),
+    snapshots,
     comparison: []
   }
 
@@ -123,9 +169,12 @@ function inspect (dir) {
 function render (prototypes, prototypesDir) {
   const rows = prototypes.map((p) => {
     const changed = p.comparison.filter((c) => c.state !== 'same')
-    const summary = p.hasVariants
+    const summary = (p.hasVariants
       ? `${changed.length} of ${p.comparison.length} pages differ`
-      : `${p.pages.length} page${p.pages.length === 1 ? '' : 's'}, no versions`
+      : `${p.pages.length} page${p.pages.length === 1 ? '' : 's'}, no versions`) +
+      (p.snapshots.length
+        ? ` · ${p.snapshots.length} snapshot${p.snapshots.length === 1 ? '' : 's'}`
+        : '')
 
     // Only the pages that differ are listed. An unchanged page is not something
     // you act on, and one real prototype here has 3,190 of them — a table of
@@ -148,6 +197,24 @@ function render (prototypes, prototypesDir) {
         </table>
         ${unchanged ? `<p class="empty">${unchanged} other page${unchanged === 1 ? '' : 's'} unchanged.</p>` : ''}`
 
+    // Frozen rounds, newest first — the order the manifest keeps them in.
+    // "changed since" is the useful number: it says how far the live prototype
+    // has moved from the thing participants were actually shown.
+    const snapshots = p.snapshots.length === 0
+      ? ''
+      : `<h3>Snapshots</h3>
+        <table>
+          <thead><tr><th>Frozen</th><th>Taken</th><th>Changed since</th><th></th></tr></thead>
+          <tbody>${p.snapshots.map((s) => `
+            <tr>
+              <td>${escape(s.label)}${s.note ? `<br><span class="meta">${escape(s.note)}</span>` : ''}</td>
+              <td>${escape(s.taken ?? '—')}</td>
+              <td>${s.changed} of ${s.pages}</td>
+              <td><a href="http://localhost:${p.port}/snapshots/${escape(s.slug)}/">open</a></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>`
+
     return `<section>
       <h2>${escape(p.serviceName ?? p.folder)}</h2>
       <p class="meta">
@@ -162,6 +229,7 @@ function render (prototypes, prototypesDir) {
       <pre>cd "${escape(p.dir)}"
 npm run dev</pre>
       ${comparison}
+      ${snapshots}
     </section>`
   }).join('')
 
@@ -186,6 +254,7 @@ npm run dev</pre>
   .intro { color: var(--muted); margin: 0 0 40px; max-width: 60ch; }
   section { border-top: 4px solid var(--green); padding-top: 16px; margin-bottom: 48px; }
   h2 { font-size: 20px; font-weight: 600; margin: 0 0 4px; }
+  h3 { font-size: 16px; font-weight: 600; margin: 24px 0 8px; }
   .meta { color: var(--muted); font-size: 14px; margin: 0 0 8px; }
   .summary { font-weight: 500; margin: 0 0 16px; }
   .warn { color: #d4351c; }

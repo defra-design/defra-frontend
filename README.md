@@ -140,9 +140,13 @@ service name, versions, the command to start it, and which pages differ between
 versions. `--dir <path>` reads prototypes kept somewhere else, writing the page
 into `~/Defra prototypes` rather than into the folder it scanned.
 
-The difference check normalises away the link prefixes `--variants` adds, so
-"differs" means a real content change. Without that, every copied page reports
-as changed — an answer that looks like information and is not.
+It also lists each prototype's [snapshots](#keeping-an-earlier-round) with how
+many of their pages have changed since.
+
+The difference check normalises away the link prefixes `--variants` and
+`--snapshot` add, so "differs" means a real content change. Without that, every
+copied page reports as changed — an answer that looks like information and is
+not.
 
 ### Comparing two versions in research
 
@@ -167,6 +171,32 @@ Each prototype also gets its own port, recorded in `app/config.json` and read by
 `npm run dev`, so two different prototypes can run at once. Ports are spaced 100
 apart because the kit binds a second one at `port - 50` for live reload, and
 anything closer would put one prototype's reload proxy on another's main port.
+
+### Keeping an earlier round
+
+```bash
+npx defra-create-prototype --snapshot "round 1"
+```
+
+Freezes the pages as they are now at `localhost:3000/snapshots/round-1/`, and
+leaves the live ones untouched. For the other versioning case: a round of
+research is over, the pages are about to be rebuilt, and round two always asks
+what the thing participants actually saw looked like.
+
+What it replaces is a folder called `backup copy`, with nothing recording when
+it was taken or what it was for, and no way to look at it without stopping the
+prototype that is running. A snapshot is served by the same prototype — no
+second install, no second port, no second terminal — and `snapshots.json`
+records the date, the note you gave it, and the versions it was built against.
+`--dashboard` lists them with how many of their pages have changed since, which
+is the number that says whether what people saw still resembles this.
+
+The layout, stylesheets and `app/routes.js` are deliberately **not** frozen. A
+snapshot freezes the pages and the journey, not the design system: copying the
+layout would pin every old snapshot to an old header forever and gain nothing,
+since the layout extends a plugin that resolves at its installed version
+regardless. The trade is that a snapshot shows old content in today's design,
+and a journey depending on a route you later change may stop working.
 
 ### Updating a prototype
 
