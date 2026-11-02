@@ -76,8 +76,8 @@ const components = []
  *   configuration  fixtures declare `use` — there is NO defra macro. It is an
  *                  upstream macro in a sanctioned Defra configuration, 100%
  *                  govuk-frontend markup. `header` is this: generic-header
- *                  with a Defra wordmark, which is why CLAUDE.md says not to
- *                  build a Defra header component.
+ *                  with a Defra wordmark, which is why CONTRIBUTING.md says not
+ *                  to build a Defra header component.
  *   addition       own macro, registered in deviations.additions, no upstream
  *                  equivalent.
  *   override       own macro, registered in deviations.components, replaces an
