@@ -90,15 +90,15 @@ jobs:
 
       - run: npm ci
 
-      # Both packages release together. A tag that disagrees with either
-      # package.json means someone bumped one and forgot the other, which would
+      # All three packages release together. A tag that disagrees with any
+      # package.json means someone bumped one and forgot another, which would
       # otherwise publish a half-release that cannot be taken back.
       - name: Tag must match the committed versions
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
           set -euo pipefail
           tag="${GITHUB_REF_NAME#v}"
-          for dir in packages/defra-frontend packages/create-prototype; do
+          for dir in packages/defra-frontend packages/create-prototype packages/mcp; do
             version=$(node -p "require('./$dir/package.json').version")
             if [ "$version" != "$tag" ]; then
               echo "::error::$dir is at $version but the tag is v$tag. Bump both packages to the same version."
@@ -116,7 +116,7 @@ jobs:
       - name: Publish
         run: |
           set -euo pipefail
-          for dir in packages/defra-frontend packages/create-prototype; do
+          for dir in packages/defra-frontend packages/create-prototype packages/mcp; do
             name=$(node -p "require('./$dir/package.json').name")
             version=$(node -p "require('./$dir/package.json').version")
             if npm view "$name@$version" version > /dev/null 2>&1; then

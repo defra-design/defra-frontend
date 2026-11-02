@@ -209,6 +209,29 @@ So the output is a list of things to fix, not a score. **A prototype with no
 errors here has not been accessibility tested**, and nothing in the report
 should be quoted as a pass.
 
+## Working with an assistant
+
+A prototype made with this command is set up for VS Code already. Open the
+folder there and GitHub Copilot can see what the design system contains, make
+pages, run the prototype, check it for accessibility and freeze a round of
+research.
+
+There is nothing to configure. Creating a prototype writes `.vscode/mcp.json`,
+and `--update` adds it to one made earlier. If you already have other MCP
+servers configured, they are kept.
+
+What it adds is knowing which code is the right code. An assistant that does
+not know this design system will reach for `govukFooter` on a service that may
+not legally use it, or try to change a GOV.UK component by creating a file at
+`govuk/components/<name>/template.njk` — which does nothing at all, with no
+error, because GOV.UK macros include their template by relative path.
+
+It will not host your prototype, and it will not tell you a prototype is
+accessible. See [`defra-mcp`](https://www.npmjs.com/package/defra-mcp).
+
+The GitHub Copilot CLI uses a different configuration file and is not set up by
+this.
+
 ## Updating a prototype
 
 From inside the prototype:

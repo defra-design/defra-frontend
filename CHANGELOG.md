@@ -1,10 +1,74 @@
 # Changelog
 
-Both packages release together and share a version number, so a release may
-contain nothing for one of them. Where that happens it is said explicitly.
+The packages release together and share a version number, so a release may
+contain nothing for some of them. Where that happens it is said explicitly.
 
 Dates are the publish date. Nothing here is stable — see
 [Status](README.md#status).
+
+## 0.8.0 — unreleased
+
+Adds a third package. **`defra-frontend` is unchanged**, bumped to keep the
+packages answerable from one version number.
+
+### defra-mcp — new
+
+What an assistant in VS Code reads to know this design system.
+
+The CLI covers the lifecycle already, but every command in it is a terminal
+command, and the audience this repo keeps failing to reach is the one that does
+not use a terminal. The gap is not spinning a prototype up — one npx command
+does that. It is editing. A designer who cannot write Nunjucks cannot add a
+page, and the mistake that punishes them hardest is silent: a file placed at
+`govuk/components/<name>/template.njk` to change a GOV.UK component does
+nothing at all, with no error, because GOV.UK macros include their template by
+relative path. An assistant with no knowledge of this design system makes that
+mistake confidently.
+
+Nine tools. Three are knowledge — what components exist, one component's macro
+name and parameters and a working example, and how a page file becomes a URL.
+Six act: create a page from a template, run the prototype, audit it, freeze a
+round, push to GitHub, and ask a published prototype whether it is protected.
+
+It does not edit files. VS Code already does that, and doing it in two places
+is how the two disagree.
+
+The component catalogue is generated from `packages/defra-frontend` rather than
+written, for the same reason the Storybook prop tables are, and precomputed
+rather than read at runtime because the server runs inside a prototype where
+the design system's source files are not there. `npm run catalogue` rebuilds
+it; the check fails when it and the design system have drifted apart.
+
+Building it found a real one. The catalogue advertised a `defraHeader` macro.
+There is no such macro — `src/defra/components/header` ships fixtures and no
+template, because the Defra header is upstream `govukGenericHeader` with a
+wordmark, which is the thing CONTRIBUTING.md says not to build. An assistant
+following that advice writes an import that fails at render, on the component
+that appears on every page. A Defra component is a configuration, an addition
+or an override, and conflating the first two produced it.
+
+Two things it will not do. `publish` pushes to GitHub and stops: hosting needs
+a platform that runs Node and an account to go with it, and GitHub Pages cannot
+run a prototype at all. And `audit` returns a list of things to fix, never a
+pass — it says every time that a placeholder standing in for a label raises
+nothing, because axe accepts the placeholder as the field's name.
+
+Tool descriptions are now an instruction source, checked like the READMEs. They
+are the highest-traffic instructions here: read every session, acted on
+directly, and proof-read by nobody.
+
+### defra-create-prototype
+
+**Creating a prototype sets it up for VS Code.**
+
+A designer who can hand-write `.vscode/mcp.json` does not need an assistant
+that knows the design system; the one who does will never create that file. So
+the command they already run writes it. `--update` retro-fits prototypes made
+earlier.
+
+It merges. A prototype may already configure other MCP servers, and writing
+that file to insert ours would delete theirs with nothing said. One that cannot
+be parsed is left alone entirely.
 
 ## 0.7.1 — 2 November 2026
 

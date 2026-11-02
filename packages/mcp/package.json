@@ -1,6 +1,6 @@
 {
   "name": "defra-mcp",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "Design system knowledge and prototype commands for an assistant working in a Defra prototype",
   "license": "OGL-UK-3.0",
   "type": "module",
@@ -21,6 +21,6 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",
-    "defra-create-prototype": "^0.7.1"
+    "defra-create-prototype": "^0.8.0"
   }
 }

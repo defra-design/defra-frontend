@@ -369,7 +369,7 @@ components being broken.
 
 ## Releasing to npm
 
-Two packages publish, both unscoped — **not** under `@defra`. That scope is a
+Three packages publish, all unscoped — **not** under `@defra`. That scope is a
 live npm organisation owned by Defra's delivery teams (`@defra/forms-model`,
 `@defra/hapi-tracing`, `@defra/interactive-map`, ~20 more) with Defra digital
 staff as maintainers. Publishing into it would both fail without membership and
@@ -387,7 +387,7 @@ the existing `@defra`. Don't spend another afternoon on it.
 
 ### Cutting a release
 
-`.github/workflows/release.yml` publishes both packages. There is no npm token
+`.github/workflows/release.yml` publishes all three packages. There is no npm token
 in the repository: it uses **trusted publishing**, where npm verifies the OIDC
 claims GitHub issues — organisation, repository, workflow filename — against a
 publisher configured on each package. Nothing to rotate, and no credential that
@@ -427,8 +427,8 @@ Three things about the workflow are load-bearing:
 
 ### Configuring the trusted publisher
 
-Per package, on npmjs.com under **Settings → Trusted publishing**. Both packages
-need their own, pointing at the same workflow:
+Per package, on npmjs.com under **Settings → Trusted publishing**. All three
+packages need their own, pointing at the same workflow:
 
 | Field | Value |
 |---|---|
@@ -459,7 +459,8 @@ to a scope would need `access: "public"` added back.
 
 **Provenance comes for free and should stay that way.** npm attaches a
 provenance attestation automatically under trusted publishing, with no
-`--provenance` flag, because this repository is public and both packages are.
+`--provenance` flag, because this repository is public and all three packages
+are.
 Each release is then publicly linked to the commit and workflow run that built
 it — which is most of the reason trusted publishing is worth the setup for a
 library other departments might depend on.

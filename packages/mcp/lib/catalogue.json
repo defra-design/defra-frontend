@@ -1,6 +1,6 @@
 {
   "govukFrontend": "6.4.0",
-  "defraFrontend": "0.7.1",
+  "defraFrontend": "0.8.0",
   "pageTypes": [
     "check-answers",
     "question-page",

@@ -24,10 +24,11 @@ not a replacement for it.
 |---|---|
 | [`defra-frontend`](https://www.npmjs.com/package/defra-frontend) | The library: sass, Nunjucks macros, JavaScript, and the Prototype Kit plugin. |
 | [`defra-create-prototype`](https://www.npmjs.com/package/defra-create-prototype) | The command that creates and updates a Defra prototype. |
+| [`defra-mcp`](https://www.npmjs.com/package/defra-mcp) | What an assistant in VS Code reads to know this design system. |
 
-Both are [Open Government Licence v3.0](LICENCE) and require GOV.UK Frontend 6
-as a peer dependency. They share a version number and release together, so a
-release may contain nothing for one of them — [CHANGELOG.md](CHANGELOG.md) says
+All three are [Open Government Licence v3.0](LICENCE) and the first two require
+GOV.UK Frontend 6 as a peer dependency. They share a version number and release
+together, so a release may contain nothing for some of them — [CHANGELOG.md](CHANGELOG.md) says
 when that is the case.
 
 ### Why unscoped, and not `@defra`
@@ -65,6 +66,7 @@ gets more expensive with every prototype created, not less. The migration that
 | Build a prototype to test with users | [Making a prototype](#making-a-prototype) |
 | Use these components in a real service | [Using it in a service](#using-it-in-a-service) |
 | Browse what exists | [Storybook](https://defra-design.github.io/defra-frontend/) |
+| Get help building a prototype without writing code | [Working with an assistant](#working-with-an-assistant) |
 | Change or add a component | [Working on this repo](#working-on-this-repo) |
 
 ## What makes it different
@@ -235,6 +237,35 @@ error message explains how to fix the error, or whether the journey works by
 keyboard. A prototype with no errors here has not been accessibility tested, and
 the report says so on its face.
 
+### Working with an assistant
+
+A prototype made with `npx defra-create-prototype` is set up for VS Code
+already. Open the folder there and GitHub Copilot can see what this design
+system contains — which components exist, what their parameters are, which
+Defra component replaces which GOV.UK one — and can make pages, run the
+prototype, check it for accessibility and freeze a round of research.
+
+There is nothing to configure. The command writes `.vscode/mcp.json` when it
+creates the prototype, and `--update` adds it to one made earlier.
+
+This matters most for the mistakes that are invisible when made. An assistant
+that does not know this design system will reach for `govukFooter` on a service
+that may not legally use it, or try to change a GOV.UK component by creating a
+file at `govuk/components/<name>/template.njk` — which does nothing at all, with
+no error, because GOV.UK macros include their template by relative path.
+
+It does not edit files on its own account; VS Code already does that. What it
+adds is knowing which code is the right code.
+
+Two things it will not do. It will not host the prototype — `publish` pushes to
+GitHub and stops, because hosting needs an account and a card. And it will not
+tell you a prototype is accessible: the check returns a list of things to fix
+and says, every time, that a placeholder standing in for a label raises nothing
+at all.
+
+The GitHub Copilot CLI uses a different configuration file from VS Code and is
+not set up by this.
+
 ### Updating a prototype
 
 A prototype pins the version it was created with, so changes here do not reach
@@ -333,6 +364,7 @@ Storybook stories are generated, not written. Change a component's
 ```
 packages/defra-frontend    the published package — tokens, components, page types
 packages/create-prototype  npx tool that creates a Defra prototype
+packages/mcp               design system knowledge for an assistant in VS Code
 apps/storybook             component library (published at the root URL)
 apps/docs                  guidance site (published at /docs/)
 deviations.json            every deviation and addition, with its reasoning
