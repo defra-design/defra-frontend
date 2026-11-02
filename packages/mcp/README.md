@@ -45,11 +45,25 @@ viewing a page, because a browser does that better.
 
 ## Tools
 
-| Tool | Answers |
+| Tool | Does |
 |---|---|
-| `list_components` | What exists, which Defra components replace GOV.UK ones, and which must not be used |
-| `component_help` | One component's macro name, import path, parameters and a working example |
-| `list_page_types` | The page types, how a file becomes a URL, and the layout every page extends |
+| `list_components` | Says what exists, which Defra components replace GOV.UK ones, and which must not be used |
+| `component_help` | Gives one component's macro name, import path, parameters and a working example |
+| `list_page_types` | Explains the page types, how a file becomes a URL, and the layout every page extends |
+| `create_page` | Writes a page from a template, at the right path, extending the right layout |
+| `run_prototype` | Starts the prototype and returns its address |
+| `audit` | Checks every page against WCAG 2.1 AA with axe-core |
+| `snapshot` | Freezes the pages as they are now, so a round of research stays viewable |
+
+The tools that act on a prototype refuse to run in a folder that is not one,
+and `create_page` refuses to overwrite a page that already exists. Both guards
+are there because an assistant retrying a call must not be able to destroy
+work.
+
+`audit` returns a list of things to fix and never a pass. An automated check
+finds a minority of accessibility problems, and the commonest mistake in a
+prototype — a placeholder standing in for a label — is one it cannot report at
+all, because axe accepts the placeholder as the field's name.
 
 ## The catalogue is generated
 

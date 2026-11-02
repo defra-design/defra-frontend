@@ -20,6 +20,7 @@
     "behaviour": "node scripts/behaviour.mjs"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.32.2"
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "defra-create-prototype": "^0.7.1"
   }
 }

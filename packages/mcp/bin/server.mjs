@@ -37,13 +37,27 @@ import { fileURLToPath } from 'node:url'
 import { listComponents } from '../lib/tools/list-components.mjs'
 import { componentHelp } from '../lib/tools/component-help.mjs'
 import { listPageTypes } from '../lib/tools/list-page-types.mjs'
+import { createPage } from '../lib/tools/create-page.mjs'
+import { runPrototype } from '../lib/tools/run-prototype.mjs'
+import { audit } from '../lib/tools/audit.mjs'
+import { snapshot } from '../lib/tools/snapshot.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const { version } = JSON.parse(
   readFileSync(join(here, '..', 'package.json'), 'utf8')
 )
 
-export const TOOLS = [listComponents, componentHelp, listPageTypes]
+export const TOOLS = [
+  // Knowledge first: these are the ones that should be called before writing
+  // anything, and order is the only nudge available here.
+  listComponents,
+  componentHelp,
+  listPageTypes,
+  createPage,
+  runPrototype,
+  audit,
+  snapshot
+]
 
 const server = new Server(
   { name: 'defra', version },
