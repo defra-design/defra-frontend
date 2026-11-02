@@ -161,6 +161,54 @@ freezing it would gain almost nothing.
 The trade is worth knowing. A snapshot shows old content in today's design, and
 a journey that depends on a route you later change may stop working.
 
+## Checking accessibility
+
+From inside your prototype:
+
+```bash
+npx defra-create-prototype --audit
+```
+
+Runs axe-core over every page your prototype serves and groups what it finds by
+issue, so one bad pattern repeated across twelve pages reads as one thing to
+change rather than twelve findings. It writes a report you can send on, and
+starts the prototype itself if it is not already running.
+
+Two things it does that `npx pa11y <url>` does not:
+
+- **It knows your pages.** The kit maps `app/views` to routes, so the list comes
+  off disk. A prototype has no sitemap and no reliable links between every page,
+  so crawling misses whole journeys.
+- **It will not pass a page that did not render.** A check-answers page with no
+  session data behind it can return 500, and an auditor pointed at that URL
+  cheerfully audits the kit's error page and reports no problems. Every page is
+  asked for its status first, and anything that is not a page is listed as **not
+  checked** rather than counted as a pass.
+
+The checker is fetched by `npx` the first time you audit, and drives the Chrome
+already on your machine — Edge works too. Nothing is added to your prototype and
+no browser is downloaded. If Chrome is somewhere unusual, name it:
+
+```bash
+PUPPETEER_EXECUTABLE_PATH="/path/to/chrome" npx defra-create-prototype --audit
+```
+
+It checks against WCAG 2.1 AA, which leaves out axe's own "best practice" rules
+— heading order among them. That is on purpose: some of those fire on the kit's
+own templates, and findings you cannot act on are the quickest way to learn to
+ignore a report.
+
+### What it does not tell you
+
+An automated check reads the markup, and that is a minority of accessibility. It
+cannot tell you whether the page makes sense read aloud, whether the reading
+order matches the visual order, whether an error message explains how to fix the
+error, or whether the journey can be completed by keyboard. Those need a person.
+
+So the output is a list of things to fix, not a score. **A prototype with no
+errors here has not been accessibility tested**, and nothing in the report
+should be quoted as a pass.
+
 ## Updating a prototype
 
 From inside the prototype:

@@ -6,6 +6,7 @@
  *   npx defra-create-prototype --update     update the one you are in
  *   npx defra-create-prototype --variants   split it into current and future
  *   npx defra-create-prototype --snapshot   freeze the pages as they are now
+ *   npx defra-create-prototype --audit      accessibility audit of its pages
  *   npx defra-create-prototype --dashboard  list every prototype you have
  *   npx defra-create-prototype --check      is a published one protected?
  *
@@ -31,7 +32,7 @@
  *      which is the only ordering in which a token layer can work: settings
  *      must reach govuk-frontend before it compiles.
  */
-import { spawnSync } from 'node:child_process'
+import { spawn, spawnSync } from 'node:child_process'
 import { existsSync, readFileSync, writeFileSync, mkdirSync, renameSync, cpSync } from 'node:fs'
 import { join, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -128,6 +129,8 @@ const isHere = args.includes('--here')
 const isVariants = args.includes('--variants')
 // Freeze the pages as they are now, keeping them reachable.
 const isSnapshot = args.includes('--snapshot')
+// Run an accessibility audit over the prototype's own pages.
+const isAudit = args.includes('--audit')
 // List every prototype in the shared folder, with what differs between versions.
 const isDashboard = args.includes('--dashboard')
 // Ask a published prototype whether it is actually password protected.
@@ -306,7 +309,7 @@ Or point it at prototypes you already have:
   process.exit(0)
 }
 
-if (!isUpdate && !isVariants && !isSnapshot && !argName && !interactive) {
+if (!isUpdate && !isVariants && !isSnapshot && !isAudit && !argName && !interactive) {
   console.error(`
 Usage:
   npx defra-create-prototype <name>        create a new prototype
@@ -314,6 +317,7 @@ Usage:
   npx defra-create-prototype --variants    split it into current and future
   npx defra-create-prototype --snapshot "round 1"
                                            freeze the pages as they are now
+  npx defra-create-prototype --audit       accessibility audit of its pages
   npx defra-create-prototype --dashboard   list every prototype you have
   npx defra-create-prototype --check <url> is a published one protected?
 
@@ -1174,6 +1178,227 @@ machine. Worth fixing before you rely on it:
   process.exit(0)
 }
 
+// --- Accessibility audit ---------------------------------------------------
+// axe-core over every page the prototype serves, fetched by npx rather than
+// depended on.
+//
+// The browser deliberately does not live in this package. pa11y brings its own
+// Chromium, which is a sizeable one-off download that npm then caches —
+// shipping a few hundred megabytes of browser inside a package whose argument
+// is payload discipline would be hard to defend, and would land on every
+// designer whether they ever audit anything or not.
+//
+// Two things this does that `npx pa11y <url>` does not. It knows the pages,
+// because the kit maps app/views to routes and a prototype has no sitemap and
+// no reliable links between every page. And it asks each page for its status
+// first, so a page that returned 500 is named as unchecked instead of being
+// audited as the kit's error page and counted as clean — a false pass is worse
+// than no audit, and a check-answers page with no session data is exactly where
+// one would happen.
+if (isAudit) {
+  const { pagePaths, reachable, summarise, renderReport, runPa11y, findBrowser, missingBrowser, explainFailure } =
+    await import('./audit.mjs')
+
+  const pkgPath = join(dir, 'package.json')
+  const pkg = existsSync(pkgPath) ? JSON.parse(readFileSync(pkgPath, 'utf8')) : null
+  if (!pkg || !{ ...pkg.dependencies, ...pkg.devDependencies }['govuk-prototype-kit']) {
+    console.error(`
+This does not look like a prototype.
+
+Run the command from inside your prototype folder:
+
+  cd "${PROTOTYPES_DIR}/my-service"
+  npx defra-create-prototype --audit
+`)
+    process.exit(1)
+  }
+
+  const paths = pagePaths(join(dir, 'app', 'views'))
+  if (paths.length === 0) {
+    console.error(`
+There are no pages to audit yet.
+
+Make some pages in app/views first.
+`)
+    process.exit(1)
+  }
+
+  const port = portOf(dir) ?? 3000
+  const base = `http://localhost:${port}`
+  const name = pkg.name || dir.split(sep).pop()
+
+  const up = async () => {
+    try {
+      await fetch(`${base}/`, { redirect: 'manual' })
+      return true
+    } catch {
+      return false
+    }
+  }
+
+  // Started here if it is not already running, because "open a second terminal
+  // and run npm run dev" is the kind of step this command exists to remove. A
+  // prototype someone is working on is usually up already, in which case this
+  // does nothing.
+  let started = null
+  const stop = () => {
+    if (!started) return
+    const child = started
+    started = null
+    try {
+      if (process.platform === 'win32') {
+        spawnSync('taskkill', ['/pid', String(child.pid), '/T', '/F'], { stdio: 'ignore' })
+      } else {
+        // The whole group: npm spawns the kit, so killing npm alone would leave
+        // a server holding the port for the rest of the day.
+        process.kill(-child.pid, 'SIGTERM')
+      }
+    } catch { /* already gone */ }
+  }
+  process.on('SIGINT', () => {
+    stop()
+    process.exit(130)
+  })
+
+  if (!await up()) {
+    console.log(`\nStarting your prototype on port ${port} to audit it. This takes a moment.\n`)
+    started = spawn('npm', ['run', 'dev'], {
+      cwd: dir,
+      stdio: 'ignore',
+      detached: process.platform !== 'win32',
+      shell: process.platform === 'win32'
+    })
+    const deadline = Date.now() + 120_000
+    while (!await up()) {
+      if (Date.now() > deadline || started.exitCode !== null) {
+        stop()
+        console.error(`
+Could not start your prototype, so there is nothing to audit.
+
+Start it yourself and see what it says:
+
+  cd "${dir}"
+  npm run dev
+
+Then run the audit again in another terminal.
+`)
+        process.exit(1)
+      }
+      await new Promise((r) => setTimeout(r, 2000))
+    }
+  }
+
+  console.log(`\nChecking ${paths.length} page${paths.length === 1 ? '' : 's'} on ${base}\n`)
+
+  const { ok, broken } = await reachable(base, paths)
+  if (ok.length === 0) {
+    stop()
+    console.error(`None of the ${paths.length} pages returned a page to check.
+${broken.map((b) => `  ${b.path} — ${b.reason}`).join('\n')}
+`)
+    process.exit(1)
+  }
+
+  const browser = findBrowser()
+  console.log(`Running axe-core over ${ok.length} page${ok.length === 1 ? '' : 's'}${
+    browser ? `, using ${browser.split(sep).pop()}` : ''}.
+The first run fetches the checker itself, which takes a minute.
+`)
+
+  const { report, failed, stderr } = runPa11y(base, ok, { browser })
+  stop()
+
+  if (failed) {
+    console.error(missingBrowser(stderr)
+      ? `
+The audit needs a Chromium-based browser to open your pages in, and could not
+find one.
+
+Install Google Chrome from https://www.google.com/chrome and run this again.
+Microsoft Edge works too, if it is already on your machine.
+
+If you have one somewhere unusual, name it:
+
+  PUPPETEER_EXECUTABLE_PATH="/path/to/chrome" npx defra-create-prototype --audit
+`
+      : `
+The audit could not be run.
+
+${explainFailure(stderr)}
+
+If that mentions a proxy or a network problem, this is one to ask a developer
+to run for now.
+`)
+    process.exit(1)
+  }
+
+  const summary = summarise(report.results)
+
+  const reportPath = join(PROTOTYPES_DIR, `accessibility-${toFolderName(name) || 'prototype'}.html`)
+  mkdirSync(PROTOTYPES_DIR, { recursive: true })
+  writeFileSync(reportPath, renderReport({ name, base, audited: ok, broken, summary }))
+
+  console.log(`
+────────────────────────────────────────────────────────────────────────
+
+${ok.length} page${ok.length === 1 ? '' : 's'} checked · ${
+  summary.issues.length} thing${summary.issues.length === 1 ? '' : 's'} to fix · ${
+  summary.errors} error${summary.errors === 1 ? '' : 's'}, ${
+  summary.warnings} warning${summary.warnings === 1 ? '' : 's'} in total
+`)
+
+  // By issue, not by page. One missing label pattern in a shared include is
+  // twelve findings across twelve pages and one thing to change, and a
+  // page-by-page list hides that completely.
+  if (summary.issues.length === 0) {
+    console.log('No automated issues in the pages checked.\n')
+  } else {
+    for (const issue of summary.issues) {
+      console.log(`${issue.type === 'error' ? 'ERROR  ' : 'WARNING'} ${issue.message}
+         ${issue.code} · ${issue.pages.length} of ${ok.length} page${ok.length === 1 ? '' : 's'}
+${issue.examples.map((e) => `         ${e.path}  ${e.selector}`).join('\n')}${
+  issue.help ? `\n         how to fix: ${issue.help}` : ''}
+`)
+    }
+  }
+
+  if (broken.length) {
+    console.log(`NOT CHECKED — these did not return a page, so they are absent from the
+counts above rather than counted as passing:
+
+${broken.map((b) => `  ${b.path} — ${b.reason}`).join('\n')}
+
+A page that needs answers from an earlier step is the usual reason. Walk the
+journey in the browser and audit again, or audit that page on its own.
+`)
+  }
+
+  console.log(`Full report, which you can send on:
+
+  ${reportPath}
+
+WHAT THIS DOES NOT TELL YOU
+
+An automated check reads the markup, and that is a minority of accessibility.
+It cannot tell you whether the page makes sense read aloud, whether the reading
+order matches the visual order, whether an error message explains how to fix
+the error, or whether the journey can be completed by keyboard. Those need a
+person.
+
+So this is a list of things to fix, not a score. A prototype with no errors
+here has not been accessibility tested, and nothing in the report should be
+quoted as a pass.
+
+────────────────────────────────────────────────────────────────────────
+`)
+
+  const opener = process.platform === 'darwin'
+    ? 'open'
+    : process.platform === 'win32' ? 'start' : 'xdg-open'
+  spawnSync(opener, [reportPath], { stdio: 'ignore', shell: process.platform === 'win32' })
+  process.exit(summary.errors > 0 ? 1 : 0)
+}
+
 // --- Questions -------------------------------------------------------------
 // Asked rather than configured. The brand mode especially: it is a licence
 // boundary, and leaving it as a Sass variable meant the default silently
@@ -1460,6 +1685,17 @@ The copy stays reachable at http://localhost:${port}/snapshots/round-1/ from thi
 same prototype, and your live pages are not touched. Use this instead of making
 a "backup copy" folder — a snapshot records when it was taken and what it was
 built against, and you do not need to stop this prototype to look at it.
+
+## Checking accessibility
+
+\`\`\`
+npx defra-create-prototype --audit
+\`\`\`
+
+Runs axe-core over every page and writes a report of what to fix. It is a list
+of things to fix, not a score — an automated check reads the markup, which is a
+minority of accessibility, so a prototype with no errors here has **not** been
+accessibility tested.
 
 ## Important
 

@@ -198,6 +198,43 @@ since the layout extends a plugin that resolves at its installed version
 regardless. The trade is that a snapshot shows old content in today's design,
 and a journey depending on a route you later change may stop working.
 
+### Checking accessibility
+
+```bash
+npx defra-create-prototype --audit
+```
+
+Runs axe-core over every page the prototype serves, grouped by issue rather than
+by page — one bad pattern in a shared include is one thing to change, not twelve
+findings. It starts the prototype if it is not running and writes a report that
+can be sent on.
+
+The pages come off disk, because the kit maps `app/views` to routes and a
+prototype has neither a sitemap nor reliable links between every page, so a
+crawl misses whole journeys. Each one is asked for its status before it is
+audited: a check-answers page with no session data can return 500, and an
+auditor pointed at that URL audits the kit's error page and reports nothing
+wrong. Those pages are listed as **not checked** rather than counted as passing.
+
+The checker is fetched by `npx` and drives **the Chrome already on the machine**
+— Edge too, since it is Chromium underneath. Nothing is bundled: a few hundred
+megabytes of browser inside a package whose argument is payload discipline would
+be hard to defend, and would land on every designer whether they ever audit
+anything or not. It is also the only version that works behind a proxy, where a
+large download is the likeliest thing to fail.
+
+The standard is WCAG 2.1 AA, which excludes axe's own "best practice" rules — so
+heading order, for one, is not covered. That is deliberate: the kit's templates
+trip some of those, and findings a designer cannot act on are the fastest way to
+teach someone to ignore a report.
+
+**This is a list of things to fix, not a score.** An automated check reads the
+markup, which is a minority of accessibility: it cannot judge whether a page
+makes sense read aloud, whether reading order matches visual order, whether an
+error message explains how to fix the error, or whether the journey works by
+keyboard. A prototype with no errors here has not been accessibility tested, and
+the report says so on its face.
+
 ### Updating a prototype
 
 A prototype pins the version it was created with, so changes here do not reach

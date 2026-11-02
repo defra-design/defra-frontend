@@ -61,9 +61,57 @@ silently exclude their pages from every snapshot from then on. Earlier snapshots
 are excluded from the copy, without which each one would contain all of its
 predecessors and the folder would roughly double every time.
 
+**Added `--audit`, an accessibility audit of the prototype's own pages.**
+
+```bash
+npx defra-create-prototype --audit
+```
+
+axe-core over every page, grouped **by issue rather than by page**: one bad
+pattern in a shared include is twelve findings across twelve pages and one thing
+to change, and a page-by-page list hides that completely. It starts the
+prototype if it is not already running, and writes a report that can be sent on.
+
+Two things it does that `npx pa11y <url>` does not.
+
+It knows the pages. The kit maps `app/views` to routes, so the list comes off
+disk — a prototype has no sitemap and no reliable links between every page, so
+crawling misses whole journeys. Frozen snapshots and the shared layout are
+excluded.
+
+And it will not pass a page that did not render. A check-answers page with no
+session data behind it can return 500; pa11y pointed at that URL audits the
+kit's error page, finds nothing wrong, and reports a page nobody has tested as
+clean. Every page is asked for its status first, and anything that is not a page
+— an error, or a redirect into someone else's journey — is listed as **not
+checked** rather than counted as a pass.
+
+**The browser is not a dependency, and is not downloaded either.** The original
+plan was that pa11y brings its own Chromium via `npx`; running it showed that it
+does not. puppeteer's Chromium arrives through a postinstall script, npx does
+not run it, and pa11y fails with `Could not find Chrome (ver. 156.0.8078.47)` —
+a pinned version `puppeteer browsers install chrome` would not necessarily match
+either. So it drives the Chrome already on the machine, Edge included. That is
+the better answer anyway: instant instead of a few hundred megabytes, and a
+large download is the likeliest thing to fail behind a government proxy.
+`PUPPETEER_EXECUTABLE_PATH` names one kept somewhere unusual.
+
+The standard is WCAG 2.1 AA, which leaves out axe's own "best practice" rules —
+heading order among them. Deliberate: some of those fire on the kit's own
+templates, and findings a designer cannot act on are the quickest way to teach
+someone to ignore a report.
+
+**It is a list of things to fix, not a score**, and both the terminal output and
+the report say so on their face. An automated check reads the markup, which is a
+minority of accessibility: it cannot judge whether a page makes sense read
+aloud, whether reading order matches visual order, whether an error message
+explains how to fix the error, or whether the journey works by keyboard. A
+prototype with no errors here has not been accessibility tested. Same rule as
+the carbon numbers — no badge, no rating.
+
 ### Tests
 
-The behaviour suite is up from 32 assertions to 59, and the harness now reads
+The behaviour suite is up from 32 assertions to 93, and the harness now reads
 files defensively. Mutation testing found that making `--snapshot` move the live
 pages rather than copy them failed the suite with a stack trace and **no failing
 assertion** — ending the run, so every later block was skipped. A test that is

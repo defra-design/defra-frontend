@@ -450,6 +450,176 @@ console.log('─'.repeat(66))
   rmSync(out, { recursive: true, force: true })
 }
 
+// --- accessibility audit ---------------------------------------------------
+// The browser is not tested here — pa11y brings its own Chromium and downloads
+// it on first use, which is minutes and hundreds of megabytes, so a suite that
+// did that would not run on every push. What is tested is everything around it:
+// which pages get audited, which get excluded and why, and how findings are
+// grouped. Those are the parts that decide whether the answer is right.
+
+{
+  const { pagePaths } = await import('../bin/audit.mjs')
+  const dir = fixture({
+    pages: {
+      'index.html': 'x',
+      'start.html': 'x',
+      'apply/index.html': 'x',
+      'apply/name.njk': 'x',
+      'apply/deep/nested.html': 'x',
+      'notes.md': 'x',
+      'snapshots/round-1/start.html': 'x'
+    }
+  })
+  const paths = pagePaths(join(dir, 'app', 'views'))
+
+  check('audit maps index.html to the route above it', paths.includes('/'))
+  check('and apply/index.html to its folder', paths.includes('/apply'))
+  check('and a page to its path without the extension', paths.includes('/start'))
+  check('njk pages are audited too', paths.includes('/apply/name'))
+  check('nested pages are found', paths.includes('/apply/deep/nested'))
+  check('non-pages are ignored', !paths.some((p) => p.includes('notes')))
+  // Both would be noise rather than findings: the layout is not a page, and a
+  // frozen round is a copy nobody is going to change.
+  check('the shared layout is not audited', !paths.some((p) => p.includes('layouts')))
+  check('frozen snapshots are not audited', !paths.some((p) => p.includes('snapshots')),
+    JSON.stringify(paths))
+  rmSync(dir, { recursive: true, force: true })
+}
+
+{
+  // The false pass this exists to prevent. A page that 500s still returns a
+  // body — the kit's error page — which audits clean and would be counted as a
+  // page with no problems.
+  const { reachable } = await import('../bin/audit.mjs')
+  const server = await stub((req, res) => {
+    if (req.url === '/broken') { res.writeHead(500); res.end('<h1>Error</h1>') } else if (req.url === '/moved') { res.writeHead(302, { Location: '/' }); res.end() } else { res.writeHead(200); res.end('<h1>fine</h1>') }
+  })
+  const { ok, broken } = await reachable(server.url, ['/', '/broken', '/moved'])
+
+  check('a page that renders is audited', ok.includes('/'))
+  check('a page that errors is not audited as though it had rendered',
+    !ok.includes('/broken') && broken.some((b) => b.path === '/broken'))
+  check('and the status it gave is reported',
+    broken.find((b) => b.path === '/broken')?.reason === 'answered 500')
+  check('a page that redirects is not audited under its own name',
+    !ok.includes('/moved') && broken.some((b) => b.path === '/moved'))
+  server.close()
+}
+
+{
+  const { reachable } = await import('../bin/audit.mjs')
+  const { ok, broken } = await reachable('http://127.0.0.1:1', ['/'])
+  check('an unreachable page is reported, not silently dropped',
+    ok.length === 0 && broken.length === 1)
+}
+
+{
+  // Grouped by issue, because one bad pattern in a shared include is one thing
+  // to change and a page-by-page list hides that entirely.
+  const { summarise } = await import('../bin/audit.mjs')
+  const issue = (code, selector) => ({
+    code,
+    type: 'error',
+    // axe appends its documentation URL to every message, which is the most
+    // useful part of the finding and pushes the line past a terminal's width.
+    message: `${code} is wrong (https://dequeuniversity.com/rules/axe/4.13/${code})`,
+    selector
+  })
+  const { issues, errors, warnings } = summarise({
+    'http://localhost:4000/a': [issue('label', '#one'), issue('color-contrast', 'p')],
+    'http://localhost:4000/b': [issue('label', '#two'),
+      { code: 'region', type: 'warning', message: 'region', selector: 'div' }],
+    'http://localhost:4000/c': [issue('label', '#three')],
+    // pa11y-ci puts a string here when the page could not be loaded at all.
+    'http://localhost:4000/d': 'Error: timed out'
+  })
+
+  check('findings are counted by severity', errors === 4 && warnings === 1,
+    `${errors} errors, ${warnings} warnings`)
+  check('the same issue across pages is one finding',
+    issues.filter((i) => i.code === 'label').length === 1)
+  check('and it names every page it is on',
+    issues.find((i) => i.code === 'label')?.pages.join() === '/a,/b,/c')
+  check('the most widespread issue comes first', issues[0]?.code === 'label')
+  check('errors are listed before warnings',
+    issues.findIndex((i) => i.type === 'warning') === issues.length - 1)
+  check('examples name the page as well as the element',
+    issues[0]?.examples[0]?.path === '/a' && issues[0]?.examples[0]?.selector === '#one')
+  check('axe\'s documentation link is pulled out of the message, not left in it',
+    issues[0]?.message === 'label is wrong' &&
+    issues[0]?.help === 'https://dequeuniversity.com/rules/axe/4.13/label',
+    JSON.stringify({ message: issues[0]?.message, help: issues[0]?.help }))
+  check('a page pa11y could not load does not break the summary',
+    issues.every((i) => !i.pages.includes('/d')))
+}
+
+{
+  // The report must not read as a pass. It is the thing that gets forwarded,
+  // and "0 errors" on its own is the claim this whole feature must not make.
+  const { renderReport } = await import('../bin/audit.mjs')
+  const html = renderReport({
+    name: 'a-service',
+    base: 'http://localhost:4000',
+    audited: ['/'],
+    broken: [{ path: '/check', reason: 'answered 500' }],
+    summary: { issues: [], errors: 0, warnings: 0 }
+  })
+  check('a clean report still says it is not an accessibility test',
+    /has not been accessibility tested/.test(html) && /not a score/.test(html))
+  check('and pages that were not checked are named in it',
+    /\/check/.test(html) && /answered 500/.test(html))
+  check('and it is not described as passing', !/\bpass(ed|es)\b/i.test(html.replace(/quoted as a pass/, '')))
+}
+
+{
+  // The premise this feature was first built on was wrong: `npx pa11y-ci` does
+  // NOT come with a browser. puppeteer's Chromium arrives through a postinstall
+  // script and npx does not run it, so pa11y installed cleanly and then failed
+  // with "Could not find Chrome (ver. 156.0.8078.47)". Driving the browser
+  // already on the machine is both the fix and the better answer — instant
+  // rather than a few hundred megabytes through a government proxy.
+  const { findBrowser, missingBrowser, explainFailure } = await import('../bin/audit.mjs')
+  const found = (env, platform, matches) =>
+    findBrowser({ env, platform, exists: (p) => matches.some((m) => p.includes(m)) })
+
+  check('a browser path set by hand wins over anything found',
+    findBrowser({ env: { PUPPETEER_EXECUTABLE_PATH: '/set/by/hand' }, platform: 'darwin', exists: () => true }) ===
+      '/set/by/hand')
+  check('otherwise the installed Chrome is used',
+    found({}, 'darwin', ['Google Chrome'])?.includes('Google Chrome'))
+  check('Edge counts, being on every Defra Windows laptop',
+    found({}, 'win32', ['msedge'])?.includes('msedge'))
+  check('an override pointing at nothing is ignored rather than used',
+    found({ CHROME_PATH: '/gone' }, 'darwin', ['Google Chrome'])?.includes('Google Chrome'))
+  check('no browser at all is reported as none rather than guessed at',
+    findBrowser({ env: {}, platform: 'darwin', exists: () => false }) === null)
+
+  check('the missing-browser failure is recognised, since it has a real fix',
+    missingBrowser('Error: Could not find Chrome (ver. 156.0.8078.47). This can occur if'))
+  check('and an unrelated failure is not mistaken for it',
+    !missingBrowser('Error: connect ECONNREFUSED 127.0.0.1:3000'))
+  // Inheriting stderr printed npm's warnings and a raw stack trace above our
+  // own message, and left nothing for the message itself to say.
+  check('npm deprecation noise is not reported as the error',
+    explainFailure('npm warn deprecated glob@7\nnpm warn deprecated inflight\nError: the real problem\n  at x') ===
+      'Error: the real problem\n  at x')
+}
+
+{
+  const dir = fixture({ deps: {} })
+  const { status } = await run(['--audit'], dir)
+  check('audit refuses a folder that is not a prototype', status === 1, `exit ${status}`)
+  rmSync(dir, { recursive: true, force: true })
+}
+
+{
+  const dir = fixture()
+  const { out, status } = await run(['--audit'], dir)
+  check('audit refuses a prototype with no pages, rather than starting a server',
+    status === 1 && /no pages to audit/.test(out), `exit ${status}`)
+  rmSync(dir, { recursive: true, force: true })
+}
+
 // --- report ----------------------------------------------------------------
 
 const failed = results.filter((r) => !r.ok)
