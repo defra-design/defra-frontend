@@ -6,7 +6,27 @@ contain nothing for some of them. Where that happens it is said explicitly.
 Dates are the publish date. Nothing here is stable — see
 [Status](README.md#status).
 
-## 0.8.0 — unreleased
+## 0.8.1 — 2 November 2026
+
+A packaging fix. Nothing changes in how any of the three packages behave.
+
+### defra-mcp
+
+**Declares its repository, which npm validates.**
+
+The other two packages carry `repository.url` and this one did not. npm checks
+it against the GitHub repository under trusted publishing, including the `git+`
+prefix, so the first release of this package through the workflow would have
+failed a check the other two already pass — and the npm page for 0.8.0 links
+nowhere.
+
+0.8.0 got away with it because it could not be published by the workflow at
+all. npm will not let a trusted publisher be configured for a package that does
+not exist, so the first version had to go up by hand, with a token, which does
+not run that check. This release is the first for `defra-mcp` that goes through
+the workflow, and so the first carrying a provenance attestation.
+
+## 0.8.0 — 2 November 2026
 
 Adds a third package. **`defra-frontend` is unchanged**, bumped to keep the
 packages answerable from one version number.

@@ -1,6 +1,6 @@
 {
   "name": "defra-mcp",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "Design system knowledge and prototype commands for an assistant working in a Defra prototype",
   "license": "OGL-UK-3.0",
   "repository": {
