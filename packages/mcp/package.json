@@ -3,6 +3,11 @@
   "version": "0.8.0",
   "description": "Design system knowledge and prototype commands for an assistant working in a Defra prototype",
   "license": "OGL-UK-3.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/defra-design/defra-frontend.git",
+    "directory": "packages/mcp"
+  },
   "type": "module",
   "bin": {
     "defra-mcp": "bin/server.mjs"
