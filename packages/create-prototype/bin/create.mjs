@@ -38,6 +38,7 @@ import { join, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createInterface } from 'node:readline/promises'
 import { homedir } from 'node:os'
+import { writeEditorConfig, DEFRA_MCP_NAME } from './wire-editor.mjs'
 
 import { readdirSync, rmSync } from 'node:fs'
 
@@ -503,6 +504,28 @@ const pagesIn = (root) => {
  * records an absolute path from the machine that made it, so the prototype
  * would break the moment a colleague cloned it. A tarball travels with it.
  */
+/**
+ * Wires the prototype up for an assistant working in VS Code, then installs
+ * the server so it starts from node_modules rather than a download.
+ *
+ * The devDependency is not required for this to work — npx resolves
+ * node_modules before the registry either way. It pins the version to the
+ * prototype, removes the wait on first use, and means it works on a train.
+ */
+function wireEditor (prototypeDir) {
+  const result = writeEditorConfig(prototypeDir)
+  if (!result.written) return { wired: false, reason: result.reason }
+
+  if (onNpm()) {
+    run('npm', ['install', `${DEFRA_MCP_NAME}@latest`, '--save-dev'], prototypeDir)
+    return { wired: true }
+  }
+  // --local tests an unreleased checkout. The configuration still points at
+  // the published server, which is worth saying rather than implying this
+  // checkout is what an assistant would be talking to.
+  return { wired: true, reason: 'the published assistant server is configured, not this checkout' }
+}
+
 function installDefraFrontend (prototypeDir) {
   requireASource()
   if (onNpm()) {
@@ -688,6 +711,9 @@ its app/views folder:
   console.log(`\nUpdating Defra Frontend in ${pkg.name || dir}\n`)
   const migrated = migrateFromLegacyScope(dir, pkg)
   installDefraFrontend(dir)
+  // Retro-fits prototypes made before any of this existed. Merges, so a
+  // prototype that already configures other MCP servers keeps them.
+  const editorWiring = wireEditor(dir)
   const after = installedVersion(dir)
 
   // The workarounds people wrote while these were broken now do nothing, or
@@ -708,6 +734,13 @@ its app/views folder:
 
 Updated${before && after ? ` from ${before} to ${after}` : ''}.
 `)
+
+  if (editorWiring.wired) {
+    console.log(`This prototype is now set up for VS Code. Open the folder there and an
+assistant can see the Defra components, make pages and run the accessibility
+check for you.${editorWiring.reason ? `\n(${editorWiring.reason})` : ''}
+`)
+  }
 
   if (migrated.length) {
     console.log(`${onNpm()
@@ -1521,6 +1554,11 @@ if (!onNpm()) {
 // from there, so this is the copy the kit compiles.
 installDefraFrontend(dir)
 
+// Wired here, while the prototype is being made, because this is the only
+// moment a designer is guaranteed to run a command. Asking them to add it
+// later means asking them to edit JSON, which is the thing they cannot do.
+const editor = wireEditor(dir)
+
 // --- Sass wiring -----------------------------------------------------------
 // Paths are relative to the project root because the kit compiles sass with
 // loadPaths: [projectDir].
@@ -1760,6 +1798,11 @@ WHAT TO DO NEXT
 
   Share it         See "Putting your prototype on GitHub" at
                    https://defra-design.github.io/defra-frontend/docs/prototyping/
+${editor.wired
+  ? `  Get help         Open this folder in VS Code. An assistant there can see
+                   the Defra components, make pages and run the accessibility
+                   check — it is already set up, there is nothing to configure.`
+  : `  Note             VS Code was not set up — ${editor.reason}.`}
 
 A README.md has been added to the folder with all of this in it, so you do not
 need to keep this terminal open.

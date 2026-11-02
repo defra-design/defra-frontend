@@ -625,6 +625,71 @@ console.log('─'.repeat(66))
   rmSync(dir, { recursive: true, force: true })
 }
 
+// --- editor wiring ---------------------------------------------------------
+// The bootstrap: a designer who could hand-write .vscode/mcp.json would not
+// need the server it configures, so the command they already run writes it.
+// The risk is the merge. A prototype may already configure other MCP servers,
+// and replacing that file to add ours would remove theirs with nothing said.
+
+{
+  const { writeEditorConfig } = await import('../bin/wire-editor.mjs')
+
+  {
+    const dir = fixture()
+    const result = writeEditorConfig(dir)
+    const config = json(join(dir, '.vscode', 'mcp.json'))
+    check('wiring an unconfigured prototype writes the VS Code workspace format',
+      result.written && config?.servers?.defra?.type === 'stdio' &&
+      config?.servers?.defra?.command === 'npx' &&
+      config?.servers?.defra?.args?.includes('defra-mcp'),
+      JSON.stringify(config?.servers?.defra ?? null))
+    rmSync(dir, { recursive: true, force: true })
+  }
+
+  {
+    const dir = fixture()
+    mkdirSync(join(dir, '.vscode'), { recursive: true })
+    writeFileSync(join(dir, '.vscode', 'mcp.json'), JSON.stringify({
+      servers: { somebodyElse: { type: 'stdio', command: 'node', args: ['theirs.mjs'] } }
+    }, null, 2))
+
+    writeEditorConfig(dir)
+    const config = json(join(dir, '.vscode', 'mcp.json'))
+
+    check('and keeps MCP servers someone else had already configured',
+      config?.servers?.somebodyElse?.args?.[0] === 'theirs.mjs',
+      JSON.stringify(config?.servers ?? null))
+    check('while still adding its own',
+      Boolean(config?.servers?.defra))
+    rmSync(dir, { recursive: true, force: true })
+  }
+
+  {
+    const dir = fixture()
+    mkdirSync(join(dir, '.vscode'), { recursive: true })
+    writeFileSync(join(dir, '.vscode', 'mcp.json'), '{ not json at all')
+    const result = writeEditorConfig(dir)
+    check('an mcp.json that cannot be parsed is left exactly as it was',
+      !result.written && text(join(dir, '.vscode', 'mcp.json')) === '{ not json at all',
+      result.reason)
+    rmSync(dir, { recursive: true, force: true })
+  }
+
+  {
+    const dir = fixture()
+    mkdirSync(join(dir, '.vscode'), { recursive: true })
+    writeFileSync(join(dir, '.vscode', 'mcp.json'), JSON.stringify({
+      servers: { defra: { type: 'stdio', command: 'node', args: ['/their/own/build.mjs'] } }
+    }))
+    writeEditorConfig(dir)
+    const config = json(join(dir, '.vscode', 'mcp.json'))
+    check('a defra server someone has pointed somewhere else is not overwritten',
+      config?.servers?.defra?.args?.[0] === '/their/own/build.mjs',
+      JSON.stringify(config?.servers?.defra ?? null))
+    rmSync(dir, { recursive: true, force: true })
+  }
+}
+
 // --- report ----------------------------------------------------------------
 
 const failed = results.filter((r) => !r.ok)
